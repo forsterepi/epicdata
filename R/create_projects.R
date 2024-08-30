@@ -53,20 +53,23 @@ create_new_file <- function(path, project_name, folder, script_name, template) {
 #'   end the name with '_meta'.
 #' @param path The path where the project should be created, without the name of
 #'   the project.
+#' @param db A TRUE/FALSE value indicating if the created project should include
+#'   code that supports connection to a data base via DSN in R Studio. The default
+#'   is FALSE.
 #'
-#' @return Creates a R project in the specified library and adds all templates
+#' @return Creates an R project in the specified library and adds all templates
 #'   and structre needed for creating meta data.
 #' @export
 #'
 #' @examples
-create_meta <- function(name, path) {
+create_meta <- function(name, path, db = F) {
 
   # Check
   rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
                    error = function(cnd) {
                      cli::cli_abort(c("Argument {.var path} must be a single element of type character!",
                                       "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_path")
+                                    class = "inpur_error_path", parent = cnd)
                    }
   )
 
@@ -74,7 +77,15 @@ create_meta <- function(name, path) {
                    error = function(cnd) {
                      cli::cli_abort(c("Argument {.var name} must be a single element of type character!",
                                       "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_name")
+                                    class = "inpur_error_name", parent = cnd)
+                   }
+  )
+
+  rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var db} must be TRUE or FALSE!",
+                                      "i" = "{.var NA} and {.var NULL} are not allowed."),
+                                    class = "inpur_error_db", parent = cnd)
                    }
   )
 
@@ -93,4 +104,146 @@ create_meta <- function(name, path) {
 
   create_new_file(path, name, "", "test_workflow.R", "test_template.R")
   create_new_file(path, name, "R", "test_script.R", "test_template.R")
+
+  if (db) {
+
+  }
+
+  cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
+}
+
+#' Creating a raw project
+#'
+#' Creates a project that pre-processes raw data
+#'
+#' @param name The name of the project as a single character element. It is
+#'   recommended to only use lower case letters, numbers, as well as _ and to
+#'   end the name with '_raw'.
+#' @param path The path where the project should be created, without the name of
+#'   the project.
+#' @param db A TRUE/FALSE value indicating if the created project should include
+#'   code that supports connection to a data base via DSN in R Studio. The default
+#'   is FALSE.
+#'
+#' @return Creates an R project in the specified library and adds all templates
+#'   and structre needed for pre-processing raw data.
+#' @export
+#'
+#' @examples
+create_raw <- function(name, path, db = F) {
+
+  # Check
+  rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var path} must be a single element of type character!",
+                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
+                                    class = "inpur_error_path", parent = cnd)
+                   }
+  )
+
+  rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var name} must be a single element of type character!",
+                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
+                                    class = "inpur_error_name", parent = cnd)
+                   }
+  )
+
+  rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var db} must be TRUE or FALSE!",
+                                      "i" = "{.var NA} and {.var NULL} are not allowed."),
+                                    class = "inpur_error_db", parent = cnd)
+                   }
+  )
+
+  dir_exists <- dir.exists(path)
+  if (!dir_exists) {
+    cli::cli_abort("The path does not exist!", class = "dir_exists")
+  }
+
+  proj_exists <- dir.exists(file.path(path, name))
+  if (proj_exists) {
+    cli::cli_abort("The project already exists!", class = "proj_exists")
+  }
+
+  # Do
+  create_new_project(name = name, path = path)
+
+  create_new_file(path, name, "", "test_workflow.R", "test_template.R")
+  create_new_file(path, name, "R", "test_script.R", "test_template.R")
+
+  if (db) {
+
+  }
+
+  cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
+}
+
+#' Creating a prc project
+#'
+#' Creates a project that processes the data
+#'
+#' @param name The name of the project as a single character element. It is
+#'   recommended to only use lower case letters, numbers, as well as _ and to
+#'   end the name with '_prc'.
+#' @param path The path where the project should be created, without the name of
+#'   the project.
+#' @param db A TRUE/FALSE value indicating if the created project should include
+#'   code that supports connection to a data base via DSN in R Studio. The default
+#'   is FALSE.
+#'
+#' @return Creates an R project in the specified library and adds all templates
+#'   and structre needed for processing data.
+#' @export
+#'
+#' @examples
+create_prc <- function(name, path, db = F) {
+
+  # Check
+  rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var path} must be a single element of type character!",
+                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
+                                    class = "inpur_error_path", parent = cnd)
+                   }
+  )
+
+  rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var name} must be a single element of type character!",
+                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
+                                    class = "inpur_error_name", parent = cnd)
+                   }
+  )
+
+  rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
+                   error = function(cnd) {
+                     cli::cli_abort(c("Argument {.var db} must be TRUE or FALSE!",
+                                      "i" = "{.var NA} and {.var NULL} are not allowed."),
+                                    class = "inpur_error_db", parent = cnd)
+                   }
+  )
+
+  dir_exists <- dir.exists(path)
+  if (!dir_exists) {
+    cli::cli_abort("The path does not exist!", class = "dir_exists")
+  }
+
+  proj_exists <- dir.exists(file.path(path, name))
+  if (proj_exists) {
+    cli::cli_abort("The project already exists!", class = "proj_exists")
+  }
+
+  # Do
+  create_new_project(name = name, path = path)
+
+  create_new_file(path, name, "", "test_workflow.R", "test_template.R")
+  create_new_file(path, name, "R", "test_script.R", "test_template.R")
+
+  if (db) {
+
+  }
+
+  cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
 }

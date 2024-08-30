@@ -18,6 +18,10 @@ Imports:
     cli,
     magrittr,
     rlang,
+    stringr,
     usethis
 URL: https://github.com/forsterepi/epicdata
 BugReports: https://github.com/forsterepi/epicdata/issues
+Depends: 
+    R (>= 2.10)
+LazyData: true
