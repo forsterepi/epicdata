@@ -1,6 +1,8 @@
 
 # epicdata
 
+[![R-CMD-check](https://github.com/forsterepi/epicdata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/forsterepi/epicdata/actions/workflows/R-CMD-check.yaml)
+
 The goal of epicdata is to summarize data processing in epidemiology in
 a central package. It includes functions to set up corresponding R
 projects and is based on the R package
@@ -33,7 +35,7 @@ The `epicdata` workflow consists of several stages:
   part of this workflow and uses meta data and raw data to create
   processed data, which can be analyzed. Important parts of data
   processing include comparing multiple data entries of paper
-  questionnaires, handling missing data, aa well as handling of range
+  questionnaires, handling missing data, as well as handling of range
   violations and contradictions. Based on the provided information, a
   data dictionary is created automatically.
 - `pre`: Pre-analysis describes the process of creating analysis data
