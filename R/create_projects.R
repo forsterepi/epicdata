@@ -59,7 +59,6 @@ create_new_file <- function(path, project_name, folder, script_name, template) {
 #' @export
 #'
 #' @examples
-#' to add
 create_meta <- function(name, path) {
 
   # Check
