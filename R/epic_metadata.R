@@ -251,7 +251,7 @@ uncheck_metadata <- function(metadata) {
                                     parent = cnd, class = "no_epic_metadata")
                    })
 
-  if (class(metadata) == "epic_metadata_checked") {
+  if (inherits(metadata, "epic_metadata_checked")) {
     metadata %<>% unclass(.)
     metadata %<>% structure(., class = "epic_metadata")
   }
