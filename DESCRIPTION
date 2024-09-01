@@ -10,16 +10,24 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
-    testthat (>= 3.0.0),
-    withr
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
     checkmate,
     cli,
+    dplyr,
+    DT,
     magrittr,
+    prompter,
     rlang,
+    shiny,
+    shinyalert,
+    shinyjs,
+    shinythemes,
     stringr,
-    usethis
+    tidyselect,
+    usethis,
+    withr
 URL: https://github.com/forsterepi/epicdata
 BugReports: https://github.com/forsterepi/epicdata/issues
 Depends: 

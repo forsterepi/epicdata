@@ -25,3 +25,9 @@ and structre needed for creating meta data.
 \description{
 Creates a project that sets up meta data
 }
+\examples{
+withr::with_tempdir({
+path <- getwd()
+create_meta("meta_test", path, db = TRUE)
+})
+}

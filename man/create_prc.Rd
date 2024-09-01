@@ -25,3 +25,9 @@ and structre needed for processing data.
 \description{
 Creates a project that processes the data
 }
+\examples{
+withr::with_tempdir({
+path <- getwd()
+create_prc("prc_test", path, db = TRUE)
+})
+}

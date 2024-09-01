@@ -25,3 +25,9 @@ and structre needed for pre-processing raw data.
 \description{
 Creates a project that pre-processes raw data
 }
+\examples{
+withr::with_tempdir({
+path <- getwd()
+create_raw("raw_test", path, db = TRUE)
+})
+}

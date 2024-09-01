@@ -62,6 +62,10 @@ create_new_file <- function(path, project_name, folder, script_name, template) {
 #' @export
 #'
 #' @examples
+#' withr::with_tempdir({
+#' path <- getwd()
+#' create_meta("meta_test", path, db = TRUE)
+#' })
 create_meta <- function(name, path, db = F) {
 
   # Check
@@ -130,6 +134,10 @@ create_meta <- function(name, path, db = F) {
 #' @export
 #'
 #' @examples
+#' withr::with_tempdir({
+#' path <- getwd()
+#' create_raw("raw_test", path, db = TRUE)
+#' })
 create_raw <- function(name, path, db = F) {
 
   # Check
@@ -198,6 +206,10 @@ create_raw <- function(name, path, db = F) {
 #' @export
 #'
 #' @examples
+#' withr::with_tempdir({
+#' path <- getwd()
+#' create_prc("prc_test", path, db = TRUE)
+#' })
 create_prc <- function(name, path, db = F) {
 
   # Check
