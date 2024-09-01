@@ -31,7 +31,7 @@ These data.frames are described below:
 
 \code{mc_sets} contains
 
-\code{string_dict} contains
+\code{dict} contains
 }
 \examples{
 x <- list(data.frame(a = c(1,2,3), b = c(4,5,6)),
