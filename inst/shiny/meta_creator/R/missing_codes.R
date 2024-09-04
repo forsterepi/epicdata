@@ -14,10 +14,10 @@ missing_codesUI <- function(id) {
                           selectInput(NS(id,"input_class"), label = "Code class", choices = c("MISSING", "JUMP"), width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "Is it a Jump Code or Missing Code?"),
                           br(),
-                          numericInput(NS(id,"input_id"), label = "Missing/Jump Code", value = 9000, min = 1000, max = 9999) %>%
+                          numericInput(NS(id,"input_id"), label = "Missing/Jump Code", value = 9000, min = 1000, max = 9999, width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "A 4-digit code is recommended, 8001,... for JUMP and 9001,... for MISSING codes."),
                           br(),
-                          textInput(NS(id,"input_label"), label = "Code label", placeholder = "Label") %>%
+                          textInput(NS(id,"input_label"), label = "Code label", placeholder = "Label", width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "Add the missing/jump code's label."),
                           br(),
                           actionButton(NS(id,"add"), label = "Add Missing/Jump Code") %>%

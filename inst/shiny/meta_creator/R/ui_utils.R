@@ -37,13 +37,13 @@ ui_main_tab <- function(){
            sidebarLayout(
              sidebarPanel(width = 3,
                           h3("New variable"),
-                          textInput("input_id_main", label = "Variable ID", placeholder = "ID") %>%
+                          textInput("input_id_main", label = "Variable ID", placeholder = "ID", width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "Must be unique. Restrict to lower case letters, digits, and _, if possible."),
                           br(),
-                          textAreaInput("input_label_main", label = "Label", placeholder = "Label", height = "200%", resize = "vertical") %>%
+                          textAreaInput("input_label_main", label = "Label", placeholder = "Label", height = "200%", resize = "vertical", width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "If questionnaire: question wording; else: deteiled description."),
                           br(),
-                          textAreaInput("input_label_main_eng", label = "Label (English)", placeholder = "Label (Eng)", height = "200%", resize = "vertical") %>%
+                          textAreaInput("input_label_main_eng", label = "Label (English)", placeholder = "Label (English)", height = "200%", resize = "vertical", width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "English translation of label."),
                           br(),
                           selectInput("input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"), width = "250px") %>%

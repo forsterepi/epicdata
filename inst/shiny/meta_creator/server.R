@@ -146,8 +146,8 @@ server <- function(input, output, session) {
       output$input_float_range <- renderUI({
         tagList(
           fluidRow(
-            column(3,checkboxInput("input_float_range2_smaller_equal", label = "<=", value = F)),
-            column(9,numericInput("input_float_range2", label = NULL, value = 0, step = 0.1, width = "150px"))
+            column(2,checkboxInput("input_float_range2_smaller_equal", label = "<=", value = F)),
+            column(10,numericInput("input_float_range2", label = NULL, value = 0, step = 0.1, width = "200px"))
           )
         )
       })
@@ -156,8 +156,8 @@ server <- function(input, output, session) {
       output$input_float_range <- renderUI({
         tagList(
           fluidRow(
-            checkboxInput("input_float_range1_greater_equal", label = ">=", value = F),
-            numericInput("input_float_range1", label = NULL, value = 0, step = 0.1, width = "150px")
+            column(2,checkboxInput("input_float_range1_greater_equal", label = ">=", value = F)),
+            column(10,numericInput("input_float_range1", label = NULL, value = 0, step = 0.1, width = "200px"))
           )
         )
       })
@@ -166,12 +166,12 @@ server <- function(input, output, session) {
       output$input_float_range <- renderUI({
         tagList(
           fluidRow(
-            checkboxInput("input_float_range1_greater_equal", label = ">=", value = F),
-            numericInput("input_float_range1", label = NULL, value = 0, step = 0.1, width = "150px")
+            column(2,checkboxInput("input_float_range1_greater_equal", label = ">=", value = F)),
+            column(10,numericInput("input_float_range1", label = NULL, value = 0, step = 0.1, width = "200px"))
           ),
           fluidRow(
-            checkboxInput("input_float_range2_smaller_equal", label = "<=", value = F),
-            numericInput("input_float_range2", label = NULL, value = 0, step = 0.1, width = "150px")
+            column(2,checkboxInput("input_float_range2_smaller_equal", label = "<=", value = F)),
+            column(10,numericInput("input_float_range2", label = NULL, value = 0, step = 0.1, width = "200px"))
           )
         )
       })
@@ -187,22 +187,34 @@ server <- function(input, output, session) {
     if (input$input_datetime_range_select == "-Inf to ...") {
       output$input_datetime_range <- renderUI({
         tagList(
-          dateInput("input_datetime_range2", label = NULL, format = "dd. M yyyy", weekstart = 1)
+          fluidRow(
+            column(2,checkboxInput("input_datetime_range2_smaller_equal", label = "<=", value = F)),
+            column(10,dateInput("input_datetime_range2", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "200px"))
+          )
         )
       })
     }
     if (input$input_datetime_range_select == "... to Inf") {
       output$input_datetime_range <- renderUI({
         tagList(
-          dateInput("input_datetime_range1", label = NULL, format = "dd. M yyyy", weekstart = 1)
+          fluidRow(
+            column(2,checkboxInput("input_datetime_range1_greater_equal", label = ">=", value = F)),
+            column(10,dateInput("input_datetime_range1", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "200px"))
+          )
         )
       })
     }
     if (input$input_datetime_range_select == "... to ...") {
       output$input_datetime_range <- renderUI({
         tagList(
-          dateInput("input_datetime_range1", label = NULL, format = "dd. M yyyy", weekstart = 1),
-          dateInput("input_datetime_range2", label = NULL, format = "dd. M yyyy", weekstart = 1)
+          fluidRow(
+            column(2,checkboxInput("input_datetime_range1_greater_equal", label = ">=", value = F)),
+            column(10,dateInput("input_datetime_range1", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "200px"))
+            ),
+            fluidRow(
+              column(2,checkboxInput("input_datetime_range2_smaller_equal", label = "<=", value = F)),
+              column(10,dateInput("input_datetime_range2", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "200px"))
+          )
         )
       })
     }
@@ -249,6 +261,14 @@ server <- function(input, output, session) {
       updateTextInput(session,"input_cat_label1", label = NULL, placeholder = "Name of category", value = "")
       updateTextInput(session,"input_cat_label_eng1", label = NULL, placeholder = "Name of category (English)", value = "")
     }
+  })
+
+  observeEvent(input$main_add, {
+    print(input$input_float_range2_smaller_equal)
+    print(input$input_float_range2)
+    print(is.double(input$input_float_range2))
+    print(is.integer(input$input_float_range2))
+    print(is.numeric(input$input_float_range2))
   })
 
   # # THEN Add ----------------------------------------------------------------

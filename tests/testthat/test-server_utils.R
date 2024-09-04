@@ -1,2 +1,13 @@
-test_that("", {
+test_that("float range creation works", {
+  expect_equal(float_range(dropdown = NULL, check1 = NULL, input1 = NULL, check2 = NULL, input2 = NULL)[["out"]],NA)
+  expect_equal(float_range(dropdown = "No Range", check1 = NULL, input1 = NULL, check2 = NULL, input2 = NULL)[["out"]],"(-Inf;Inf)")
+  expect_equal(float_range(dropdown = "-Inf to ...", check1 = NULL, input1 = NULL, check2 = FALSE, input2 = -1)[["out"]],"(-Inf;-1)")
+  expect_equal(float_range(dropdown = "-Inf to ...", check1 = NULL, input1 = NULL, check2 = T, input2 = 345)[["out"]],"(-Inf;345]")
+  expect_equal(float_range(dropdown = "... to Inf", check1 = F, input1 = 8, check2 = NULL, input2 = NULL)[["out"]],"(8;Inf)")
+  expect_equal(float_range(dropdown = "... to Inf", check1 = TRUE, input1 = -23, check2 = NULL, input2 = NULL)[["out"]],"[-23;Inf)")
+  expect_equal(float_range(dropdown = "... to ...", check1 = T, input1 = 1, check2 = T, input2 = 7)[["out"]],"[1;7]")
+  expect_equal(float_range(dropdown = "... to ...", check1 = T, input1 = -4, check2 = F, input2 = -3)[["out"]],"[-4;-3)")
+  expect_equal(float_range(dropdown = "... to ...", check1 = F, input1 = -767, check2 = T, input2 = 12)[["out"]],"(-767;12]")
+  expect_equal(float_range(dropdown = "... to ...", check1 = F, input1 = 0, check2 = F, input2 = 65)[["out"]],"(0;65)")
+  expect_true(float_range(dropdown = "... to ...", check1 = F, input1 = 0, check2 = F, input2 = -65)[["check_input1_greater_input2"]])
 })

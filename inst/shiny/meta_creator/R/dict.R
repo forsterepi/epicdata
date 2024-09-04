@@ -11,10 +11,10 @@ dictUI <- function(id) {
            sidebarLayout(
              sidebarPanel(width = 3,
                     h3("Dictionary Entries"),
-                    textInput(NS(id,"input_value"), label = "Allowed input value", placeholder = "Value") %>%
+                    textInput(NS(id,"input_value"), label = "Allowed input value", placeholder = "Value", width = "250px") %>%
                       prompter::add_prompt(position = "right", message = "Add the allowed value in its initial language."),
                     br(),
-                    textInput(NS(id,"input_value_eng"), label = "Allowed input value (Eng)", placeholder = "Value in English") %>%
+                    textInput(NS(id,"input_value_eng"), label = "Allowed input value (Eng)", placeholder = "Value in English", width = "250px") %>%
                       prompter::add_prompt(position = "right", message = "Add the allowed value in English."),
                     br(),
                     actionButton(NS(id,"add"), label = "Add Dictionary Entry") %>%
