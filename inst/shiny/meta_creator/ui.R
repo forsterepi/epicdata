@@ -6,7 +6,7 @@
 ui <- tagList(
   shinyjs::useShinyjs(),
   prompter::use_prompt(),
-  tags$style(type = "text/css", ".form-control.shiny-bound-input, .numeric-input {height: 35px; width: 250px;}"),
+  tags$style(type = "text/css", ".form-control.shiny-bound-input, .numeric-input {height: 35px;}"),
   navbarPage(
     theme = shinythemes::shinytheme("flatly"),
     title = "Create Metadata",

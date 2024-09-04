@@ -49,7 +49,10 @@ ui_main_tab <- function(){
                           selectInput("input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"), width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "Please see 'HELP/About data types' for help."),
                           br(),
-                          uiOutput("input_main_by_data_type")
+                          uiOutput("input_main_by_data_type"),
+                          actionButton("main_add", "Add"),
+                          actionButton("delete_add", "Delete"),
+                          actionButton("clear_add", "Clear")
              ),
              mainPanel(width = 9,
                        DT::DTOutput("main_tbl")

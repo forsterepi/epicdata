@@ -83,26 +83,127 @@ server <- function(input, output, session) {
     }
     if (input$input_data_type_main == "integer") {
       output$input_main_by_data_type <- renderUI({
-        selectInput("input_na_else_main", label = "NA else", width = "250px",
-                    choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
-                                  magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
-                                  magrittr::extract(order(.))))
+        tagList(
+          selectInput("input_na_else_main", label = "NA else", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
+                                    magrittr::extract(order(.)))),
+          fluidRow(
+            column(1),
+            column(11,
+            actionButton("more_lines_cat", "+"),
+            actionButton("less_lines_cat", "-")
+          )),
+          br(),
+          div(id = "cat_placeholder",
+              div(
+                id = "cat_row1",
+                class = "input-row",
+                tagList(
+                  numericInput("input_cat_numeric1", label = NULL, value = 1, min = 0, step = 1),
+                  textInput("input_cat_label1", label = NULL, placeholder = "Name of category"),
+                  textInput("input_cat_label_eng1", label = NULL, placeholder = "Name of category (English)")
+                )
+              ))
+        )
       })
     }
     if (input$input_data_type_main == "float") {
       output$input_main_by_data_type <- renderUI({
-        selectInput("input_na_else_main", label = "NA else", width = "250px",
-                    choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
-                                  magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
-                                  magrittr::extract(order(.))))
+        tagList(
+          selectInput("input_na_else_main", label = "NA else", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
+                                    magrittr::extract(order(.)))),
+          selectInput("input_float_range_select", label = "Range", width = "250px",
+                      choices = c("No Range","-Inf to ...", "... to Inf", "... to ...")),
+          uiOutput("input_float_range")
+        )
       })
     }
     if (input$input_data_type_main == "datetime") {
       output$input_main_by_data_type <- renderUI({
-        selectInput("input_na_else_main", label = "NA else", width = "250px",
-                    choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
-                                  magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.")) %>%
-                                  magrittr::extract(order(.))))
+        tagList(
+          selectInput("input_na_else_main", label = "NA else", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.")) %>%
+                                    magrittr::extract(order(.)))),
+          selectInput("input_datetime_range_select", label = "Range", width = "250px",
+                      choices = c("No Range","-Inf to ...", "... to Inf", "... to ...")),
+          uiOutput("input_datetime_range")
+        )
+      })
+    }
+  })
+
+  observeEvent(input$input_float_range_select, {
+    if (input$input_float_range_select == "No Range") {
+      output$input_float_range <- renderUI({
+        tagList()
+      })
+    }
+    if (input$input_float_range_select == "-Inf to ...") {
+      output$input_float_range <- renderUI({
+        tagList(
+          fluidRow(
+            column(3,checkboxInput("input_float_range2_smaller_equal", label = "<=", value = F)),
+            column(9,numericInput("input_float_range2", label = NULL, value = 0, step = 0.1, width = "150px"))
+          )
+        )
+      })
+    }
+    if (input$input_float_range_select == "... to Inf") {
+      output$input_float_range <- renderUI({
+        tagList(
+          fluidRow(
+            checkboxInput("input_float_range1_greater_equal", label = ">=", value = F),
+            numericInput("input_float_range1", label = NULL, value = 0, step = 0.1, width = "150px")
+          )
+        )
+      })
+    }
+    if (input$input_float_range_select == "... to ...") {
+      output$input_float_range <- renderUI({
+        tagList(
+          fluidRow(
+            checkboxInput("input_float_range1_greater_equal", label = ">=", value = F),
+            numericInput("input_float_range1", label = NULL, value = 0, step = 0.1, width = "150px")
+          ),
+          fluidRow(
+            checkboxInput("input_float_range2_smaller_equal", label = "<=", value = F),
+            numericInput("input_float_range2", label = NULL, value = 0, step = 0.1, width = "150px")
+          )
+        )
+      })
+    }
+  })
+
+  observeEvent(input$input_datetime_range_select, {
+    if (input$input_datetime_range_select == "No Range") {
+      output$input_datetime_range <- renderUI({
+        tagList()
+      })
+    }
+    if (input$input_datetime_range_select == "-Inf to ...") {
+      output$input_datetime_range <- renderUI({
+        tagList(
+          dateInput("input_datetime_range2", label = NULL, format = "dd. M yyyy", weekstart = 1)
+        )
+      })
+    }
+    if (input$input_datetime_range_select == "... to Inf") {
+      output$input_datetime_range <- renderUI({
+        tagList(
+          dateInput("input_datetime_range1", label = NULL, format = "dd. M yyyy", weekstart = 1)
+        )
+      })
+    }
+    if (input$input_datetime_range_select == "... to ...") {
+      output$input_datetime_range <- renderUI({
+        tagList(
+          dateInput("input_datetime_range1", label = NULL, format = "dd. M yyyy", weekstart = 1),
+          dateInput("input_datetime_range2", label = NULL, format = "dd. M yyyy", weekstart = 1)
+        )
       })
     }
   })
@@ -113,214 +214,43 @@ server <- function(input, output, session) {
                                          paging = FALSE, order = list(0,'asc'),
                                          searchHighlight = TRUE))
 
+  # Cat Input ---------------------------------------------------------------
+  n_cat <- reactiveVal(1)
 
+  ## more_lines_cat
+  observeEvent(input$more_lines_cat ,{
+    n <- n_cat() + 1
+    n_cat(n)
 
-  # # STEP
-  #
-  # # Dropdown Menus ----------------------------------------------------------
-  # output$select_subject <- renderUI(selectInput("select_subject", "Subject (WHAT)", c(Choose = "", steplist()[["what"]]$key_what %>% magrittr::extract(order(.))), selectize = T))
-  # output$select_does <- renderUI(selectInput("select_does", "DOES", c(Choose = "", steplist()[["does"]]$key_does %>% magrittr::extract(order(.))), selectize = T))
-  # output$select_where <- renderUI(selectInput("select_where", "WHERE", c(Choose = "", steplist()[["where"]]$key_where %>% magrittr::extract(order(.))), selectize = T))
-  # output$step_input_module <- renderUI(selectInput("step_input_module", label = "Module", c(Choose = "", steplist()[["module"]]$key_module %>% magrittr::extract(order(.))), selectize = T))
-  #
-  # # Object Input ------------------------------------------------------------
-  # ## Define check_object, which indicates if for the current DOES segment we need a WHAT or THEN object
-  # check_object <- reactive(min(length(steplist()[["does"]]$then_object_does[steplist()[["does"]]$key_does == input$select_does]),
-  #                              steplist()[["does"]]$then_object_does[steplist()[["does"]]$key_does == input$select_does]))
-  #
-  # ## Define object_what & object_then
-  # object_what <- reactiveVal()
-  # object_then <- reactiveVal()
-  #
-  # ## object_what remembers the current value of select_object_what, even if select_object_then is currently rendered
-  # observeEvent(input$select_object_what, {
-  #   object_what(input$select_object_what)
-  # })
-  #
-  # ## object_then remembers the current value of select_object_then, even if select_object_what is currently rendered
-  # observeEvent(input$select_object_then, {
-  #   object_then(input$select_object_then)
-  # })
-  #
-  # ## object_key holds the current object value (WHAT or THEN depending on check_object)
-  # object_key <- reactive({
-  #   if (check_object() == "1") {
-  #     object_what("")
-  #     object_key <- input$select_object_then
-  #   } else {
-  #     object_then("")
-  #     object_key <- input$select_object_what
-  #   }
-  # })
-  #
-  # ## Render the corresponding selectInput depending on check_object
-  # output$select_object <- renderUI({
-  #   if (check_object() == "1") {
-  #     selectInput("select_object_then", "Object (THEN)", selected = object_then(), c(Choose = "", steplist()[["then"]]$desc_then %>% magrittr::extract(order(.))), selectize = T)
-  #   } else {
-  #     selectInput("select_object_what", "Object (WHAT)", selected = object_what(), c(Choose = "", steplist()[["what"]]$key_what %>% magrittr::extract(order(.))), selectize = T)
-  #   }
-  # })
-  #
-  #
-  # # IF Input ----------------------------------------------------------------
-  # n_if <- reactiveVal(1)
-  #
-  # ## more_lines_if
-  # observeEvent(input$more_lines_if ,{
-  #   n <- n_if() + 1
-  #   n_if(n)
-  #
-  #   insertUI(
-  #     selector = "#if_placeholder",
-  #     where = "beforeEnd",
-  #     ui = div(
-  #       id = paste0("if_row", n),
-  #       class = "input-row",
-  #       fluidRow(
-  #         column(2, numericInput(paste0("if_numeric_input", n), label = NULL, value = 1, min = 1)),
-  #         column(10, selectInput(paste0("if_select_input", n), label = NULL,
-  #                                choices = c(Choose = "", steplist()[["then"]]$desc_then %>% magrittr::extract(order(.)))))
-  #       )))
-  # })
-  #
-  # ## less_lines_if
-  # observeEvent(input$less_lines_if ,{
-  #   n <- n_if()
-  #
-  #   if (n > 1) {
-  #     removeUI(
-  #       selector = paste0("#if_row", n)
-  #     )
-  #     n_if(n - 1)
-  #   } else {
-  #     updateSelectInput(session, "if_select_input1", label = NULL, selected = "")
-  #     updateNumericInput(session, "if_numeric_input1", label = NULL, value = 1)
-  #   }
-  # })
-  #
-  # # IFNOT Input -------------------------------------------------------------
-  # n_ifnot <- reactiveVal(1)
-  #
-  # ## more_lines_ifnot
-  # observeEvent(input$more_lines_ifnot ,{
-  #   n <- n_ifnot() + 1
-  #   n_ifnot(n)
-  #
-  #   insertUI(
-  #     selector = "#ifnot_placeholder",
-  #     where = "beforeEnd",
-  #     ui = div(
-  #       id = paste0("ifnot_row", n),
-  #       class = "input-row",
-  #       fluidRow(
-  #         column(2, numericInput(paste0("ifnot_numeric_input", n), label = NULL, value = 1, min = 1)),
-  #         column(10, selectInput(paste0("ifnot_select_input", n), label = NULL,
-  #                                choices = c(Choose = "", steplist()[["then"]]$desc_then %>% magrittr::extract(order(.)))))
-  #       )))
-  # })
-  #
-  # ## less_lines_ifnot
-  # observeEvent(input$less_lines_ifnot ,{
-  #   n <- n_ifnot()
-  #
-  #   if (n > 1) {
-  #     removeUI(
-  #       selector = paste0("#ifnot_row", n)
-  #     )
-  #     n_ifnot(n - 1)
-  #   } else {
-  #     updateSelectInput(session, "ifnot_select_input1", label = NULL, selected = "")
-  #     updateNumericInput(session, "ifnot_numeric_input1", label = NULL, value = 1)
-  #   }
-  # })
-  #
-  # # IF Preview --------------------------------------------------------------
-  # ## step_if_id
-  # output$step_if_id <- renderText({
-  #   val_select <- vector(mode = "character", length = isolate(n_if()))
-  #   for (i in 1:isolate(n_if())) {
-  #     val_select[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("if_select_input",i)] %||% ""
-  #   }
-  #   val_numeric <- vector(mode = "numeric", length = isolate(n_if()))
-  #   for (i in 1:isolate(n_if())) {
-  #     val_numeric[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("if_numeric_input",i)]
-  #   }
-  #
-  #   val <- fun_create_step_if_id(input_select = val_select, input_numeric = val_numeric, then_data = steplist()[["then"]])
-  #
-  #   val[[1]]
-  # })
-  #
-  # ## step_if_desc
-  # output$step_if_desc <- renderText({
-  #   val_select <- vector(mode = "character", length = isolate(n_if()))
-  #   for (i in 1:isolate(n_if())) {
-  #     val_select[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("if_select_input",i)] %||% ""
-  #   }
-  #   val_numeric <- vector(mode = "numeric", length = isolate(n_if()))
-  #   for (i in 1:isolate(n_if())) {
-  #     val_numeric[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("if_numeric_input",i)]
-  #   }
-  #
-  #   fun_create_step_if_desc(input_select = val_select, input_numeric = val_numeric)
-  # })
-  #
-  # # IFNOT Preview -----------------------------------------------------------
-  # ## step_ifnot_id
-  # output$step_ifnot_id <- renderText({
-  #   val_select <- vector(mode = "character", length = isolate(n_ifnot()))
-  #   for (i in 1:isolate(n_ifnot())) {
-  #     val_select[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("ifnot_select_input",i)] %||% ""
-  #   }
-  #   val_numeric <- vector(mode = "numeric", length = isolate(n_ifnot()))
-  #   for (i in 1:isolate(n_ifnot())) {
-  #     val_numeric[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("ifnot_numeric_input",i)]
-  #   }
-  #
-  #   val <- fun_create_step_ifnot_id(input_select = val_select, input_numeric = val_numeric, then_data = steplist()[["then"]])
-  #
-  #   val[[1]]
-  # })
-  #
-  # ## step_ifnot_desc
-  # output$step_ifnot_desc <- renderText({
-  #   val_select <- vector(mode = "character", length = isolate(n_ifnot()))
-  #   for (i in 1:isolate(n_ifnot())) {
-  #     val_select[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("ifnot_select_input",i)] %||% ""
-  #   }
-  #   val_numeric <- vector(mode = "numeric", length = isolate(n_ifnot()))
-  #   for (i in 1:isolate(n_ifnot())) {
-  #     val_numeric[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("ifnot_numeric_input",i)]
-  #   }
-  #
-  #   fun_create_step_ifnot_desc(input_select = val_select, input_numeric = val_numeric)
-  # })
-  #
-  # # THEN Preview ------------------------------------------------------------
-  # ## step_then_id
-  # output$step_then_id <- renderText({
-  #   fun_create_then_step_id(subject_key = input$select_subject, does_key = input$select_does, object_key = (object_key() %||% ""),
-  #                           where_key = input$select_where, check_object = (check_object() %||% ""),
-  #                           what_data = steplist()[["what"]], does_data = steplist()[["does"]],
-  #                           where_data = steplist()[["where"]], then_data = steplist()[["then"]])
-  # })
-  #
-  # ## step_then_desc
-  # output$step_then_desc <- renderText({
-  #   fun_create_then_step_desc(subject_key = input$select_subject, does_key = input$select_does, object_key = (object_key() %||% ""),
-  #                             where_key = input$select_where, check_object = (check_object() %||% ""),
-  #                             what_data = steplist()[["what"]], does_data = steplist()[["does"]],
-  #                             where_data = steplist()[["where"]], then_data = steplist()[["then"]])
-  # })
-  #
-  #
-  # # THEN Table --------------------------------------------------------------
-  # output$then_tbl <- DT::renderDataTable(steplist()[["then"]], server = T, rownames = F, selection = "none",
-  #                                        options = list(scrollY = '500px', scrollCollapse = TRUE,
-  #                                                       paging = FALSE, order = list(0,'asc'),
-  #                                                       searchHighlight = TRUE))
-  #
+    insertUI(
+      selector = "#cat_placeholder",
+      where = "beforeEnd",
+      ui = div(
+        id = paste0("cat_row", n),
+        class = "input-row",
+        tagList(
+          numericInput(paste0("input_cat_numeric", n), label = NULL, value = 1, min = 0, step = 1),
+          textInput(paste0("input_cat_label", n), label = NULL, placeholder = "Name of category"),
+          textInput(paste0("input_cat_label_eng", n), label = NULL, placeholder = "Name of category (English)")
+        )))
+  })
+
+  ## less_lines_cat
+  observeEvent(input$less_lines_cat ,{
+    n <- n_cat()
+
+    if (n > 1) {
+      removeUI(
+        selector = paste0("#cat_row", n)
+      )
+      n_cat(n - 1)
+    } else {
+      updateNumericInput(session, "input_cat_numeric1", label = NULL, value = 1, min = 0, step = 1)
+      updateTextInput(session,"input_cat_label1", label = NULL, placeholder = "Name of category", value = "")
+      updateTextInput(session,"input_cat_label_eng1", label = NULL, placeholder = "Name of category (English)", value = "")
+    }
+  })
+
   # # THEN Add ----------------------------------------------------------------
   # observeEvent(input$then_add, {
   #   steplist_temp <- steplist()
