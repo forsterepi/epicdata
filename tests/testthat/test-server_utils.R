@@ -11,3 +11,17 @@ test_that("float range creation works", {
   expect_equal(float_range(dropdown = "... to ...", check1 = F, input1 = 0, check2 = F, input2 = 65)[["out"]],"(0;65)")
   expect_true(float_range(dropdown = "... to ...", check1 = F, input1 = 0, check2 = F, input2 = -65)[["check_input1_greater_input2"]])
 })
+
+test_that("datetime range creation works", {
+  expect_equal(datetime_range(dropdown = NULL, check1 = NULL, input1 = NULL, check2 = NULL, input2 = NULL)[["out"]],NA)
+  expect_equal(datetime_range(dropdown = "No Range", check1 = NULL, input1 = NULL, check2 = NULL, input2 = NULL)[["out"]],"(-Inf;Inf)")
+  expect_equal(datetime_range(dropdown = "-Inf to ...", check1 = NULL, input1 = NULL, check2 = FALSE, input2 = as.Date("2022-02-02"))[["out"]],"(-Inf;02.02.2022)")
+  expect_equal(datetime_range(dropdown = "-Inf to ...", check1 = NULL, input1 = NULL, check2 = T, input2 = as.Date("1992-08-08"))[["out"]],"(-Inf;08.08.1992]")
+  expect_equal(datetime_range(dropdown = "... to Inf", check1 = F, input1 = as.Date("2010-04-12"), check2 = NULL, input2 = NULL)[["out"]],"(12.04.2010;Inf)")
+  expect_equal(datetime_range(dropdown = "... to Inf", check1 = TRUE, input1 = as.Date("2009-03-23"), check2 = NULL, input2 = NULL)[["out"]],"[23.03.2009;Inf)")
+  expect_equal(datetime_range(dropdown = "... to ...", check1 = T, input1 = as.Date("2009-03-23"), check2 = T, input2 = as.Date("2010-04-12"))[["out"]],"[23.03.2009;12.04.2010]")
+  expect_equal(datetime_range(dropdown = "... to ...", check1 = T, input1 = as.Date("2009-03-23"), check2 = F, input2 = as.Date("2010-04-12"))[["out"]],"[23.03.2009;12.04.2010)")
+  expect_equal(datetime_range(dropdown = "... to ...", check1 = F, input1 = as.Date("2009-03-23"), check2 = T, input2 = as.Date("2010-04-12"))[["out"]],"(23.03.2009;12.04.2010]")
+  expect_equal(datetime_range(dropdown = "... to ...", check1 = F, input1 = as.Date("2009-03-23"), check2 = F, input2 = as.Date("2010-04-12"))[["out"]],"(23.03.2009;12.04.2010)")
+  expect_true(datetime_range(dropdown = "... to ...", check1 = F, input1 = as.Date("2010-04-12"), check2 = F, input2 = as.Date("2009-03-23"))[["check_input1_greater_input2"]])
+})

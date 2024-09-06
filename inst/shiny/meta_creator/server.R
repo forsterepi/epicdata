@@ -264,11 +264,18 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$main_add, {
-    print(input$input_float_range2_smaller_equal)
-    print(input$input_float_range2)
-    print(is.double(input$input_float_range2))
-    print(is.integer(input$input_float_range2))
-    print(is.numeric(input$input_float_range2))
+    # print(input$input_datetime_range2_smaller_equal)
+    # print(input$input_datetime_range2)
+    # print(is.character(input$input_datetime_range2))
+    # print(class(input$input_datetime_range2))
+    # print(typeof(input$input_datetime_range2))
+    # print(lubridate::as_date(input$input_datetime_range2))
+    # print(is.numeric(input$input_datetime_range2))
+    print(datetime_range(dropdown = input$input_datetime_range_select,
+                          check1 = input$input_datetime_range1_greater_equal,
+                          input1 = input$input_datetime_range1,
+                          check2 = input$input_datetime_range2_smaller_equal,
+                          input2 = input$input_datetime_range2))
   })
 
   # # THEN Add ----------------------------------------------------------------
