@@ -271,11 +271,20 @@ server <- function(input, output, session) {
     # print(typeof(input$input_datetime_range2))
     # print(lubridate::as_date(input$input_datetime_range2))
     # print(is.numeric(input$input_datetime_range2))
-    print(datetime_range(dropdown = input$input_datetime_range_select,
-                          check1 = input$input_datetime_range1_greater_equal,
-                          input1 = input$input_datetime_range1,
-                          check2 = input$input_datetime_range2_smaller_equal,
-                          input2 = input$input_datetime_range2))
+    # print(datetime_range(dropdown = input$input_datetime_range_select,
+    #                       check1 = input$input_datetime_range1_greater_equal,
+    #                       input1 = input$input_datetime_range1,
+    #                       check2 = input$input_datetime_range2_smaller_equal,
+    #                       input2 = input$input_datetime_range2))
+    val_text <- vector(mode = "character", length = isolate(n_cat()))
+    for (i in 1:isolate(n_cat())) {
+      val_text[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label",i)] %||% ""
+    }
+    val_num <- vector(mode = "numeric", length = isolate(n_cat()))
+    for (i in 1:isolate(n_cat())) {
+      val_num[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_numeric",i)]
+    }
+    print(cat_list(num_input = val_num, text_input = val_text))
   })
 
   # # THEN Add ----------------------------------------------------------------

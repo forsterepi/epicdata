@@ -25,3 +25,12 @@ test_that("datetime range creation works", {
   expect_equal(datetime_range(dropdown = "... to ...", check1 = F, input1 = as.Date("2009-03-23"), check2 = F, input2 = as.Date("2010-04-12"))[["out"]],"(23.03.2009;12.04.2010)")
   expect_true(datetime_range(dropdown = "... to ...", check1 = F, input1 = as.Date("2010-04-12"), check2 = F, input2 = as.Date("2009-03-23"))[["check_input1_greater_input2"]])
 })
+
+test_that("cat_list works", {
+  expect_equal(cat_list(num_input = NULL, text_input = NULL)[["out"]],NA)
+  expect_equal(cat_list(num_input = list(1,2,3),text_input = list("a","b","c"))[["out"]],"1 = a | 2 = b | 3 = c")
+  expect_true(cat_list(num_input = list(1), text_input = list(""))[["check_integer_but_empty"]])
+  expect_true(cat_list(num_input = list(1,2), text_input = list("",""))[["check_integer_but_empty"]])
+  expect_true(cat_list(num_input = list(1,2,3),text_input = list("a","b","b"))[["check_dupli_text"]])
+  expect_true(cat_list(num_input = list(1,2,2),text_input = list("a","b","c"))[["check_dupli_num"]])
+})
