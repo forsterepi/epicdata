@@ -2,7 +2,7 @@ float_range <- function(dropdown, check1, input1, check2, input2) {
   check_input1_greater_input2 <- F
 
   if (is.null(dropdown)) {
-    return(list(out = NA,check_input1_greater_input2 = check_input1_greater_input2))
+    return(list(out = NA, check_input1_greater_input2 = check_input1_greater_input2))
   }
 
   if (dropdown == "No Range") {
@@ -45,14 +45,14 @@ float_range <- function(dropdown, check1, input1, check2, input2) {
     out <- paste0(bracket1,input1,";",input2,bracket2)
   }
 
-  return(list(out = out,check_input1_greater_input2 = check_input1_greater_input2))
+  return(list(out = out, check_input1_greater_input2 = check_input1_greater_input2))
 }
 
 datetime_range <- function(dropdown, check1, input1, check2, input2) {
   check_input1_greater_input2 <- F
 
   if (is.null(dropdown)) {
-    return(list(out = NA,check_input1_greater_input2 = check_input1_greater_input2))
+    return(list(out = NA, check_input1_greater_input2 = check_input1_greater_input2))
   }
 
   if (dropdown == "No Range") {
@@ -95,7 +95,7 @@ datetime_range <- function(dropdown, check1, input1, check2, input2) {
     out <- paste0(bracket1,format(input1,"%d.%m.%Y"),";",format(input2,"%d.%m.%Y"),bracket2)
   }
 
-  return(list(out = out,check_input1_greater_input2 = check_input1_greater_input2))
+  return(list(out = out, check_input1_greater_input2 = check_input1_greater_input2))
 }
 
 cat_list <- function(num_input, text_input) {

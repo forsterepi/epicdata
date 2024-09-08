@@ -51,8 +51,8 @@ ui_main_tab <- function(){
                           br(),
                           uiOutput("input_main_by_data_type"),
                           actionButton("main_add", "Add"),
-                          actionButton("delete_add", "Delete"),
-                          actionButton("clear_add", "Clear")
+                          actionButton("main_delete", "Delete"),
+                          actionButton("main_clear", "Clear")
              ),
              mainPanel(width = 9,
                        DT::DTOutput("main_tbl")

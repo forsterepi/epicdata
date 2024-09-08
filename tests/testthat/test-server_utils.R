@@ -29,6 +29,7 @@ test_that("datetime range creation works", {
 test_that("cat_list works", {
   expect_equal(cat_list(num_input = NULL, text_input = NULL)[["out"]],NA)
   expect_equal(cat_list(num_input = list(1,2,3),text_input = list("a","b","c"))[["out"]],"1 = a | 2 = b | 3 = c")
+  expect_equal(cat_list(num_input = list(1,2,3),text_input = list("a","","c"))[["out"]],"1 = a | 3 = c")
   expect_true(cat_list(num_input = list(1), text_input = list(""))[["check_integer_but_empty"]])
   expect_true(cat_list(num_input = list(1,2), text_input = list("",""))[["check_integer_but_empty"]])
   expect_true(cat_list(num_input = list(1,2,3),text_input = list("a","b","b"))[["check_dupli_text"]])

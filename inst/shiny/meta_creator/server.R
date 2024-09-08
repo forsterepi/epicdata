@@ -70,6 +70,8 @@ server <- function(input, output, session) {
 
   # main input by data type -------------------------------------------------
   observeEvent(input$input_data_type_main, {
+    n_cat(1)
+
     if (input$input_data_type_main == "string") {
       output$input_main_by_data_type <- renderUI({
         tagList(
@@ -263,28 +265,186 @@ server <- function(input, output, session) {
     }
   })
 
-  observeEvent(input$main_add, {
-    # print(input$input_datetime_range2_smaller_equal)
-    # print(input$input_datetime_range2)
-    # print(is.character(input$input_datetime_range2))
-    # print(class(input$input_datetime_range2))
-    # print(typeof(input$input_datetime_range2))
-    # print(lubridate::as_date(input$input_datetime_range2))
-    # print(is.numeric(input$input_datetime_range2))
-    # print(datetime_range(dropdown = input$input_datetime_range_select,
-    #                       check1 = input$input_datetime_range1_greater_equal,
-    #                       input1 = input$input_datetime_range1,
-    #                       check2 = input$input_datetime_range2_smaller_equal,
-    #                       input2 = input$input_datetime_range2))
+# Main Add ----------------------------------------------------------------
+  observeEvent(input$main_clear, {
     val_text <- vector(mode = "character", length = isolate(n_cat()))
     for (i in 1:isolate(n_cat())) {
       val_text[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label",i)] %||% ""
     }
-    val_num <- vector(mode = "numeric", length = isolate(n_cat()))
+    val_text_eng <- vector(mode = "character", length = isolate(n_cat()))
     for (i in 1:isolate(n_cat())) {
-      val_num[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_numeric",i)]
+      val_text_eng[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label_eng",i)] %||% ""
     }
-    print(cat_list(num_input = val_num, text_input = val_text))
+    length_val_text <- val_text %>% unlist() %>% .[val_text != ""] %>% length()
+    length_val_text_eng <- val_text_eng %>% unlist() %>% .[val_text_eng != ""] %>% length()
+    print(val_text)
+    print(val_text_eng)
+    print(length_val_text)
+    print(length_val_text_eng)
+  })
+
+  observeEvent(input$main_add, {
+    metadata_temp <- metadata()
+
+    id_empty_fine <- T
+    if (input$input_id_main == "") {
+      id_empty_fine <- F
+      shinyalert::shinyalert(title = "Warning!", text = "Please specify variable ID.", type = "warning")
+    }
+    label_empty_fine <- T
+    if (input$input_label_main == "") {
+      label_empty_fine <- F
+      shinyalert::shinyalert(title = "Warning!", text = "Please specify variable label.", type = "warning")
+    }
+    na_else_empty_fine <- T
+    if (input$input_na_else_main == "") {
+      na_else_empty_fine <- F
+      shinyalert::shinyalert(title = "Warning!", text = "Please specify NA else value.", type = "warning")
+    }
+    id_dupli_fine <- T
+    if (input$input_id_main %>% magrittr::is_in(metadata_temp[["main"]]$id_main)) {
+      id_dupli_fine <- F
+      shinyalert::shinyalert(title = "Warning!", text = "Variable ID already exists.", type = "warning")
+    }
+
+    cat_eng_fine <- T
+    cat_num_int_fine <- T
+    check_dupli_num_fine <- T
+    check_dupli_text_fine <- T
+    check_dupli_text_eng_fine <- T
+    check_integer_but_empty_fine <- T
+    if (input$input_data_type_main == "integer") {
+      val_text <- vector(mode = "character", length = isolate(n_cat()))
+      for (i in 1:isolate(n_cat())) {
+        val_text[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label",i)] %||% ""
+      }
+      val_text_eng <- vector(mode = "character", length = isolate(n_cat()))
+      for (i in 1:isolate(n_cat())) {
+        val_text_eng[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label_eng",i)] %||% ""
+      }
+      length_val_text <- val_text %>% unlist() %>% .[val_text != ""] %>% length()
+      length_val_text_eng <- val_text_eng %>% unlist() %>% .[val_text_eng != ""] %>% length()
+      if (length_val_text_eng > 0 & length_val_text_eng != length_val_text) {
+        cat_eng_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify english translations for all categories or none of them.", type = "warning")
+      }
+      if ((length_val_text_eng > 0 & input$input_label_main_eng == "") |
+          (length_val_text_eng == 0 & input$input_label_main_eng != "")) {
+        cat_eng_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify english translations for categories and label.", type = "warning")
+      }
+
+      val_num <- vector(mode = "numeric", length = isolate(n_cat()))
+      for (i in 1:isolate(n_cat())) {
+        val_num[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_numeric",i)]
+      }
+      cat_num_int_fine <- val_num %>% unlist() %>% is.integer()
+      if (!cat_num_int_fine) {
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify only integers as category numbers.", type = "warning")
+      }
+
+      val <- cat_list(num_input = val_num, text_input = val_text)
+      if (val[["check_dupli_num"]]) {
+        check_dupli_num_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Some category numbers appear multiple times.", type = "warning")
+      }
+      if (val[["check_dupli_text"]]) {
+        check_dupli_text_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Some categories appear multiple times.", type = "warning")
+      }
+      if (val[["check_integer_but_empty"]]) {
+        check_integer_but_empty_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify categories.", type = "warning")
+      }
+
+      val_eng <- cat_list(num_input = val_num, text_input = val_text_eng)
+      if (val_eng[["check_dupli_text"]]) {
+        check_dupli_text_eng_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Some English categories appear multiple times.", type = "warning")
+      }
+    }
+
+    check_input1_greater_input2_fine <- T
+    if (input$input_data_type_main == "float") {
+      range_float <- float_range(dropdown = input$input_float_range_select,
+                                 check1 = input$input_float_range1_greater_equal,
+                                 input1 = input$input_float_range1,
+                                 check2 = input$input_float_range2_smaller_equal,
+                                 input2 = input$input_float_range2)
+      if (range_float[["check_input1_greater_input2"]]) {
+        check_input1_greater_input2_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify ranges with the first value being smaller than the second.", type = "warning")
+      }
+    }
+    if (input$input_data_type_main == "datetime") {
+      range_datetime <- datetime_range(dropdown = input$input_datetime_range_select,
+                                       check1 = input$input_datetime_range1_greater_equal,
+                                       input1 = input$input_datetime_range1,
+                                       check2 = input$input_datetime_range2_smaller_equal,
+                                       input2 = input$input_datetime_range2)
+      if (range_datetime[["check_input1_greater_input2"]]) {
+        check_input1_greater_input2_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify ranges with the first value being smaller than the second.", type = "warning")
+      }
+    }
+
+    if (id_empty_fine & label_empty_fine & na_else_empty_fine & id_dupli_fine & cat_eng_fine & cat_num_int_fine &
+        check_dupli_num_fine & check_dupli_text_fine & check_dupli_text_eng_fine & check_integer_but_empty_fine &
+        check_input1_greater_input2_fine) {
+
+      if (input$input_data_type_main == "string") {
+        to_add <- data.frame(id_main = input$input_id_main,
+                             label_main = input$input_label_main,
+                             label_main_eng = input$input_label_main_eng,
+                             data_type_main = "string",
+                             na_else_main = input$input_na_else_main,
+                             value_labels_main = "NA",
+                             value_labels_main_eng = "NA",
+                             range_main = "NA",
+                             ops_main = input$input_ops_main)
+      }
+      if (input$input_data_type_main == "integer") {
+        to_add <- data.frame(id_main = input$input_id_main,
+                             label_main = input$input_label_main,
+                             label_main_eng = input$input_label_main_eng,
+                             data_type_main = "integer",
+                             na_else_main = input$input_na_else_main,
+                             value_labels_main = val[["out"]],
+                             value_labels_main_eng = val_eng[["out"]],
+                             range_main = "NA",
+                             ops_main = "NA")
+      }
+      if (input$input_data_type_main == "float") {
+        to_add <- data.frame(id_main = input$input_id_main,
+                             label_main = input$input_label_main,
+                             label_main_eng = input$input_label_main_eng,
+                             data_type_main = "float",
+                             na_else_main = input$input_na_else_main,
+                             value_labels_main = "NA",
+                             value_labels_main_eng = "NA",
+                             range_main = range_float[["out"]],
+                             ops_main = "NA")
+      }
+      if (input$input_data_type_main == "datetime") {
+        to_add <- data.frame(id_main = input$input_id_main,
+                             label_main = input$input_label_main,
+                             label_main_eng = input$input_label_main_eng,
+                             data_type_main = "datetime",
+                             na_else_main = input$input_na_else_main,
+                             value_labels_main = "NA",
+                             value_labels_main_eng = "NA",
+                             range_main = range_datetime[["out"]],
+                             ops_main = "NA")
+      }
+    metadata_temp[["main"]] <- rbind(metadata_temp[["main"]],to_add)
+    metadata(metadata_temp)
+
+    n_cat(1)
+    updateTextInput(session, "input_id_main", label = "Variable ID", placeholder = "ID", value = "")
+    updateTextInput(session, "input_label_main", label = "Variable ID", placeholder = "ID", value = "")
+    updateTextInput(session, "input_label_main_eng", label = "Variable ID", placeholder = "ID", value = "")
+    updateSelectInput(session, "input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"))
+    }
   })
 
   # # THEN Add ----------------------------------------------------------------
