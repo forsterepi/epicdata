@@ -266,23 +266,6 @@ server <- function(input, output, session) {
   })
 
 # Main Add ----------------------------------------------------------------
-  observeEvent(input$main_clear, {
-    val_text <- vector(mode = "character", length = isolate(n_cat()))
-    for (i in 1:isolate(n_cat())) {
-      val_text[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label",i)] %||% ""
-    }
-    val_text_eng <- vector(mode = "character", length = isolate(n_cat()))
-    for (i in 1:isolate(n_cat())) {
-      val_text_eng[i] <- lapply(reactiveValuesToList(input), unclass)[paste0("input_cat_label_eng",i)] %||% ""
-    }
-    length_val_text <- val_text %>% unlist() %>% .[val_text != ""] %>% length()
-    length_val_text_eng <- val_text_eng %>% unlist() %>% .[val_text_eng != ""] %>% length()
-    print(val_text)
-    print(val_text_eng)
-    print(length_val_text)
-    print(length_val_text_eng)
-  })
-
   observeEvent(input$main_add, {
     metadata_temp <- metadata()
 
@@ -392,10 +375,16 @@ server <- function(input, output, session) {
         check_dupli_num_fine & check_dupli_text_fine & check_dupli_text_eng_fine & check_integer_but_empty_fine &
         check_input1_greater_input2_fine) {
 
+      if (input$input_label_main_eng == "") {
+        eng_label <- "NA"
+      } else {
+        eng_label <- input$input_label_main_eng %>% stringr::str_trim("both")
+      }
+
       if (input$input_data_type_main == "string") {
         to_add <- data.frame(id_main = input$input_id_main,
                              label_main = input$input_label_main,
-                             label_main_eng = input$input_label_main_eng,
+                             label_main_eng = eng_label,
                              data_type_main = "string",
                              na_else_main = input$input_na_else_main,
                              value_labels_main = "NA",
@@ -406,7 +395,7 @@ server <- function(input, output, session) {
       if (input$input_data_type_main == "integer") {
         to_add <- data.frame(id_main = input$input_id_main,
                              label_main = input$input_label_main,
-                             label_main_eng = input$input_label_main_eng,
+                             label_main_eng = eng_label,
                              data_type_main = "integer",
                              na_else_main = input$input_na_else_main,
                              value_labels_main = val[["out"]],
@@ -417,7 +406,7 @@ server <- function(input, output, session) {
       if (input$input_data_type_main == "float") {
         to_add <- data.frame(id_main = input$input_id_main,
                              label_main = input$input_label_main,
-                             label_main_eng = input$input_label_main_eng,
+                             label_main_eng = eng_label,
                              data_type_main = "float",
                              na_else_main = input$input_na_else_main,
                              value_labels_main = "NA",
@@ -428,7 +417,7 @@ server <- function(input, output, session) {
       if (input$input_data_type_main == "datetime") {
         to_add <- data.frame(id_main = input$input_id_main,
                              label_main = input$input_label_main,
-                             label_main_eng = input$input_label_main_eng,
+                             label_main_eng = eng_label,
                              data_type_main = "datetime",
                              na_else_main = input$input_na_else_main,
                              value_labels_main = "NA",
@@ -441,11 +430,31 @@ server <- function(input, output, session) {
 
     n_cat(1)
     updateTextInput(session, "input_id_main", label = "Variable ID", placeholder = "ID", value = "")
-    updateTextInput(session, "input_label_main", label = "Variable ID", placeholder = "ID", value = "")
-    updateTextInput(session, "input_label_main_eng", label = "Variable ID", placeholder = "ID", value = "")
+    updateTextInput(session, "input_label_main", label = "Label", placeholder = "Label", value = "")
+    updateTextInput(session, "input_label_main_eng", label = "Label (English)", placeholder = "Label (English)", value = "")
     updateSelectInput(session, "input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"))
     }
   })
+
+# Main Clear --------------------------------------------------------------
+  observeEvent(input$main_clear, {
+    n_cat(1)
+    updateTextInput(session, "input_id_main", label = "Variable ID", placeholder = "ID", value = "")
+    updateTextInput(session, "input_label_main", label = "Label", placeholder = "Label", value = "")
+    updateTextInput(session, "input_label_main_eng", label = "Label (English)", placeholder = "Label (English)", value = "")
+    updateSelectInput(session, "input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"))
+  })
+
+# Main Delete -------------------------------------------------------------
+  observeEvent(input$main_delete, {
+    shinyalert::shinyalert(title = "Delete row", type = "input", inputType = "text", inputPlaceholder = "Provide id_main",
+                           callbackR = function(delete_id) {
+                             metadata_temp <- metadata()
+                             metadata_temp[["main"]] %<>% dplyr::filter(.data[["id_main"]] != delete_id)
+                             metadata(metadata_temp)}
+    )
+  })
+
 
   # # THEN Add ----------------------------------------------------------------
   # observeEvent(input$then_add, {

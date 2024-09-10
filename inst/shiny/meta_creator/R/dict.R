@@ -11,6 +11,7 @@ dictUI <- function(id) {
            sidebarLayout(
              sidebarPanel(width = 3,
                     h3("Dictionary Entries"),
+                    uiOutput(NS(id,"input_var")),
                     textInput(NS(id,"input_value"), label = "Allowed input value", placeholder = "Value", width = "250px") %>%
                       prompter::add_prompt(position = "right", message = "Add the allowed value in its initial language."),
                     br(),
@@ -46,6 +47,9 @@ dictServer <- function(id, metadata) {
   # moduleServer
   moduleServer(id, function(input, output, session) {
 
+    output$input_var <- renderUI(selectInput(NS(id,"input_var"), "Variable", selectize = T,
+                                                c(Choose = "", metadata() %>% get_vars_of_type("string"))))
+
     tableServer("tbl", metadata, metadata_part,
                 editable = list(target = "cell", disable = list(columns = c(0))),
                 options = list(scrollY = '750px', scrollCollapse = TRUE,
@@ -53,30 +57,45 @@ dictServer <- function(id, metadata) {
 
     deleteServer("delete", metadata, metadata_part)
 
-    # observeEvent(input$add, {
-    #   metadata_temp <- metadata()
-    #
-    #   if (input$input_key %>% stringr::str_trim("both") %>% magrittr::equals("")) {
-    #     shinyalert::shinyalert(title = "Warning!", text = "The keyword is empty.", type = "warning")
-    #   }
-    #   if (input$input_key %>% stringr::str_trim("both") %>% stringr::str_to_lower() %>% magrittr::is_in(metadata_temp[[metadata_part]][[paste0("key_",metadata_part)]] %>% stringr::str_trim("both") %>% stringr::str_to_lower())) {
-    #     shinyalert::shinyalert(title = "Warning!", text = "This dict segment already exists.", type = "warning")
-    #     updateTextInput(session, inputId = "input_key", label = NULL, value = "")
-    #     updateTextInput(session, inputId = "input_desc", label = NULL, value = "")
-    #   }
-    #   if ((input$input_key %>% stringr::str_trim("both") %>% stringr::str_to_lower() %>% magrittr::is_in(metadata_temp[[metadata_part]][[paste0("key_",metadata_part)]] %>% stringr::str_trim("both") %>% stringr::str_to_lower()) %>% magrittr::not()) &
-    #       input$input_key %>% stringr::str_trim("both") %>% magrittr::equals("") %>% magrittr::not()) {
-    #     to_add <- data.frame(id_dict = fun_get_id(metadata_temp[[metadata_part]][[paste0("id_",metadata_part)]],"dict"),
-    #                          key_dict = input$input_key %>% stringr::str_trim("both"),
-    #                          desc_dict = input$input_desc %>% stringr::str_trim("both"))
-    #
-    #     metadata_temp[[metadata_part]] <- rbind(metadata_temp[[metadata_part]],to_add)
-    #     metadata(metadata_temp)
-    #
-    #     updateTextInput(session, inputId = "input_key", label = NULL, value = "")
-    #     updateTextInput(session, inputId = "input_desc", label = NULL, value = "")
-    #   }
-    # })
+    observeEvent(input$add, {
+      metadata_temp <- metadata()
+
+      dict_var_empty_fine <- T
+      if (input$input_var == "") {
+        dict_var_empty_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify a variable from the dropdown list.", type = "warning")
+      }
+      dict_val_empty_fine <- T
+      if (input$input_value == "") {
+        dict_val_empty_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify a value.", type = "warning")
+      }
+      dict_id_val_combi_exists_fine <- T
+      if (paste0(input$input_var,input$input_value) %>% magrittr::is_in(paste0(metadata_temp[["dict"]]$var_dict,metadata_temp[["dict"]]$value_dict))) {
+        dict_id_val_combi_exists_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "This value is already in the list for this variable.", type = "warning")
+      }
+
+      if (dict_var_empty_fine & dict_val_empty_fine & dict_id_val_combi_exists_fine) {
+
+        if (input$input_value_eng == "") {
+          eng_value <- "NA"
+        } else {
+          eng_value <- input$input_value_eng %>% stringr::str_trim("both")
+        }
+
+        to_add <- data.frame(id_dict = fun_get_id(metadata_temp[["dict"]][["id_dict"]],"dict"),
+                             var_dict = input$input_var %>% stringr::str_trim("both"),
+                             value_dict = input$input_value %>% stringr::str_trim("both"),
+                             value_dict_eng = eng_value)
+
+        metadata_temp[[metadata_part]] <- rbind(metadata_temp[[metadata_part]],to_add)
+        metadata(metadata_temp)
+
+        updateTextInput(session, inputId = "input_value", label = "Allowed input value", value = "")
+        updateTextInput(session, inputId = "input_value_eng", label = "Allowed input value (Eng)", value = "")
+      }
+    })
   })
 }
 

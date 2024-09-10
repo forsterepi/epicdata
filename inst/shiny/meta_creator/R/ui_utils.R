@@ -46,8 +46,7 @@ ui_main_tab <- function(){
                           textAreaInput("input_label_main_eng", label = "Label (English)", placeholder = "Label (English)", height = "200%", resize = "vertical", width = "250px") %>%
                             prompter::add_prompt(position = "right", message = "English translation of label."),
                           br(),
-                          selectInput("input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"), width = "250px") %>%
-                            prompter::add_prompt(position = "right", message = "Please see 'HELP/About data types' for help."),
+                          selectInput("input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"), width = "250px"),
                           br(),
                           uiOutput("input_main_by_data_type"),
                           actionButton("main_add", "Add"),
