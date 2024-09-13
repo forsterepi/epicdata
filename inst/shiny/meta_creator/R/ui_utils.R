@@ -60,6 +60,29 @@ ui_main_tab <- function(){
   )
 }
 
+#' UI missing_rules tab
+#'
+#' Defines the UI elements of tab 'Missing Rules' in the Metadata Creator `shiny` app.
+#'
+#' @noRd
+ui_missing_rules_tab <- function(){
+  tabPanel("Missing Rules",
+           sidebarLayout(
+             sidebarPanel(width = 3,
+                          uiOutput("missing_rules_var"),
+                          uiOutput("missing_rules_rule"),
+                          actionButton("missing_rules_add", "Add"),
+                          actionButton("missing_rules_delete", "Delete"),
+                          actionButton("missing_rules_clear", "Clear"),
+                          actionButton("missing_rules_link", "Link with AND")
+             ),
+             mainPanel(width = 9,
+                       DT::DTOutput("missing_rules_tbl")
+             )
+           )
+  )
+}
+
 # ui_step_tab <- function(){
 #   empty <- empty_metadata()
 #   initial_then_data <- empty$then

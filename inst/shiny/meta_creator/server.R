@@ -66,9 +66,9 @@ server <- function(input, output, session) {
   # dict
   dictServer("dict_tab", metadata)
 
-  # main
+  # Main
 
-  # main input by data type -------------------------------------------------
+  # Main Input by Data Type -------------------------------------------------
   observeEvent(input$input_data_type_main, {
     n_cat(1)
 
@@ -222,13 +222,13 @@ server <- function(input, output, session) {
     }
   })
 
-  # main table --------------------------------------------------------------
+  # Main Table --------------------------------------------------------------
   output$main_tbl <- DT::renderDataTable(metadata()[["main"]], server = T, rownames = F, selection = "none", editable = "cell",
                                          options = list(scrollY = '500px', scrollCollapse = TRUE,
                                          paging = FALSE, order = list(0,'asc'),
                                          searchHighlight = TRUE))
 
-  # Cat Input ---------------------------------------------------------------
+  # Main Cat Input ---------------------------------------------------------------
   n_cat <- reactiveVal(1)
 
   ## more_lines_cat
@@ -453,6 +453,75 @@ server <- function(input, output, session) {
                              metadata_temp[["main"]] %<>% dplyr::filter(.data[["id_main"]] != delete_id)
                              metadata(metadata_temp)}
     )
+  })
+
+  # Missing Rules Inputs ----------------------------------------------------
+  output$missing_rules_var <- renderUI(selectInput("input_missing_rules_var", "Variable ...", selectize = T,
+                                           c(Choose = "", metadata()[["main"]]$id_main)))
+
+  observeEvent(input$input_missing_rules_var, {
+    if (input$input_missing_rules_var == "") {
+      output$missing_rules_rule <- renderUI({})
+    }
+    if (get_type_of_var(input$input_missing_rules_var, metadata()) == "string") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
+                                    magrittr::extract(order(.)))),
+          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("==", "!=")),
+          textInput("input_missing_rules_value", label = NULL)
+        )
+      })
+    }
+    if (get_type_of_var(input$input_missing_rules_var, metadata()) == "integer") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
+                                    magrittr::extract(order(.)))),
+          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("in", "!in")),
+          selectInput("input_missing_rules_value", label = NULL, multiple = T)
+        )
+      })
+    }
+    if (get_type_of_var(input$input_missing_rules_var, metadata()) == "float") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
+                                    magrittr::extract(order(.)))),
+          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("==", "!=",">",">=","<","<=")),
+          numericInput("input_missing_rules_value", label = NULL, value = 0, step = 0.1, width = "250px")
+        )
+      })
+    }
+    if (get_type_of_var(input$input_missing_rules_var, metadata()) == "datetime") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
+                      choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
+                                    magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.")) %>%
+                                    magrittr::extract(order(.)))),
+          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("==", "!=",">",">=","<","<=")),
+          dateInput("input_missing_rules_value", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "250px")
+        )
+      })
+    }
+
+  })
+
+  # Missing Rules Table --------------------------------------------------------------
+  output$missing_rules_tbl <- DT::renderDataTable(metadata()[["missing_rules"]], server = T, rownames = F, selection = "none", editable = F,
+                                         options = list(scrollY = '500px', scrollCollapse = TRUE,
+                                                        paging = FALSE, order = list(0,'asc'),
+                                                        searchHighlight = TRUE))
+
+  observeEvent(input$missing_rules_clear, {
+    print(input$input_missing_rules_var %>% get_type_of_var(metadata()))
   })
 
 

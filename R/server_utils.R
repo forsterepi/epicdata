@@ -141,6 +141,7 @@ cat_list <- function(num_input, text_input) {
 #' type.
 #'
 #' @param metadata The current metadata, i.e., metadata().
+#' @param type A single charatcer element containing the data type. Can be 'string', 'float', 'integer', or 'datetime'.
 #'
 #' @noRd
 get_vars_of_type <- function(metadata, type) {
@@ -153,6 +154,29 @@ get_vars_of_type <- function(metadata, type) {
 
   if (nrow(temp) > 0) {
     out <- temp$id_main %>% magrittr::extract(temp$id_main %>% stringr::str_to_lower() %>% order())
+  } else {
+    out <- ""
+  }
+  return(out)
+}
+
+#' Get data type of certain variable
+#'
+#' Processes the metadata to present the data type of a certain variable.
+#'
+#' @param var A single character element that contains the ID of the variable (id_main).
+#' @param metadata The current metadata, i.e., metadata().
+#'
+#' @noRd
+get_type_of_var <- function(var, metadata) {
+
+  #checkmate::assert_character(var, min.chars = 1, len = 1, any.missing = F, null.ok = F)
+
+  temp <- metadata[["main"]] %>%
+    dplyr::filter(.data$id_main == var)
+
+  if (nrow(temp) > 0) {
+    out <- temp$data_type_main[1]
   } else {
     out <- ""
   }

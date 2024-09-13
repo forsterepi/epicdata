@@ -13,6 +13,7 @@ ui <- tagList(
     ui_start_tab(),
     missing_codesUI("missing_codes_tab"),
     ui_main_tab(),
+    ui_missing_rules_tab(),
     dictUI("dict_tab"),
     ui_help_tab()
   )
