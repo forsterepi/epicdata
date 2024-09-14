@@ -72,8 +72,8 @@ validate_metadata <- function(x) {
   checkmate::assert_data_frame(x[["missing_codes"]], ncols = 3, col.names = "named", add = coll)
   checkmate::assert_subset(colnames(x[["missing_codes"]]), c("id_missing_codes","label_missing_codes","class_missing_codes"), add = coll)
 
-  checkmate::assert_data_frame(x[["missing_rules"]], ncols = 3, col.names = "named", add = coll)
-  checkmate::assert_subset(colnames(x[["missing_rules"]]), c("id_missing_rules","var_missing_rules","value_missing_rules"), add = coll)
+  checkmate::assert_data_frame(x[["missing_rules"]], ncols = 4, col.names = "named", add = coll)
+  checkmate::assert_subset(colnames(x[["missing_rules"]]), c("id_missing_rules","var_missing_rules","code_missing_rules","value_missing_rules"), add = coll)
 
   checkmate::assert_data_frame(x[["contras"]], ncols = 6, col.names = "named", add = coll)
   checkmate::assert_subset(colnames(x[["contras"]]), c("id_contras","var1_contras","var2_contras","rule_contras","label_contras","solution_contras"), add = coll)
@@ -107,7 +107,7 @@ empty_metadata <- function() {
 
   # main
   main_vars <- c("id_main","label_main","label_main_eng","data_type_main","na_else_main","value_labels_main","value_labels_main_eng","range_main","ops_main")
-  x[[1]] <- matrix(rep("NA",length(main_vars)), nrow = 1, ncol = length(main_vars)) %>%
+  x[[1]] <- matrix(c(rep("NA", 3), "string", rep("NA",length(main_vars) - 4)), nrow = 1, ncol = length(main_vars)) %>%
     as.data.frame() %>%
     magrittr::set_colnames(main_vars)
   names(x)[1] <- "main"
@@ -120,7 +120,7 @@ empty_metadata <- function() {
   names(x)[2] <- "missing_codes"
 
   # missing_rules
-  missing_rules_vars <- c("id_missing_rules","var_missing_rules","value_missing_rules")
+  missing_rules_vars <- c("id_missing_rules","var_missing_rules","code_missing_rules","value_missing_rules")
   x[[3]] <- matrix(c("r0",rep("NA",length(missing_rules_vars) - 1)), nrow = 1, ncol = length(missing_rules_vars)) %>%
     as.data.frame() %>%
     magrittr::set_colnames(missing_rules_vars)

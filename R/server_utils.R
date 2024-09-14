@@ -170,8 +170,6 @@ get_vars_of_type <- function(metadata, type) {
 #' @noRd
 get_type_of_var <- function(var, metadata) {
 
-  #checkmate::assert_character(var, min.chars = 1, len = 1, any.missing = F, null.ok = F)
-
   temp <- metadata[["main"]] %>%
     dplyr::filter(.data$id_main == var)
 
@@ -239,5 +237,34 @@ fun_get_id <- function(id_col, metadata_part = c("missing_rules","contras","mc_s
   out <- paste0(letter_to_use,number_to_use)
 
   # Return
+  return(out)
+}
+
+#' Get values of integer variable as list
+#'
+#' Get the categories of an integer value from `metadata` main table.
+#'
+#' @param var A single character element that contains the ID of an integer
+#'   variable (id_main).
+#' @param metadata The current metadata, i.e., metadata().
+#'
+#' @returns A vector of type character containing the names of the categories of
+#'   the specified variable.
+#'
+#' @noRd
+get_cats_of_var <- function(var, metadata) {
+
+  temp <- metadata[["main"]] %>%
+    dplyr::filter(.data$id_main == var)
+
+  if (nrow(temp) > 0) {
+    out <- temp$value_labels_main[1] %>%
+      stringr::str_split_1(stringr::fixed(" | ")) %>%
+      stringr::str_split(stringr::fixed(" = ")) %>%
+      purrr::map(magrittr::extract(2)) %>%
+      unlist()
+  } else {
+    out <- ""
+  }
   return(out)
 }

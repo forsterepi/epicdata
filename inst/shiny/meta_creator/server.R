@@ -436,7 +436,7 @@ server <- function(input, output, session) {
     }
   })
 
-# Main Clear --------------------------------------------------------------
+  # Main Clear --------------------------------------------------------------
   observeEvent(input$main_clear, {
     n_cat(1)
     updateTextInput(session, "input_id_main", label = "Variable ID", placeholder = "ID", value = "")
@@ -445,7 +445,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "input_data_type_main", label = "Data type", choices = c("string","integer","float","datetime"))
   })
 
-# Main Delete -------------------------------------------------------------
+  # Main Delete -------------------------------------------------------------
   observeEvent(input$main_delete, {
     shinyalert::shinyalert(title = "Delete row", type = "input", inputType = "text", inputPlaceholder = "Provide id_main",
                            callbackR = function(delete_id) {
@@ -461,57 +461,91 @@ server <- function(input, output, session) {
 
   observeEvent(input$input_missing_rules_var, {
     if (input$input_missing_rules_var == "") {
+      output$missing_rules_code <- renderUI({})
       output$missing_rules_rule <- renderUI({})
     }
     if (get_type_of_var(input$input_missing_rules_var, metadata()) == "string") {
-      output$missing_rules_rule <- renderUI({
+      output$missing_rules_code <- renderUI({
         tagList(
           selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
                       choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
                                     magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
                                     magrittr::extract(order(.)))),
-          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("==", "!=")),
-          textInput("input_missing_rules_value", label = NULL)
+          selectInput("input_missing_rules_var_condition", label = "... if ...", selectize = T, c(Choose = "", metadata()[["main"]]$id_main))
         )
       })
     }
     if (get_type_of_var(input$input_missing_rules_var, metadata()) == "integer") {
-      output$missing_rules_rule <- renderUI({
+      output$missing_rules_code <- renderUI({
         tagList(
           selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
                       choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
                                     magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
                                     magrittr::extract(order(.)))),
-          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("in", "!in")),
-          selectInput("input_missing_rules_value", label = NULL, multiple = T)
+          selectInput("input_missing_rules_var_condition", label = "... if ...", selectize = T, c(Choose = "", metadata()[["main"]]$id_main))
         )
       })
     }
     if (get_type_of_var(input$input_missing_rules_var, metadata()) == "float") {
-      output$missing_rules_rule <- renderUI({
+      output$missing_rules_code <- renderUI({
         tagList(
           selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
                       choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
                                     magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.") %>% magrittr::not()) %>%
                                     magrittr::extract(order(.)))),
-          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("==", "!=",">",">=","<","<=")),
-          numericInput("input_missing_rules_value", label = NULL, value = 0, step = 0.1, width = "250px")
+          selectInput("input_missing_rules_var_condition", label = "... if ...", selectize = T, c(Choose = "", metadata()[["main"]]$id_main))
         )
       })
     }
     if (get_type_of_var(input$input_missing_rules_var, metadata()) == "datetime") {
-      output$missing_rules_rule <- renderUI({
+      output$missing_rules_code <- renderUI({
         tagList(
           selectInput("input_missing_rules_code", label = "... gets code ...", width = "250px",
                       choices = c(Choose = "", metadata()[["missing_codes"]]$id_missing_codes %>%
                                     magrittr::extract(metadata()[["missing_codes"]]$id_missing_codes %>% stringr::str_detect("^01\\.01\\.")) %>%
                                     magrittr::extract(order(.)))),
-          selectInput("input_missing_rules_operator", label = "... if value ...", width = "250px", choices = c("==", "!=",">",">=","<","<=")),
-          dateInput("input_missing_rules_value", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "250px")
+          selectInput("input_missing_rules_var_condition", label = "... if ...", selectize = T, c(Choose = "", metadata()[["main"]]$id_main))
         )
       })
     }
+  })
 
+  observeEvent(input$input_missing_rules_var_condition, {
+    if (input$input_missing_rules_var_condition == "") {
+      output$missing_rules_rule <- renderUI({})
+    }
+    if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "string") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_operator_s", label = NULL, width = "250px", choices = c("==", "!=")),
+          textInput("input_missing_rules_value_s", label = NULL, placeholder = "Text", width = "250px")
+        )
+      })
+    }
+    if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "integer") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_operator_i", label = NULL, width = "250px", choices = c("IN", "!IN")),
+          selectInput("input_missing_rules_value_i", label = NULL, choices = get_cats_of_var(input$input_missing_rules_var_condition, metadata()), multiple = T)
+        )
+      })
+    }
+    if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "float") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_operator_f", label = NULL, width = "250px", choices = c("==", "!=",">",">=","<","<=")),
+          numericInput("input_missing_rules_value_f", label = NULL, value = 0, step = 0.1, width = "250px")
+        )
+      })
+    }
+    if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "datetime") {
+      output$missing_rules_rule <- renderUI({
+        tagList(
+          selectInput("input_missing_rules_operator_d", label = NULL, width = "250px", choices = c("==", "!=",">",">=","<","<=")),
+          dateInput("input_missing_rules_value_d", label = NULL, format = "dd. M yyyy", weekstart = 1, width = "250px")
+        )
+      })
+    }
   })
 
   # Missing Rules Table --------------------------------------------------------------
@@ -520,9 +554,110 @@ server <- function(input, output, session) {
                                                         paging = FALSE, order = list(0,'asc'),
                                                         searchHighlight = TRUE))
 
-  observeEvent(input$missing_rules_clear, {
-    print(input$input_missing_rules_var %>% get_type_of_var(metadata()))
+  # Missing Rules Add -------------------------------------------------------
+  observeEvent(input$missing_rules_add, {
+    metadata_temp <- metadata()
+
+    var_empty_fine <- T
+    code_empty_fine <- T
+    var_condition_empty_fine <- T
+    value_empty_fine <- T
+
+    if (input$input_missing_rules_var == "") {
+      var_empty_fine <- F
+      shinyalert::shinyalert(title = "Warning!", text = "Please specify variable, for which the missing rules applies.", type = "warning")
+    }
+
+    if (var_empty_fine) {
+      if (input$input_missing_rules_code == "") {
+        code_empty_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify missing/jump code.", type = "warning")
+      }
+      if (input$input_missing_rules_var_condition == "") {
+        var_condition_empty_fine <- F
+        shinyalert::shinyalert(title = "Warning!", text = "Please specify condition.", type = "warning")
+      }
+      if (var_condition_empty_fine) {
+        if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "string") {
+          if (input$input_missing_rules_value_s == "") {
+            value_empty_fine <- F
+            shinyalert::shinyalert(title = "Warning!", text = "Please specify condition.", type = "warning")
+          }
+        }
+        if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "integer") {
+          if (is.null(input$input_missing_rules_value_i)) {
+            value_empty_fine <- F
+            shinyalert::shinyalert(title = "Warning!", text = "Please specify condition.", type = "warning")
+          }
+        }
+      }
+    }
+
+    if (var_empty_fine & code_empty_fine & var_condition_empty_fine & value_empty_fine) {
+      if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "string") {
+        input_val <- input$input_missing_rules_value_s
+        input_op <- input$input_missing_rules_operator_s
+      }
+      if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "integer") {
+        input_val <- input$input_missing_rules_value_i %>% stringr::str_c(collapse = ", ") %>% paste0("(",.,")")
+        input_op <- input$input_missing_rules_operator_i
+      }
+      if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "float") {
+        input_val <- input$input_missing_rules_value_f %>% as.character()
+        input_op <- input$input_missing_rules_operator_f
+      }
+      if (get_type_of_var(input$input_missing_rules_var_condition, metadata()) == "datetime") {
+        input_val <- input$input_missing_rules_value_d %>% format("%d.%m.%Y")
+        input_op <- input$input_missing_rules_operator_d
+      }
+
+      to_add <- data.frame(id_missing_rules = fun_get_id(metadata_temp[["missing_rules"]][["id_missing_rules"]],"missing_rules"),
+                           var_missing_rules = input$input_missing_rules_var,
+                           code_missing_rules = input$input_missing_rules_code,
+                           value_missing_rules = paste(input$input_missing_rules_var_condition, input_op, input_val))
+      metadata_temp[["missing_rules"]] <- rbind(metadata_temp[["missing_rules"]],to_add)
+      metadata(metadata_temp)
+
+      updateSelectInput(session, "input_missing_rules_var", "Variable ...", c(Choose = "", metadata()[["main"]]$id_main))
+    }
   })
+
+  # Missing Rules Clear -----------------------------------------------------
+  observeEvent(input$missing_rules_clear, {
+    updateSelectInput(session, "input_missing_rules_var", "Variable ...", c(Choose = "", metadata()[["main"]]$id_main))
+  })
+
+
+  # Missing Rules Delete ----------------------------------------------------
+  observeEvent(input$missing_rules_delete, {
+    shinyalert::shinyalert(title = "Delete row", type = "input", inputType = "text", inputPlaceholder = "Provide id_missing_rules",
+                           callbackR = function(delete_id) {
+                             metadata_temp <- metadata()
+                             metadata_temp[["missing_rules"]] %<>% dplyr::filter(.data[["id_missing_rules"]] != delete_id)
+                             metadata(metadata_temp)}
+    )
+  })
+
+  # Missing Rules Link ------------------------------------------------------
+  observeEvent(input$missing_rules_link, {
+    shinyalert::shinyalert(title = "Link 2 conditions with AND", type = "input", inputType = "text", inputPlaceholder = "r1+r2",
+                           callbackR = function(input_ids) {
+                             ids <- input_ids %>% stringr::str_split_1("\\+") %>% stringr::str_trim("both")
+                             metadata_temp <- metadata()
+                             vals <- metadata_temp[["missing_rules"]] %>%
+                               dplyr::filter(.data[["id_missing_rules"]] %in% ids) %>%
+                               magrittr::extract2("value_missing_rules") %>%
+                               stringr::str_c(collapse = " AND ")
+                             metadata_temp[["missing_rules"]] %<>% dplyr::filter(!(.data[["id_missing_rules"]] %in% ids))
+                             to_add <- data.frame(id_missing_rules = fun_get_id(metadata_temp[["missing_rules"]][["id_missing_rules"]],"missing_rules"),
+                                                  var_missing_rules = x,
+                                                  code_missing_rules = x,
+                                                  value_missing_rules = vals)
+                             metadata_temp[["missing_rules"]] <- rbind(metadata_temp[["missing_rules"]],to_add)
+                             metadata(metadata_temp)}
+    )
+  })
+
 
 
   # # THEN Add ----------------------------------------------------------------

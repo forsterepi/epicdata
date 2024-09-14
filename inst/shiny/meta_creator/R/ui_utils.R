@@ -70,10 +70,12 @@ ui_missing_rules_tab <- function(){
            sidebarLayout(
              sidebarPanel(width = 3,
                           uiOutput("missing_rules_var"),
+                          uiOutput("missing_rules_code"),
                           uiOutput("missing_rules_rule"),
                           actionButton("missing_rules_add", "Add"),
                           actionButton("missing_rules_delete", "Delete"),
                           actionButton("missing_rules_clear", "Clear"),
+                          br(),br(),
                           actionButton("missing_rules_link", "Link with AND")
              ),
              mainPanel(width = 9,
