@@ -1,9 +1,7 @@
 
-<img src="man/figures/logo.png" align="left" height="139"/>
-
-# epicdata
-
 [![R-CMD-check](https://github.com/forsterepi/epicdata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/forsterepi/epicdata/actions/workflows/R-CMD-check.yaml)
+
+# epicdata <img src="man/figures/logo.png" align="left" height="139"/>
 
 The goal of epicdata is to summarize data processing in epidemiology in
 a central package. It includes functions to set up corresponding R
