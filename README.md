@@ -1,4 +1,6 @@
 
+<img src="man/figures/logo.png" align="right" height="139"/>
+
 # epicdata
 
 [![R-CMD-check](https://github.com/forsterepi/epicdata/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/forsterepi/epicdata/actions/workflows/R-CMD-check.yaml)
