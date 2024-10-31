@@ -6,6 +6,8 @@
 \alias{epicdata-package}
 \title{epicdata: Data Processing in Epidemiology}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 A workflow for processing of epidemiological data, including setup of meta data and handling of raw data.
 }
 \seealso{
