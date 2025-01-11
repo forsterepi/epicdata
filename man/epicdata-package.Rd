@@ -4,7 +4,7 @@
 \name{epicdata-package}
 \alias{epicdata}
 \alias{epicdata-package}
-\title{epicdata: Data Processing in Epidemiology}
+\title{epicdata: Clean Data for Epidemiology}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 

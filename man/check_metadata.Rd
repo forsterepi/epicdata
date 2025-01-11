@@ -2,12 +2,12 @@
 % Please edit documentation in R/check_metadata.R
 \name{check_metadata}
 \alias{check_metadata}
-\title{Check \code{epic_metadata} class objects}
+\title{Check \code{epicdata_meta} class objects}
 \usage{
 check_metadata(metadata)
 }
 \arguments{
-\item{metadata}{An \code{epic_metadata} object.}
+\item{metadata}{An \code{epicdata_meta} object.}
 }
 \value{
 Prints information about successful and unsuccessful checks in the
@@ -15,7 +15,7 @@ console. Returns the input metadata. If checks were successful, returns
 checked metadata that can be used in data processing.
 }
 \description{
-Check if \code{epic_metadata} class objects fulfill the conditions for being used
+Check if \code{epicdata_meta} class objects fulfill the conditions for being used
 in data processing.
 }
 \examples{

@@ -17,9 +17,9 @@ deleteUI <- function(id) {
 #'
 #' @param id Namespace argument.
 #' @param metadata Metadata object, which contains the data as an
-#'   `epic_metadata` class object. This argument is reactive.
+#'   `epicdata_meta` class object. This argument is reactive.
 #' @param metadata_part Addresses a specific data.frame element of metadata.
-#'   Options are element names of class `epic_metadata`. This argument is
+#'   Options are element names of class `epicdata_meta`. This argument is
 #'   not reactive.
 #'
 #' @noRd

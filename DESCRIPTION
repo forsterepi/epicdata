@@ -1,5 +1,5 @@
 Package: epicdata
-Title: Data Processing in Epidemiology
+Title: Clean Data for Epidemiology
 Version: 0.0.0.9000
 Authors@R: 
     person("Felix", "Forster", , "felix.forster@med.uni-muenchen.de", role = c("aut", "cre"),
@@ -27,7 +27,8 @@ Imports:
     stringr,
     tidyselect,
     usethis,
-    withr
+    withr,
+    yaml
 URL: https://github.com/forsterepi/epicdata
 BugReports: https://github.com/forsterepi/epicdata/issues
 Depends: 

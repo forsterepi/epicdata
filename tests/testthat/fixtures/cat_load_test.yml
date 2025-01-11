@@ -1,0 +1,25 @@
+main:
+- id: var1
+  type: integer
+  values:
+  - 1 =one or more
+  - 2  = two
+  - 3=   three
+- id: var2
+  type: integer
+  values:
+    1: one or more
+    2: two
+    3: three
+- id: var3
+  type: integer
+  values:
+  - 1: one or more
+  - 2: two
+  - 3: three
+- id: var4
+  type: integer
+  values:
+  - 1: one or more
+    2: two
+    3: three

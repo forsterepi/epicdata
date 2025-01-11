@@ -1,3 +1,5 @@
+source(system.file("shiny","meta_creator","R","server_utils.R", package = "epicdata"), local = TRUE)
+
 test_that("float range creation works", {
   expect_equal(float_range(dropdown = NULL, check1 = NULL, input1 = NULL, check2 = NULL, input2 = NULL)[["out"]],NA)
   expect_equal(float_range(dropdown = "No Range", check1 = NULL, input1 = NULL, check2 = NULL, input2 = NULL)[["out"]],"(-Inf;Inf)")

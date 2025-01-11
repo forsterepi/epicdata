@@ -1,9 +1,9 @@
-#' Check `epic_metadata` class objects
+#' Check `epicdata_meta` class objects
 #'
-#' Check if `epic_metadata` class objects fulfill the conditions for being used
+#' Check if `epicdata_meta` class objects fulfill the conditions for being used
 #' in data processing.
 #'
-#' @param metadata An `epic_metadata` object.
+#' @param metadata An `epicdata_meta` object.
 #'
 #' @return Prints information about successful and unsuccessful checks in the
 #'   console. Returns the input metadata. If checks were successful, returns
@@ -17,11 +17,11 @@ check_metadata <- function(metadata) {
 
   rlang::try_fetch(validate_metadata(metadata),
                    error = function(cnd) {
-                     cli::cli_abort("{.var metadata} must be an object of class {.emph epic_metadata}!",
-                                    parent = cnd, class = "no_epic_metadata")
+                     cli::cli_abort("{.var metadata} must be an object of class {.emph epicdata_meta}!",
+                                    parent = cnd, class = "no_epicdata_meta")
                    })
 
-  cli::cli_h1("Checking {.emph epic_metadata} {as.character(substitute(metadata))}")
+  cli::cli_h1("Checking {.emph epicdata_meta} {as.character(substitute(metadata))}")
 
   # metadata %<>% uncheck_metadata()
   #
@@ -38,7 +38,7 @@ check_metadata <- function(metadata) {
   # rlang::try_fetch({
   #   spsUtil::quiet(check_does_keys(metadata))
   #   metadata %<>% unclass(.)
-  #   metadata %<>% structure(., class = "epic_metadata_checked")
+  #   metadata %<>% structure(., class = "epicdata_meta_checked")
   #   cli::cli_alert_success("Checking successful!")
   # },
   # error = function(cnd) {

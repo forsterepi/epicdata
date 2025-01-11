@@ -37,7 +37,7 @@ dictUI <- function(id) {
 #'
 #' @param id Namespace argument.
 #' @param metadata Metadata object, which contains the data as an
-#'   `epic_metadata` class object. This argument is reactive.
+#'   `epicdata_meta` class object. This argument is reactive.
 #'
 #' @noRd
 dictServer <- function(id, metadata) {

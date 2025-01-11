@@ -23,7 +23,7 @@ check_if_rds <- function(x) {
 #' Check metadata upload class and structure
 #'
 #' Checks if the file uploaded into the Metadata Creator `shiny` app has the
-#' correct class `epic_metadata` and the correct structure using
+#' correct class `epicdata_meta` and the correct structure using
 #' `validate_metadata()`.
 #'
 #' @param x The uploaded file after reading it with `readRDS()`.
@@ -33,7 +33,7 @@ check_if_metadata <- function(x) {
   tryCatch({
     validate_metadata(x)
   }, error = function(e) {
-    shinyalert::shinyalert(title = "Warning!", text = "The selected file is an .rds file but does not contain an object of class epic_metadata.", type = "warning")
+    shinyalert::shinyalert(title = "Warning!", text = "The selected file is an .rds file but does not contain an object of class epicdata_meta.", type = "warning")
     validate(
       need(FALSE, paste("File validation error:", e$message))
     )

@@ -1,9 +1,9 @@
-#' Construct `epic_metadata` objects
+#' Construct `epicdata_meta` objects
 #'
-#' Constructor function for S3 class `epic_metadata`. The class is used
+#' Constructor function for S3 class `epicdata_meta`. The class is used
 #' with the Meta Data Creator `shiny` app to store the inputed information.
 #'
-#' @details `epic_metadata` objects are lists containing 6 data.frames.
+#' @details `epicdata_meta` objects are lists containing 6 data.frames.
 #'   These data.frames are described below:
 #'
 #'   `main` contains
@@ -18,12 +18,12 @@
 #'
 #'   `dict` contains
 #'
-#' @param x A list to be converted to class `epic_metadata`.
+#' @param x A list to be converted to class `epicdata_meta`.
 #'
-#' @returns A `epic_metadata` object. Its structure is described in
+#' @returns A `epicdata_meta` object. Its structure is described in
 #'   Details.
 #'
-#' @seealso [validate_metadata()], [print.epic_metadata()],
+#' @seealso [validate_metadata()], [print.epicdata_meta()],
 #'   [empty_metadata()]
 #'
 #' @export
@@ -34,21 +34,21 @@
 #' metadata <- new_metadata(x)
 new_metadata <- function(x = list()) {
   stopifnot(is.list(x))
-  structure(x, class = "epic_metadata")
+  structure(x, class = "epicdata_meta")
 }
 
-#' Validate `epic_metadata` objects
+#' Validate `epicdata_meta` objects
 #'
-#' Validates that the provided input object of class `epic_metadata` has
+#' Validates that the provided input object of class `epicdata_meta` has
 #' the correct structure.
 #'
-#' @param x An `epic_metadata` or `epic_metadata_checked` object to be
+#' @param x An `epicdata_meta` or `epicdata_meta_checked` object to be
 #'   validated.
 #'
-#' @returns An `epic_metadata` or `epic_metadata_checked` object, that
+#' @returns An `epicdata_meta` or `epicdata_meta_checked` object, that
 #'   has been checked to have the correct structure.
 #'
-#' @seealso [new_metadata()] for information on `epic_metadata` objects
+#' @seealso [new_metadata()] for information on `epicdata_meta` objects
 #'
 #' @export
 #'
@@ -58,7 +58,7 @@ new_metadata <- function(x = list()) {
 validate_metadata <- function(x) {
 
   class_input <- class(x)
-  if (class_input %>% magrittr::is_in(c("epic_metadata_checked","epic_metadata")) %>% magrittr::not()) {
+  if (class_input %>% magrittr::is_in(c("epicdata_meta_checked","epicdata_meta")) %>% magrittr::not()) {
     cli::cli_abort("{.var x} must be a metadata object!", class = "no_metadata")
   }
 
@@ -89,14 +89,14 @@ validate_metadata <- function(x) {
   return(x)
 }
 
-#' Create empty `epic_metadata` object
+#' Create empty `epicdata_meta` object
 #'
-#' Creates an empty `epic_metadata` object with the correct structure. It
+#' Creates an empty `epicdata_meta` object with the correct structure. It
 #' is used when starting up the Meta Data Creator `shiny` app.
 #'
-#' @returns A empty `epic_metadata` object with correct structure.
+#' @returns A empty `epicdata_meta` object with correct structure.
 #'
-#' @seealso [new_metadata()] for information on `epic_metadata` objects
+#' @seealso [new_metadata()] for information on `epicdata_meta` objects
 #'
 #' @export
 #'
@@ -153,23 +153,23 @@ empty_metadata <- function() {
   return(x)
 }
 
-#' Print `epic_metadata` objects
+#' Print `epicdata_meta` objects
 #'
-#' Print method for objects of class `epic_metadata`.
+#' Print method for objects of class `epicdata_meta`.
 #'
-#' @param x A `epic_metadata` object.
+#' @param x A `epicdata_meta` object.
 #' @inheritParams base::print.default
 #'
-#' @returns Prints the `epic_metadata` object in the console.
+#' @returns Prints the `epicdata_meta` object in the console.
 #'
-#' @seealso [new_metadata()] for information on `epic_metadata` objects
+#' @seealso [new_metadata()] for information on `epicdata_meta` objects
 #'
 #' @export
 #'
 #' @examples
 #' x <- empty_metadata()
 #' print(x)
-print.epic_metadata <- function(x, ...) {
+print.epicdata_meta <- function(x, ...) {
   cli::cli_alert_danger("unchecked (please run {.code check_metadata()} before continuing)")
   cat("The Metadata describes ",nrow(x$main)," variables.\n\n")
   cat("Missing/Jump Codes: ",nrow(x$missing_codes),"\n")
@@ -179,16 +179,16 @@ print.epic_metadata <- function(x, ...) {
   cat("Dictionary Entries for String Variables: ",nrow(x$dict),"\n")
 }
 
-#' Print `epic_metadata_checked` objects
+#' Print `epicdata_meta_checked` objects
 #'
-#' Print method for objects of class `epic_metadata_checked`.
+#' Print method for objects of class `epicdata_meta_checked`.
 #'
-#' @param x A `epic_metadata_checked` object.
+#' @param x A `epicdata_meta_checked` object.
 #' @inheritParams base::print.default
 #'
-#' @returns Prints the `epic_metadata_checked` object in the console.
+#' @returns Prints the `epicdata_meta_checked` object in the console.
 #'
-#' @seealso [new_metadata()] for information on `epic_metadata` objects
+#' @seealso [new_metadata()] for information on `epicdata_meta` objects
 #'
 #' @export
 #'
@@ -196,7 +196,7 @@ print.epic_metadata <- function(x, ...) {
 #' x <- empty_metadata()
 #' x <- check_metadata(x)
 #' print(x)
-print.epic_metadata_checked <- function(x, ...) {
+print.epicdata_meta_checked <- function(x, ...) {
   cli::cli_alert_success("checked successfully")
   cat("The Metadata describes ",nrow(x$main)," variables.\n\n")
   cat("Missing/Jump Codes: ",nrow(x$missing_codes),"\n")
@@ -206,54 +206,24 @@ print.epic_metadata_checked <- function(x, ...) {
   cat("Dictionary Entries for String Variables: ",nrow(x$dict),"\n")
 }
 
-#' Load `epic_metadata` objects
+#' Unchecking `epicdata_meta` objects
 #'
-#' @param path File path to `epic_metadata` object.
+#' Putting a checked `epicdata_meta` back to an unchecked status.
 #'
-#' @return Load a `epic_metadata` object and returns it.
-#'
-#' @export
-#'
-#' @examples
-#' withr::with_tempdir({
-#' x <- empty_metadata()
-#' saveRDS(x,"metadata.rds")
-#' metadata <- load_metadata("metadata.rds")})
-load_metadata <- function(path) {
-
-  checkmate::assert_character(path, pattern = "\\.rds$", len = 1)
-  metadata <- readRDS(path)
-
-  metadata %<>% validate_metadata()
-
-  metadata$main %<>% dplyr::mutate(dplyr::across(tidyselect::where(is.character), stringr::str_trim))
-  metadata$missing_codes %<>% dplyr::mutate(dplyr::across(tidyselect::where(is.character), stringr::str_trim))
-  metadata$missing_rules %<>% dplyr::mutate(dplyr::across(tidyselect::where(is.character), stringr::str_trim))
-  metadata$contras %<>% dplyr::mutate(dplyr::across(tidyselect::where(is.character), stringr::str_trim))
-  metadata$mc_sets %<>% dplyr::mutate(dplyr::across(tidyselect::where(is.character), stringr::str_trim))
-  metadata$dict %<>% dplyr::mutate(dplyr::across(tidyselect::where(is.character), stringr::str_trim))
-
-  return(metadata)
-}
-
-#' Uncheckeing `epic_metadata` objects
-#'
-#' Putting a checked `epic_metadata` back to an unchecked status.
-#'
-#' @param metadata An `epic_metadata` or `epic_metadata_checked` object.
+#' @param metadata An `epicdata_meta` or `epicdata_meta_checked` object.
 #'
 #' @noRd
 uncheck_metadata <- function(metadata) {
 
   rlang::try_fetch(validate_metadata(metadata),
                    error = function(cnd) {
-                     cli::cli_abort("{.var metadata} must be an object of class {.emph epic_metadata}!",
-                                    parent = cnd, class = "no_epic_metadata")
+                     cli::cli_abort("{.var metadata} must be an object of class {.emph epicdata_meta}!",
+                                    parent = cnd, class = "no_epicdata_meta")
                    })
 
-  if (inherits(metadata, "epic_metadata_checked")) {
+  if (inherits(metadata, "epicdata_meta_checked")) {
     metadata %<>% unclass(.)
-    metadata %<>% structure(., class = "epic_metadata")
+    metadata %<>% structure(., class = "epicdata_meta")
   }
 
   return(metadata)
