@@ -102,35 +102,35 @@ contras:
 
 ## Component: options
 
-Options are key-value pairs below component `options`. List all key-value pairs on the second layer without any dashes.
+Options are key-value pairs below component `options`. List all key-value pairs on the second layer without any dashes. In the list of option keys below, allowed values for the corresponding key are found in the brackets after each key.
 
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Key             | Value                                          | Use                                                                                | Description                                                                                                                                                                                                                                                                                                                                                                          |
-+=================+================================================+====================================================================================+======================================================================================================================================================================================================================================================================================================================================================================================+
-| study.name      | Text                                           | Recommended                                                                        | A short name of your study that is used for project and file names. If missing, a generic name will be used instead.                                                                                                                                                                                                                                                                 |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| id.var          | One of the values of key `id` from `var.list`. | Recommended. Mandatory when `double.entry: yes` or `id.pattern` has ben specified. | The name of the ID variable, which is used to identify observations. Duplicate values in the ID variable are allowed if `double.entry: yes`. If missing, a generic ID variable will be added temporarily.                                                                                                                                                                            |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| id.pattern      | Regular expression in quotation marks `""`     | Recommended                                                                        | A regex pattern that must be fulfiled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded.                                                                                                                                                                                                                                                 |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| read.from       | folder, db                                     | Depends                                                                            | Defines which code module for reading raw data is used. If missing, defaults to `folder`.                                                                                                                                                                                                                                                                                            |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| date.format     | ymd, ydm, mdy, myd, dmy, dym                   | Mandatory when not all data variables have key `format` defined in `var.list`      | Defines the default date format. The value specified here is used for all variables of `type: date` for which no individual format is defined in `var.list`. If all date variables have a format defined, `date.format` has no impact. It uses lubridate functions to process inputs. The possible values define the order of day (d), month (m) and year (y). See lubridate::ymd(). |
-|                 |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-| format.date     |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| time.format     | hms, hm, ms                                    |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-|                 |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-| format.time     |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| datetime.format |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-|                 |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-| format.datetime |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| mc.handling     |                                                |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| double.entry    | yes, no                                        |                                                                                    |                                                                                                                                                                                                                                                                                                                                                                                      |
-+-----------------+------------------------------------------------+------------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+**Study information**
+
+-   `study.name` (Text): A short name for your study that is used for project and file names. If missing, a generic name will be used instead.
+
+-   `id.var` (Value of key `id` from `var.list`): The name of the ID variable, which is used to identify observations. Allowed are the variable names specified in `var.list` as `id`. Duplicate values in the ID variable are allowed only if `double.entry: yes`. If missing, a generic ID variable will be added temporarily. Mandatory when `double.entry: yes` or `id.pattern` has been specified.
+
+-   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. Surround with quotation marks, e.g., `"[:digit:]{5}"`!
+
+**Module selection**
+
+-   `read.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
+
+-   `mc.handling` ():
+
+-   `double.entry` (boolean, i.e., `true`, `yes`, `false`, `no`):
+
+**Global variable defaults**
+
+-   `date.format` or `format.date` (one of: `ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`): Defines the default date format. The value specified here is used for all variables of `type: date` for which no individual `format` is defined in `var.list`. If all date variables have a format defined, `date.format` has no impact. In `epicdata`, `lubridate` functions are used to process dates. The possible values define the order of day (d), month (m) and year (y). See `lubridate::ymd()` for possible date formats that can be processed with these functions. Mandatory when there are variables of `type: date` and not all of them have key `format` defined in `var.list`. Do not use both `date.format` and `format.date`.
+
+-   `time.format` or `format.time` (one of: `hms`, `hm`, `ms`):
+
+-   `datetime.format` or `format.datetime` (one of: ):
+
+-   `to.na` (Text):
+
+-   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`):
 
 ``` yaml
 options:
@@ -142,21 +142,86 @@ options:
 
 ## Component: var.list
 
-The list of variables `var.list` is the core of the metadata and a mandatory part of it.
+The list of variables `var.list` is the core of the metadata and a mandatory part of it. List all key-value pairs on the second layer. The same keys are re-used for each variable. Use a dash for only the first key of every new variable. In the list of variable keys below, allowed values for the corresponding key are found in the brackets after each key. Many keys only apply to certain variable types. Do not specify keys that apply to other types of variables. The list below is structured by the type of variable the keys apply to.
 
-| Key          | Value                                | Use       | Description |
-|--------------|--------------------------------------|-----------|-------------|
-| id           |                                      | Mandatory |             |
-| old.id       |                                      |           |             |
-| label        |                                      |           |             |
-| label.eng    |                                      |           |             |
-| type         | text, cat, num, date, time, datetime | Mandatory |             |
-| na.else      |                                      |           |             |
-| ops          | yes, no                              |           |             |
-| cats         |                                      |           |             |
-| cats.eng     |                                      |           |             |
-| from         |                                      |           |             |
-| from.exclude |                                      |           |             |
-| to           |                                      |           |             |
-| to.exclude   |                                      |           |             |
-| new          |                                      |           |             |
+**Keys that apply to all variables:**
+
+-   `id` (Text):
+
+-   `old.id` (Text):
+
+-   `label` (Text):
+
+-   `label.eng` (Text):
+
+-   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`):
+
+-   `na.else` ():
+
+-   `to.na` ():
+
+-   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`):
+
+-   `new` ():
+
+**Text variables:**
+
+-   `ops` (boolean, i.e., `true`, `yes`, `false`, `no`):
+
+**Categorical (cat) variables:**
+
+-   `cats` ():
+
+-   `cats.eng` ():
+
+**Numeric (num) variables:**
+
+`from` ():
+
+`from.exclude` ():
+
+`to` ():
+
+`to.exclude` ():
+
+**Date variables:**
+
+`format` ():
+
+`from` ():
+
+`from.exclude` ():
+
+`to` ():
+
+`to.exclude` ():
+
+**Time variables:**
+
+`format` ():
+
+`from` ():
+
+`from.exclude` ():
+
+`to` ():
+
+`to.exclude` ():
+
+**Datetime variables:**
+
+`format` ():
+
+`from` ():
+
+`from.exclude` ():
+
+`to` ():
+
+`to.exclude` ():
+
+``` yaml
+var.list:
+- id:
+  label:
+```

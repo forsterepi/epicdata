@@ -8,8 +8,8 @@ package and deliver clean data for epidemiology. Metadata is specified
 as YAML in a format developed to be as user-friendly and comprehensive
 as possible. Based on the metadata, `epicdata` will create an R project
 with all code for data processing. The `epicdata` workflow has been
-influenced by the concept of data quality in observational health
-dataconcept of data quality in observational health data of R package
+influenced by the concept of data quality in observational health data
+of R package
 [dataquieR](https://dataquality.qihs.uni-greifswald.de/IntroductoryTutorial.html).
 However, while `dataquieR` focuses on quality reporting, this package
 focuses on data processing.
