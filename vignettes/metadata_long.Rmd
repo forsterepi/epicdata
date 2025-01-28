@@ -21,16 +21,16 @@ some [text]{style="background-color: blue"}
 `epicdata` wants to be a user-friendly, yet comprehensive data processing and cleaning tool for all types of epidemiological studies. We therefore adhere to the following design principles:
 
 -   Modular workflow: `epicdata` follows a data processing workflow (see [here]{style="background-color: blue"} for details) but you can choose, which workflow modules you need.
--   Metadata as only input: `epicdata` creates your processing code from the metadata alone. Your individual workflow is concluded from your metadata. If you don't specify any contradictions, `epicdata` will skip contradiction checks.
+-   Metadata as only input: `epicdata` creates your processing code from the metadata alone. Your individual workflow is concluded from your metadata. If you, e.g., don't specify any contradictions, `epicdata` will skip contradiction checks.
 -   Modular metadata: You only specify what you need. If you have no date variables, there's no need to specify a date format.
 -   Forgiving: Whenever possible, metadata can be specified in different ways to remove barriers in metadata creation. Did you forget if you need to specify date.format or format.date? No problem, `epicdata` understands both.
 -   Complete logging: Data cleaning will lead to changes in individual data values. `epicdata` logs every single change that is made throughout the cleaning process.
 -   Automate as much as possible: The user only needs to provide metadata and decide what to do with problematic data values. `epicdata` creates the code, applies your decisions, and creates a data dictionary.
--   Usable for non-veteran R users: Metadata is specified in human readable YAML format. `epicdata` creates R code. User decisions can be inputted in a user-friendly ways.
+-   Usable for non-veteran R users: Metadata is specified in human readable YAML format. `epicdata` creates R code. User decisions can be inputted in user-friendly ways.
 
 ## Format (YAML)
 
-In `epicdata`, metadata is specified in YAML format. YAML has been designed to be readable for both humans and computers. This is accomplished by indentations, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information.
+In `epicdata`, metadata is specified in **YAML** format. YAML has been designed to be readable for both humans and computers. This is accomplished by **indentations**, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information.
 
 ``` yaml
 First.layer
@@ -42,7 +42,7 @@ First.layer
   Second.layer
 ```
 
-Colons `:` are used to specify key-value pairs, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Usually no quotation marks `""` are necessary when specifying values. In the rare occasion when quotation marks are necessary, `epicmodel` will tell you so. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Usually no quotation marks `""` are necessary when specifying values. In the rare occasion when quotation marks are necessary, `epicmodel` will tell you so. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
 
 ``` yaml
 name: France
@@ -51,7 +51,7 @@ population.million: 68
 eu.member: yes
 ```
 
-Dashes `-` are used to form lists, either of values without any keys, or of a repeating set of key-value pairs. All values or key-value pairs need to have the same indentation. In a list of values without keys, all of them have a dash. In a list of key-value pairs, only the first key-value pair does. Note that in the example below `continents` and `countries` are on the first layer, while all other lines are on the second layer. Therefore, e.g., `name: France` and `capital: Paris` have the same indentation even though `name: France` has the additional dash.
+Dashes `-` are used to form **lists**, either of values without any keys, or of a repeating set of key-value pairs. All values or key-value pairs in the same list need to have the same indentation. In a list of values without keys, all of them have a dash. In a list of key-value pairs, several key-value pairs together describe an individual object. The keys repeat for every new object. Only the first key-value pair has a dash. Note that in the example below `continents` and `countries` are on the first layer, while all other lines are on the second layer. Therefore, e.g., `name: France` and `capital: Paris` have the same indentation even though `name: France` has the additional dash.
 
 ``` yaml
 continents:
@@ -69,11 +69,34 @@ countries:
   eu.member: yes
 ```
 
+## Metadata design principles
+
+-   Including a key without specifying a value is equal to not including the key at all.
+
+``` yaml
+options:
+  study.name: epicdata
+  id.var:
+  read.from: folder
+```
+
+is equal to
+
+``` yaml
+options:
+  study.name: epicdata
+  read.from: folder
+```
+
+-   Not specifying a key contains information for some keys as it defaults to a pre-specified value. (See the end of this vignette for a complete list of defaults.)
+
+-   Whenever useful, different spellings are offered, e.g., `date.format` and `format.date`.
+
 ## Components
 
 In `epicdata`, metadata consists of several components:
 
--   `options`: A list of options specifying information on study level, e.g. `study.name`, activating/deactivating certain parts of the workflow, e.g. `double.entry`, and defining defaults for certain variable characteristics, e.g. `date.format`.
+-   `options`: A list of options specifying study information, e.g. `study.name`, selection of workflow modules, e.g. `double.entry`, and defining global variable defaults, e.g. `date.format`.
 -   `var.list`: A list of all variables, where variable-specific information is specified.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `na.rules`: A list of conditions that define which na.code will be used in which situation.
@@ -81,7 +104,7 @@ In `epicdata`, metadata consists of several components:
 -   `mc.sets`: A list of variables that belong to the same multiple choice (mc) question.
 -   `contras`: A list of implausible combinations of values from two variables.
 
-The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order.
+The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
 
 ``` yaml
 options:
@@ -112,7 +135,7 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. Surround with quotation marks, e.g., `"[:digit:]{5}"`!
 
-**Module selection**
+**Workflow module selection**
 
 -   `read.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
 
@@ -186,7 +209,7 @@ The list of variables `var.list` is the core of the metadata and a mandatory par
 
 **Date variables:**
 
-`format` ():
+`format` or `date.format` or `format.date` ():
 
 `from` ():
 
@@ -198,7 +221,7 @@ The list of variables `var.list` is the core of the metadata and a mandatory par
 
 **Time variables:**
 
-`format` ():
+`format` or `time.format` or `format.time` ():
 
 `from` ():
 
@@ -210,7 +233,7 @@ The list of variables `var.list` is the core of the metadata and a mandatory par
 
 **Datetime variables:**
 
-`format` ():
+`format` or `datetime.format` or `format.datetime` ():
 
 `from` ():
 
@@ -225,3 +248,47 @@ var.list:
 - id:
   label:
 ```
+
+## Defaults
+
+Defaults are the values that are used if the key is not specified at all. Not all keys have defaults.
+
+### options
+
+| Key                                    | Default                    |
+|----------------------------------------|----------------------------|
+| `study.name`                           | `my_study`                 |
+| `id.var`                               | `id.var` (with values 1:N) |
+| `id.pattern`                           | \-                         |
+| `read.from`                            | `folder`                   |
+| `mc.handling`                          | `none`                     |
+| `double.entry`                         | `no`                       |
+| `date.format` or `format.date`         | \-                         |
+| `time.format` or `format.time`         | \-                         |
+| `datetime.format` or `format.datetime` | \-                         |
+| `to.na`                                | \-                         |
+| `touch.na`                             | `yes`                      |
+
+### var.list
+
+| Key | Default |
+|------------------------------------|------------------------------------|
+| `id` | \- |
+| `old.id` | \- |
+| `label` | \- |
+| `label.eng` | \- |
+| `type` | \- |
+| `na.else` | \- |
+| `to.na` | option `to.na` |
+| `touch.na` | option `touch.na` |
+| `new` | \- |
+| `ops` | `no` |
+| `cats` | \- |
+| `cats.eng` | \- |
+| `from` | $-\infty$ (number, date, time, or datetime) |
+| `from.exclude` | $-\infty$ (number, date, time, or datetime) |
+| `to` | $\infty$ (number, date, time, or datetime) |
+| `to.exclude` | $\infty$ (number, date, time, or datetime) |
+| `format` or `date.format` or `format.date` | option `date.format` or `format.date` |
+| `format` or `time.format` or `format.time` | option `time.format` or `format.time` |
+| `format` or `datetime.format` or `format.datetime` | option `datetime.format` or `format.datetime` |
