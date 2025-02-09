@@ -155,6 +155,8 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`):
 
+-   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`):
+
 ``` yaml
 options:
   study.name: epicdata
@@ -196,6 +198,10 @@ The list of variables `var.list` is the core of the metadata and a mandatory par
 -   `cats` ():
 
 -   `cats.eng` ():
+
+-   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, tranforms the variable to factor.
+
+-   `factor.id` or `id.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide to name of the new factor variable.
 
 **Numeric (num) variables:**
 
@@ -268,11 +274,12 @@ Defaults are the values that are used if the key is not specified at all. Not al
 | `datetime.format` or `format.datetime` | \-                         |
 | `to.na`                                | \-                         |
 | `touch.na`                             | `yes`                      |
+| `to.factor`                            | `no`                       |
 
 ### var.list
 
 | Key | Default |
-|------------------------------------|------------------------------------|
+|----|----|
 | `id` | \- |
 | `old.id` | \- |
 | `label` | \- |
@@ -285,6 +292,8 @@ Defaults are the values that are used if the key is not specified at all. Not al
 | `ops` | `no` |
 | `cats` | \- |
 | `cats.eng` | \- |
+| `to.factor` | yes, if `factor.id` or `id.factor` has been speceified, otherwise option `to.factor` |
+| `factor.id` or `id.factor` | \- |
 | `from` | $-\infty$ (number, date, time, or datetime) |
 | `from.exclude` | $-\infty$ (number, date, time, or datetime) |
 | `to` | $\infty$ (number, date, time, or datetime) |

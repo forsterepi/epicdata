@@ -4,29 +4,30 @@ read_meta <- function(file) {
 
   #=============================================================================
   # Read in YAML file
-  x <- yaml::read_yaml(file)
+  yaml_input <- yaml::read_yaml(file)
 
   # Check basic structure after reading-in the file
+  meta.str.input2(yaml_input)
 
 
-  # Process read-in file
-
-  ## Process var.list fields cats and cats.eng
-  x %<>% yaml.prc.var.list.cats("cats")
-  x %<>% yaml.prc.var.list.cats("cats.eng")
-
-  # Transform corresponding elements to data.frames
-  x %<>% purrr::map(\(x) if (is.list(x)) {
-    purrr::map_dfr(x, as.data.frame)
-  } else {
-    as.character(x)
-  })
-
-  # Transform to epicdata_meta
-  x %<>% new_metadata()
-
-  # Validate
-  x %<>% validate_metadata()
+  # # Process read-in file
+  #
+  # ## Process var.list fields cats and cats.eng
+  # x %<>% yaml.prc.var.list.cats("cats")
+  # x %<>% yaml.prc.var.list.cats("cats.eng")
+  #
+  # # Transform corresponding elements to data.frames
+  # x %<>% purrr::map(\(x) if (is.list(x)) {
+  #   purrr::map_dfr(x, as.data.frame)
+  # } else {
+  #   as.character(x)
+  # })
+  #
+  # # Transform to epicdata_meta
+  # x %<>% new_metadata()
+  #
+  # # Validate
+  # x %<>% validate_metadata()
 
   return(x)
 }
