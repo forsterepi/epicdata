@@ -1,3 +1,26 @@
+meta.read <- function(x, arg = rlang::caller_arg(x),
+                      call = rlang::caller_env()) {
+
+  rlang::try_fetch({
+    yaml_input <- yaml::read_yaml(x)
+  },
+  error = function(cnd) {
+    cli::cli_abort(c("Loading YAML metadata failed!",
+                     c("Loading failed due to an error in the YAML grammar. The
+                     {.code yaml::read_yaml()} error message below reports its
+                     location.", cnd$message,
+                      "Did you forget quotation marks around
+                      {.var id.pattern}?") %>%
+                       magrittr::set_names(c("i","x","i")) %>%
+                       magrittr::extract(c(stringr::str_detect(cnd$message,
+                        "line"), TRUE, stringr::str_detect(cnd$message,
+                        "line")))), # add info only if applicable
+                   call = call,
+                   class = "error.meta.read.1")})
+
+  yaml_input
+}
+
 meta.str.input <- function(x, arg = rlang::caller_arg(x),
                            call = rlang::caller_env()) {
   logger::log_info("Checking basic metadata input structure",
@@ -22,22 +45,14 @@ meta.str.input <- function(x, arg = rlang::caller_arg(x),
 }
 
 
-meta.str.component <- function() {
+meta.str.component <- function(x) {
 
   # Create empty list
 
   components.list <- c("options","var.list","na.codes","na.rules","mc.sets",
                        "dict","contras")
 
-  check.components.template <- vector(mode = "list",
-                                   length = length(components.list)) %>%
-    magrittr::set_names(components.list)
 
-  # Define checks for every component
-
-  check.components.template[["options"]] <- rlang::expr(
-    {logger::log_info("Checking structure of options")
-    meta.str.options(x)})
 }
 
 meta.str.options <- function(x, call = rlang::caller_env()) {
@@ -107,3 +122,26 @@ meta.str.options <- function(x, call = rlang::caller_env()) {
 
 }
 
+meta.forgive.component.name <- function(x) {
+
+  names(x) %<>% stringr::str_to_lower()
+
+  forgive.options <- c("option")
+  forgive.var.list <- c("varlist","varslist","vars.list","list.var","list.vars",
+                        "variable.list","variables.list")
+  forgive.na.codes <- c("codes.na")
+  forgive.na.rules <- c("rules.na")
+  forgive.mc.sets <- c("sets.mc")
+  forgive.dict <- c("dictionary")
+  forgive.contras <- c("contra","contradiction","contradictions")
+
+  names(x)[names(x) %in% forgive.options] <- "options"
+  names(x)[names(x) %in% forgive.var.list] <- "var.list"
+  names(x)[names(x) %in% forgive.na.codes] <- "na.codes"
+  names(x)[names(x) %in% forgive.na.rules] <- "na.rules"
+  names(x)[names(x) %in% forgive.mc.sets] <- "mc.sets"
+  names(x)[names(x) %in% forgive.dict] <- "dict"
+  names(x)[names(x) %in% forgive.contras] <- "contras"
+
+  x
+}

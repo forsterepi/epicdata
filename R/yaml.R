@@ -4,11 +4,13 @@ read_meta <- function(file) {
 
   #=============================================================================
   # Read in YAML file
-  yaml_input <- yaml::read_yaml(file)
+  yaml_input <- meta.read(file)
 
-  # Check basic structure after reading-in the file
-  meta.str.input2(yaml_input)
-
+  # Check structure after reading-in the file
+  meta.str.input(yaml_input)
+  yaml_input %<>% meta.forgive.component.name()
+  #meta.str.component(yaml_input)
+  meta.str.options(yaml_input)
 
   # # Process read-in file
   #
@@ -29,7 +31,7 @@ read_meta <- function(file) {
   # # Validate
   # x %<>% validate_metadata()
 
-  return(x)
+  return(yaml_input)
 }
 
 #' Check basic structure of YAML

@@ -42,7 +42,7 @@ First.layer
   Second.layer
 ```
 
-Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Usually no quotation marks `""` are necessary when specifying values. In the rare occasion when quotation marks are necessary, `epicmodel` will tell you so. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Always include a space after the colon. Usually no quotation marks `""` are necessary when specifying values. In the rare occasion when quotation marks are necessary, `epicmodel` will tell you so. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
 
 ``` yaml
 name: France
@@ -96,7 +96,7 @@ options:
 
 In `epicdata`, metadata consists of several components:
 
--   `options`: A list of options specifying study information, e.g. `study.name`, selection of workflow modules, e.g. `double.entry`, and defining global variable defaults, e.g. `date.format`.
+-   `options`: A list of options specifying study information, e.g. `study.name`, selecting workflow modules, e.g. `double.entry`, and defining global variable defaults, e.g. `date.format`.
 -   `var.list`: A list of all variables, where variable-specific information is specified.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `na.rules`: A list of conditions that define which na.code will be used in which situation.
@@ -133,7 +133,7 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `id.var` (Value of key `id` from `var.list`): The name of the ID variable, which is used to identify observations. Allowed are the variable names specified in `var.list` as `id`. Duplicate values in the ID variable are allowed only if `double.entry: yes`. If missing, a generic ID variable will be added temporarily. Mandatory when `double.entry: yes` or `id.pattern` has been specified.
 
--   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. Surround with quotation marks, e.g., `"[:digit:]{5}"`!
+-   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. **Surround with quotation marks**, e.g., `"[:digit:]{5}"`!
 
 **Workflow module selection**
 
@@ -279,7 +279,7 @@ Defaults are the values that are used if the key is not specified at all. Not al
 ### var.list
 
 | Key | Default |
-|----|----|
+|------------------------------------|------------------------------------|
 | `id` | \- |
 | `old.id` | \- |
 | `label` | \- |
