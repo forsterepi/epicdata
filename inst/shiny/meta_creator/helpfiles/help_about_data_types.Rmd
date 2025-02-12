@@ -1,5 +1,0 @@
-## What is Metadata?
-
-**Matadata** is data about data, i.e., information that describes the structure of your data. Is is used to process your data.
-
-TBC

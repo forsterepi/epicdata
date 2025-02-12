@@ -279,7 +279,7 @@ Defaults are the values that are used if the key is not specified at all. Not al
 ### var.list
 
 | Key | Default |
-|------------------------------------|------------------------------------|
+|----|----|
 | `id` | \- |
 | `old.id` | \- |
 | `label` | \- |

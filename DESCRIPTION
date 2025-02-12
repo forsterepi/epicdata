@@ -17,20 +17,14 @@ Config/testthat/edition: 3
 Imports: 
     checkmate,
     cli,
-    dplyr,
-    DT,
+    logger,
     magrittr,
-    prompter,
     rlang,
-    shiny,
-    shinyalert,
-    shinyjs,
-    shinythemes,
     stringr,
-    tidyselect,
     usethis,
     withr,
-    yaml
+    yaml,
+    yum
 URL: https://github.com/forsterepi/epicdata
 BugReports: https://github.com/forsterepi/epicdata/issues
 Depends: 

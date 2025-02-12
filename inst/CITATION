@@ -1,6 +1,6 @@
 bibentry(
   bibtype  = "Misc",
-  title    = "epicdata: An R Package for Data Processing in Epidemiology",
+  title    = "epicdata: An R Package for Data Processing and Cleaning in Epidemiology",
   author   = person(given = "Felix", family = "Forster"),
   year     = "2024",
   url      = "https://github.com/forsterepi/epicdata"
