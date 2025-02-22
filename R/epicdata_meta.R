@@ -2,7 +2,7 @@
 #'
 #' Constructor function for S3 class `epicdata_meta`.
 #'
-#' @details `epicdata_meta` objects are lists containing 7 data.frames.
+#' @details `epicdata_meta` objects are lists containing 6 data.frames.
 #'   These data.frames are described below:
 #'
 #'   `options` contains
@@ -14,8 +14,6 @@
 #'   `na.rules` contains
 #'
 #'   `contras` contains
-#'
-#'   `mc.sets` contains
 #'
 #'   `dict` contains
 #'
@@ -98,13 +96,13 @@ read_meta <- function(file) {
 
   #=============================================================================
   # Read in YAML file
-  yaml_input <- meta.read(file)
+  yaml_input <- yaml.read(file)
 
   # Check structure after reading-in the file
-  meta.str.input(yaml_input)
-  yaml_input %<>% meta.forgive.component.name()
-  #meta.str.component(yaml_input)
-  meta.str.options(yaml_input)
+  yaml.str.input(yaml_input)
+  yaml_input %<>% yaml.forgive.component.name()
+  yaml.str.component(yaml_input)
+  yaml.str.options(yaml_input)
 
   # # Process read-in file
   #

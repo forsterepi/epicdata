@@ -29,7 +29,7 @@ Constructor function for S3 class \code{epicdata_meta}.
 \code{print()} prints
 }
 \details{
-\code{epicdata_meta} objects are lists containing 7 data.frames.
+\code{epicdata_meta} objects are lists containing 6 data.frames.
 These data.frames are described below:
 
 \code{options} contains
@@ -41,8 +41,6 @@ These data.frames are described below:
 \code{na.rules} contains
 
 \code{contras} contains
-
-\code{mc.sets} contains
 
 \code{dict} contains
 }

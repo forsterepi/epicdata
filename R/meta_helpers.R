@@ -1,4 +1,4 @@
-meta.read <- function(x, arg = rlang::caller_arg(x),
+yaml.read <- function(x, arg = rlang::caller_arg(x),
                       call = rlang::caller_env()) {
 
   rlang::try_fetch({
@@ -19,12 +19,12 @@ meta.read <- function(x, arg = rlang::caller_arg(x),
                          stringr::str_detect(cnd$message,"line"))
                          )), # add info only if applicable
                    call = call,
-                   class = "error.meta.read.1")})
+                   class = "error.yaml.read.1")})
 
   yaml_input
 }
 
-meta.str.input <- function(x, arg = rlang::caller_arg(x),
+yaml.str.input <- function(x, arg = rlang::caller_arg(x),
                            call = rlang::caller_env()) {
   logger::log_info("Checking basic metadata input structure",
                    namespace = "epicdata")
@@ -44,27 +44,40 @@ meta.str.input <- function(x, arg = rlang::caller_arg(x),
                      "i" = "Do not use dashes ({.var -}) in front of the
                             main metadata components: options, var.list, etc."),
                    call = call,
-                   class = "error.meta.str.input.1")})
+                   class = "error.yaml.str.input.1")})
 }
 
 
-meta.str.component <- function(x) {
-
-  # Create empty list
+yaml.str.component <- function(x, arg = rlang::caller_arg(x),
+                               call = rlang::caller_env()) {
 
   components.list <- c("options","var.list","na.codes","na.rules","mc.sets",
                        "dict","contras")
 
-
+  rlang::try_fetch({
+    # START: actual check
+    checkmate::assert_subset(names(x), components.list, .var.name = arg)
+    # END: actual check
+  },
+  error = function(cnd) {
+    cli::cli_abort(c("YAML contains invalid component names!",
+                     cnd$message %>%
+                       stringr::str_replace_all("\\{","(") %>%
+                       stringr::str_replace_all("\\}",")"),
+                     "Only the above listed components can be on the first
+                     YAML layer, i.e., without indentation.") %>%
+                     magrittr::set_names(c("!","x","i")),
+                   call = call,
+                   class = "error.yaml.str.component.1")})
 }
 
-meta.str.options <- function(x, call = rlang::caller_env()) {
+yaml.str.options <- function(x, call = rlang::caller_env()) {
 
   # Create empty list
 
   options.list <- c("study.name",
                     "id.var", "id.pattern",
-                    "read.from", "mc.handling", "double.entry",
+                    "load.from", "mc.handling", "double.entry",
                     "date.format", "format.date",
                     "time.format", "format.time",
                     "datetime.format", "format.datetime",
@@ -121,11 +134,11 @@ meta.str.options <- function(x, call = rlang::caller_env()) {
                        magrittr::set_names(rep("x",length(.))),
                      "i" = "Some info"),
                    call = call,
-                   class = "error.meta.str.options.1")})
+                   class = "error.yaml.str.options.1")})
 
 }
 
-meta.forgive.component.name <- function(x) {
+yaml.forgive.component.name <- function(x) {
 
   names(x) %<>% stringr::str_to_lower()
 
@@ -166,12 +179,12 @@ yaml.check.structure <- function(x) {
   metadata.components <- c("options","var.list","na.codes","na.rules","mc.sets",
                            "dict","contras")
   ## options
-  options.list <- c("study.name", "id.var", "read.from",
+  options.list <- c("study.name", "id.var", "load.from",
                     "date.format", "format.date",
                     "time.format", "format.time",
                     "datetime.format", "format.datetime",
                     "mc.handling", "double.entry", "translate", "id.pattern")
-  options.read.from <- c("folder", "db")
+  options.load.from <- c("folder", "db")
   options.mc.handling <- c("none", "adjust")
   ## var.list
   var.list.vars <- c("id", "label", "label.eng", "type", "na.else", "ops",
