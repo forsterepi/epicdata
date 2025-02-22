@@ -26,8 +26,8 @@ yaml.read <- function(x, arg = rlang::caller_arg(x),
 
 yaml.str.input <- function(x, arg = rlang::caller_arg(x),
                            call = rlang::caller_env()) {
-  logger::log_info("Checking basic metadata input structure",
-                   namespace = "epicdata")
+  # logger::log_info("Checking basic metadata input structure",
+  #                  namespace = "epicdata")
 
   rlang::try_fetch({
     # START: actual check
@@ -36,9 +36,9 @@ yaml.str.input <- function(x, arg = rlang::caller_arg(x),
     # END: actual check
     },
    error = function(cnd) {
-    logger::log_error("Checking basic metadata input structure failed",
-                      namespace = "epicdata")
-    logger::log_debug(cnd$message, namespace = "epicdata")
+    # logger::log_error("Checking basic metadata input structure failed",
+    #                   namespace = "epicdata")
+    # logger::log_debug(cnd$message, namespace = "epicdata")
     cli::cli_abort(c("YAML must describe a single list!",
                      "x" = cnd$message,
                      "i" = "Do not use dashes ({.var -}) in front of the
