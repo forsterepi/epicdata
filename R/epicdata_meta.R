@@ -2,7 +2,7 @@
 #'
 #' Constructor function for S3 class `epicdata_meta`.
 #'
-#' @details `epicdata_meta` objects are lists containing 6 data.frames.
+#' @details `epicdata_meta` objects are lists containing 5 data.frames.
 #'   These data.frames are described below:
 #'
 #'   `options` contains
@@ -14,8 +14,6 @@
 #'   `na.rules` contains
 #'
 #'   `contras` contains
-#'
-#'   `dict` contains
 #'
 #' @param x A list to be converted to class `epicdata_meta`.
 #' @param ... Additional arguments for generics `print()`, `summary()`, and `plot()`.

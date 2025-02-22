@@ -26,11 +26,12 @@ some [text]{style="background-color: blue"}
 -   Forgiving: Whenever possible, metadata can be specified in different ways to remove barriers in metadata creation. Did you forget if you need to specify date.format or format.date? No problem, `epicdata` understands both.
 -   Complete logging: Data cleaning will lead to changes in individual data values. `epicdata` logs every single change that is made throughout the cleaning process.
 -   Automate as much as possible: The user only needs to provide metadata and decide what to do with problematic data values. `epicdata` creates the code, applies your decisions, and creates a data dictionary.
+-   Interactive: Even though `epicdata` automates as much as possible, it is still run interactively, i.e., while the user is on the other side of the keyboard. During the process, the user needs to confirm the results of different workflow steps. If you are looking for a automated data validation process, try packages `pointblank` or `dataquieR`.
 -   Usable for non-veteran R users: Metadata is specified in human readable YAML format. `epicdata` creates R code. User decisions can be inputted in user-friendly ways.
 
 ## Format (YAML)
 
-In `epicdata`, metadata is specified in **YAML** format. YAML has been designed to be readable for both humans and computers. This is accomplished by **indentations**, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information.
+In `epicdata`, metadata is specified in **YAML** format. YAML has been designed to be readable for both humans and computers. This is accomplished by **indentations**, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information. (Usually, the next layer is 2 spaces or a tab towards the right.)
 
 ``` yaml
 First.layer
@@ -77,7 +78,7 @@ countries:
 options:
   study.name: epicdata
   id.var:
-  read.from: folder
+  load.from: folder
 ```
 
 is equal to
@@ -85,7 +86,7 @@ is equal to
 ``` yaml
 options:
   study.name: epicdata
-  read.from: folder
+  load.from: folder
 ```
 
 -   Not specifying a key contains information for some keys as it defaults to a pre-specified value. (See the end of this vignette for a complete list of defaults.)
@@ -100,8 +101,6 @@ In `epicdata`, metadata consists of several components:
 -   `var.list`: A list of all variables, where variable-specific information is specified.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `na.rules`: A list of conditions that define which na.code will be used in which situation.
--   `dict`: Short for dictionary. A list that contains allowed values for text variables.
--   `mc.sets`: A list of variables that belong to the same multiple choice (mc) question.
 -   `contras`: A list of implausible combinations of values from two variables.
 
 The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
@@ -114,10 +113,6 @@ var.list:
 na.codes:
   tbd
 na.rules:
-  tbd
-dict:
-  tbd
-mc.sets:
   tbd
 contras:
   tbd
@@ -137,7 +132,9 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 **Workflow module selection**
 
--   `read.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
+-   `id.list` ((boolean, i.e., `true`, `yes`, `false`, `no`):
+
+-   `load.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
 
 -   `mc.handling` ():
 
@@ -171,27 +168,37 @@ The list of variables `var.list` is the core of the metadata and a mandatory par
 
 **Keys that apply to all variables:**
 
--   `id` (Text):
+-   `id` (a syntactically valid name, see `?make.names` for details): The name of the variable. `id` must be specified for every variable. All variable names in the data set must be specified either in `id` or in `old.id`.
 
--   `old.id` (Text):
+-   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and the new name in `id`. All variable names in the data set must be specified either in `id` or in `old.id`. Cannot be used together with `new`.
 
 -   `label` (Text):
 
--   `label.eng` (Text):
+-   `label.eng` (Text): If the label is not in English, enter its English translation here for use in the data dictionnary.
 
 -   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`):
 
--   `na.else` ():
+-   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specifed always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
 
--   `to.na` ():
+-   `to.na` (text):
 
--   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`):
+-   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`): If `no`, all `NA`s, after applying `to.na`, will remain as `NA`. If `yes`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `yes`.
 
--   `new` ():
+-   `new` (): Create new variables based on existing variables by specifying `new`. If `new` is specified, `id` must not be in the data set. Also, `old.id` cannot be used. New variables are created with `dplyr::mutate()`, where the variable definition is specified as a name-value pair using tidy evaluation with data masking. For `new`, specify the value of this name-value pair. As an example, variable `mass_norm` would be created by `data.frame %>% mutate(mass_norm = mass / mean(mass, na.rm = TRUE))`. To recreate the creation of `mass_norm` in `epicdata`, `mass` must be a variable specified in `var.list`, `mass_norm` is the value for `id` for your new variable, while `mass / mean(mass, na.rm = TRUE)` is specified for `new`. If your value causes an error, try to wrap it in quotation marks.
+
+``` yaml
+var.list:
+- id: mass
+  ...
+- id: mass_norm
+  ...
+  new: mass / mean(mass, na.rm = TRUE)
+```
 
 **Text variables:**
 
--   `ops` (boolean, i.e., `true`, `yes`, `false`, `no`):
+-   `ops` (a variable or mc.set name):
+-   `dict` ():
 
 **Categorical (cat) variables:**
 
@@ -201,53 +208,55 @@ The list of variables `var.list` is the core of the metadata and a mandatory par
 
 -   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, tranforms the variable to factor.
 
--   `factor.id` or `id.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide to name of the new factor variable.
+-   `factor.id` or `id.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
+
+-   `mc.set` (a syntactically valid name, see `?make.names` for details): cannot be a value used in any `id.var`,
 
 **Numeric (num) variables:**
 
-`from` ():
+-   `from` ():
 
-`from.exclude` ():
+-   `from.exclude` ():
 
-`to` ():
+-   `to` ():
 
-`to.exclude` ():
+-   `to.exclude` ():
 
 **Date variables:**
 
-`format` or `date.format` or `format.date` ():
+-   `format` or `date.format` or `format.date` ():
 
-`from` ():
+-   `from` ():
 
-`from.exclude` ():
+-   `from.exclude` ():
 
-`to` ():
+-   `to` ():
 
-`to.exclude` ():
+-   `to.exclude` ():
 
 **Time variables:**
 
-`format` or `time.format` or `format.time` ():
+-   `format` or `time.format` or `format.time` ():
 
-`from` ():
+-   `from` ():
 
-`from.exclude` ():
+-   `from.exclude` ():
 
-`to` ():
+-   `to` ():
 
-`to.exclude` ():
+-   `to.exclude` ():
 
 **Datetime variables:**
 
-`format` or `datetime.format` or `format.datetime` ():
+-   `format` or `datetime.format` or `format.datetime` ():
 
-`from` ():
+-   `from` ():
 
-`from.exclude` ():
+-   `from.exclude` ():
 
-`to` ():
+-   `to` ():
 
-`to.exclude` ():
+-   `to.exclude` ():
 
 ``` yaml
 var.list:
@@ -261,25 +270,27 @@ Defaults are the values that are used if the key is not specified at all. Not al
 
 ### options
 
-| Key                                    | Default                    |
-|----------------------------------------|----------------------------|
-| `study.name`                           | `my_study`                 |
-| `id.var`                               | `id.var` (with values 1:N) |
-| `id.pattern`                           | \-                         |
-| `read.from`                            | `folder`                   |
-| `mc.handling`                          | `none`                     |
-| `double.entry`                         | `no`                       |
-| `date.format` or `format.date`         | \-                         |
-| `time.format` or `format.time`         | \-                         |
-| `datetime.format` or `format.datetime` | \-                         |
-| `to.na`                                | \-                         |
-| `touch.na`                             | `yes`                      |
-| `to.factor`                            | `no`                       |
+| Key | Default |
+|----|----|
+| `study.name` | `my_study` |
+| `id.var` | `id.var` (with values 1:N) |
+| `id.pattern` | \- |
+| `id.list` | `no` |
+| `load.from` | `folder` |
+| `consent` | `yes`, if `id.var` has been specified, otherwise `no` |
+| `mc.handling` | `none` |
+| `double.entry` | `no` |
+| `date.format` or `format.date` | \- |
+| `time.format` or `format.time` | \- |
+| `datetime.format` or `format.datetime` | \- |
+| `to.na` | \- |
+| `touch.na` | `yes` |
+| `to.factor` | `no` |
 
 ### var.list
 
 | Key | Default |
-|----|----|
+|------------------------------------|------------------------------------|
 | `id` | \- |
 | `old.id` | \- |
 | `label` | \- |

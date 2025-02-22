@@ -51,8 +51,7 @@ yaml.str.input <- function(x, arg = rlang::caller_arg(x),
 yaml.str.component <- function(x, arg = rlang::caller_arg(x),
                                call = rlang::caller_env()) {
 
-  components.list <- c("options","var.list","na.codes","na.rules","mc.sets",
-                       "dict","contras")
+  components.list <- c("options","var.list","na.codes","na.rules","contras")
 
   rlang::try_fetch({
     # START: actual check
@@ -147,16 +146,12 @@ yaml.forgive.component.name <- function(x) {
                         "variable.list","variables.list")
   forgive.na.codes <- c("codes.na")
   forgive.na.rules <- c("rules.na")
-  forgive.mc.sets <- c("sets.mc")
-  forgive.dict <- c("dictionary")
   forgive.contras <- c("contra","contradiction","contradictions")
 
   names(x)[names(x) %in% forgive.options] <- "options"
   names(x)[names(x) %in% forgive.var.list] <- "var.list"
   names(x)[names(x) %in% forgive.na.codes] <- "na.codes"
   names(x)[names(x) %in% forgive.na.rules] <- "na.rules"
-  names(x)[names(x) %in% forgive.mc.sets] <- "mc.sets"
-  names(x)[names(x) %in% forgive.dict] <- "dict"
   names(x)[names(x) %in% forgive.contras] <- "contras"
 
   x

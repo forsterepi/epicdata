@@ -1,0 +1,219 @@
+---
+title: "Processing workflow: detailed"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Processing workflow: detailed}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Workflow structure
+
+The data processing and cleaning workflow is **modular** and its elements can be activated and deactivated as needed. Active workflow elements are deduced from the metadata. Some elements are always active. The order of elements is important and should not be altered. The workflow consists of 3 different types of **elements**:
+
+-   **Modules**: They combine tasks that address the same structure, problem, etc., e.g., rows or contradictions. They consist of sub-modules, which hold the actual code. Deactivating a module means deactivating all of its sub-modules.
+
+-   **Sub-Modules**: They describe the actual tasks and combine code, for which it only makes sense to be run completely (active) or not at all (inactive). Every sub-module is part of exactly one module. Within a module, some sub-modules can be active and some can be inactive.
+
+-   **Variants**: Sometimes, different versions of sub-modules are needed, e.g., loading from file or from a database. Variants are these different sub-module versions. For an active sub-module with variants always exactly one variant needs to be selected. Example: When loading a file, you might want to load it from a folder or from a database. If you load from folder, you do not need the code for loading from the database and vice versa. However, since you do need to load the datasets, you need to specify, which variant you want.
+
+During the workflow, some sub-modules or variants need **user input**. There are 2 different types of input:
+
+-   **Decision**: `epicdata` processes your data but also identifies potentially problematic values. A decision refers to user input that tells `epicdata` how to procede with an identified potentially problematic value, e.g., changing it to a certain value or leaving it as is. Decisions can be saved. All decisions are logged.
+
+-   **Confirmation**: Throughout the workflow, `epicdata` asks for confirmation of actions and results. These actions and results are concluded from your inputs, i.e., the data, the metadata, and your decisions. Example: `epicdata` notes that variables `var1` and `var2` are not in the data even though they have been specified in the metadata and asks for your confirmation. The workflow will not continue without the confirmation. Otherwise, it will stop and you need to change your inputs, i.e., data or metadata or decisions. If the metadata changes, you usually need to re-create the R project. Confirmations cannot be saved. They have to be given interactively. The intention is not to patronize the user but instead to give her/him control over what happens and to increase transparency. All confirmations are logged.
+
+    Reasons for demanding confirmation are:
+
+    -   There is reasonable uncertainty if the result or action is actually intended by the user.
+
+    -   The result or action depends on processed information, which only became available during running the code.
+
+## Workflow elements
+
+### 1) Load (Module ID: LOAD)
+
+#### 1.1) Load (Sub-Module ID: LOAD/)
+
+Load the dataset that you want to process into R. This dataset is called "the data" in the remainder of this vignette.
+
+| Status                 | Condition |
+|------------------------|-----------|
+| active: Variant `CSV`  |           |
+| active: Variant `RDS`  |           |
+| active: Variant `SPSS` |           |
+|                        |           |
+| inactive               | never     |
+
+#### 1.2) Check loaded file (Sub-Module ID: LOAD/CHECK)
+
+df or tibble; special characters
+
+#### 1.3) All values to character (Sub-Module ID: LOAD/)
+
+#### 1.4 Combine multiple datasets (Sub-Module ID: LOAD/)
+
+### 2) Variables (Module ID: VAR)
+
+#### 2.1) Notice variables that are in the data but not in meta (Sub-Module ID: VAR/DF!META.NOTE)
+
+| Status   | Condition |
+|----------|-----------|
+| active   | always    |
+| inactive | never     |
+
+Desc
+
+`User input`: *Requires confirmation that variables should be missing.*
+
+#### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR/DF!META.RM)
+
+| Status   | Condition                           |
+|----------|-------------------------------------|
+| active   | option `remove.vars: yes` (default) |
+| inactive | option `remove.vars: no`            |
+
+Desc
+
+`User input`: *Requires confirmation that variables should be removed.*
+
+#### 2.3) Notice variables that are in meta but not in the data (Sub-Module ID: VAR/META!DF.NOTE)
+
+| Status   | Condition |
+|----------|-----------|
+| active   |           |
+| inactive |           |
+
+: Desc
+
+`User input`: *Requires confirmation that variables should be missing.*
+
+#### 2.4) Apply old.id (Sub-Module ID: VAR/OLD.ID)
+
+| Status | Condition |
+|------------------------------------|------------------------------------|
+| active | `old.id` has been specified for at least one variable in `var.list` |
+| inactive | `old.id` has not been used |
+
+: Desc (include check if all old.id values are available, no confirmation required because intention is clear)
+
+### 3) Rows (Module ID: ROW)
+
+#### 3.1) Remove rows based on id.pattern (Sub-Module ID: ROW/ID.PATTERN)
+
+| Status   | Condition                           |
+|----------|-------------------------------------|
+| active   | `id.pattern` has been specified     |
+| inactive | `id.pattern` has not been specified |
+
+: Desc
+
+`User input`: *Requires confirmation that IDs should be removed.*
+
+#### 3.2) Remove based on invalid.ids or valid.ids/id.list (Sub-Module ID: ROW/RM.ID)
+
+| Status                    | Condition |
+|---------------------------|-----------|
+| active: Variant `VALID`   |           |
+| active: Variant `INVALID` |           |
+| inactive                  |           |
+
+: Desc, no user input because list is provided and intentio nis clear
+
+#### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW/FILTER)
+
+| Status | Condition |
+|------------------------------------|------------------------------------|
+| active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
+| active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
+| inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
+
+: Desc, if we use filter, we need to change variable types, no? Or we adjust the filter code based on type
+
+`User input`: *Requires confirmation that rows should be removed.*
+
+#### 3.4) Remove based on informed consent (Sub-Module ID: ROW/IC)
+
+| Status   | Condition |
+|----------|-----------|
+| active   |           |
+| inactive |           |
+
+: Desc, no user input because list is provided and intentio nis clear
+
+### 4) Cells (Module ID: CELL)
+
+#### 4.1) Remove new lines/tabs (Sub-Module ID: CELL/NEW.LINE)
+
+| Status   | Condition |
+|----------|-----------|
+| active   |           |
+| inactive |           |
+
+: Desc
+
+#### 4.2) NA variants to NA (Sub-Module ID: CELL/TO.NA)
+
+### 5) Duplicates (Module ID: DUP)
+
+#### 5.1 Check for exact duplicates (Sub-Module ID: DUP/NO.ID)
+
+| Status   | Condition                       |
+|----------|---------------------------------|
+| active   | `id.var` has not been specified |
+| inactive | `id.var` has been specified     |
+
+Desc
+
+#### 5.2 Evaluate ID frequency (Sub-Module ID: DUP/FREQ)
+
+| Status   | Condition                       |
+|----------|---------------------------------|
+| active   | `id.var` has been specified     |
+| inactive | `id.var` has not been specified |
+
+: Desc
+
+`User input`: *Requires confirmation that every ID has the expected frequency.*
+
+#### 5.3 Data comparison (Sub-Module ID: DUP/COMPARE)
+
+| Status   | Condition           |
+|----------|---------------------|
+| active   | `double.entry: yes` |
+| inactive | `double.entry: no`  |
+
+: Desc
+
+database.id?? (limesurveyID)
+
+generalize to more than 2 IDs, e.g., mention all three different values maybe even with frequency
+
+`User input`: *Requires decisions regarding differences between entries of the same ID.*
+
+### 6) Multiple choice (Module ID: MC/)
+
+#### 6.1) Adjust multiple choice questions
+
+### 7) Other: please specify (Module ID: OPS/)
+
+8) Format
+
+9) Change type
+
+10) Create new variables
+
+11) Missings
+
+12) Limits
+
+13) Contradictions
+
+14) Data Dictionary
