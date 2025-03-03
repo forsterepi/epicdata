@@ -43,31 +43,52 @@ First.layer
   Second.layer
 ```
 
-Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Always include a space after the colon. Usually no quotation marks `""` are necessary when specifying values. In the rare occasion when quotation marks are necessary, `epicmodel` will tell you so. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Always include a space after the colon. Usually no quotation marks `""` are necessary when specifying values. However, use them when you start the value with a special symbol (non-letter and non-number) apart from dot `.` and underscore `_`, or when you want to force a value to be a string. (The `calling.code` would be read as the positive number `33` without quotation marks.) Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
 
 ``` yaml
 name: France
 capital: Paris
 population.million: 68
 eu.member: yes
+calling.code: "+33"
 ```
 
-Dashes `-` are used to form **lists**, either of values without any keys, or of a repeating set of key-value pairs. All values or key-value pairs in the same list need to have the same indentation. In a list of values without keys, all of them have a dash. In a list of key-value pairs, several key-value pairs together describe an individual object. The keys repeat for every new object. Only the first key-value pair has a dash. Note that in the example below `continents` and `countries` are on the first layer, while all other lines are on the second layer. Therefore, e.g., `name: France` and `capital: Paris` have the same indentation even though `name: France` has the additional dash.
+Instead of individual key-value pairs, you can also map other objects to a key, e.g., several key-value pairs. This is achived by using indentations. In the example below, the key-value pairs of `capital`, `population.million`, `eu.member`, and `calling.code` are mapped to the corresponding country. Notice that no values appear in the same line as the keys `France` and `Germany`, because the indented key-value pairs are mapped to it. In addition, `France` and `Germany` with their key-value pairs are mapped to `countries`.
 
 ``` yaml
-continents:
-- Africa
-- Asia
-- Europe
 countries:
-- name: France
-  capital: Paris
-  population.million: 68
-  eu.member: yes
-- name: Germany
-  capital: Berlin
-  population.million: 84
-  eu.member: yes
+  France:
+    capital: Paris
+    population.million: 68
+    eu.member: yes
+    calling.code: "+33"
+  Germany:
+    capital: Berlin
+    population.million: 84
+    eu.member: yes
+    calling.code: "+49"
+```
+
+Dashes `-` are used to form **lists**. Even though the YAML language can be more complicated, we only use dashes for lists of values when you need to map multiple values to the same key. All values in the same list need to have the same indentation and all of them have a dash. For this, the two space indentation is replaced by one dash and one space (`- value`). In the example below, since France only has one city with more than one million inhabitants, the value is specified as an ordinary key-value pair. However, since Germany has four cities with more than one million inhabitants, we need to specify a list. Notice that the dash has the same indentation as `million.cities`, but due to the dash and the additional space, the values themselves (`Berlin`, `Hamburg`, etc.) are indented by two characters, as usual.
+
+``` yaml
+countries:
+  France:
+    capital: Paris
+    population.million: 68
+    eu.member: yes
+    calling.code: "+33"
+    million.cities: Paris
+  Germany:
+    capital: Berlin
+    population.million: 84
+    eu.member: yes
+    calling.code: "+49"
+    million.cities:
+    - Berlin
+    - Hamburg
+    - Munich
+    - Cologne
 ```
 
 ## Metadata design principles
@@ -102,6 +123,7 @@ In `epicdata`, metadata consists of several components:
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `na.rules`: A list of conditions that define which na.code will be used in which situation.
 -   `contras`: A list of implausible combinations of values from two variables.
+-   `changes`: Individual changes to certain cells, e.g., because a participant reported an error in the questionnaire comment.
 
 The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
 
@@ -208,7 +230,7 @@ var.list:
 
 -   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, tranforms the variable to factor.
 
--   `factor.id` or `id.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
+-   `factor.name` or `name.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
 
 -   `mc.set` (a syntactically valid name, see `?make.names` for details): cannot be a value used in any `id.var`,
 
@@ -303,8 +325,8 @@ Defaults are the values that are used if the key is not specified at all. Not al
 | `ops` | `no` |
 | `cats` | \- |
 | `cats.eng` | \- |
-| `to.factor` | yes, if `factor.id` or `id.factor` has been speceified, otherwise option `to.factor` |
-| `factor.id` or `id.factor` | \- |
+| `to.factor` | yes, if `factor.name` or `name.factor` has been specified, otherwise option `to.factor` |
+| `factor.name` or `name.factor` | \- |
 | `from` | $-\infty$ (number, date, time, or datetime) |
 | `from.exclude` | $-\infty$ (number, date, time, or datetime) |
 | `to` | $\infty$ (number, date, time, or datetime) |
