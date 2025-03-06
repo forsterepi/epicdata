@@ -43,7 +43,16 @@ First.layer
   Second.layer
 ```
 
-Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Always include a space after the colon. Usually no quotation marks `""` are necessary when specifying values. However, use them when you start the value with a special symbol (non-letter and non-number) apart from dot `.` and underscore `_`, or when you want to force a value to be a string. (The `calling.code` would be read as the positive number `33` without quotation marks.) Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Always include a space after the colon. Usually no quotation marks `""` are necessary when specifying values. Some exceptions are listed below. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+
+When to use quotation marks `""`:
+
+-   By default, you don't need to wrap strings in quotation marks
+-   Use them, however, if you start a value with a special symbol (non-letter and non-number) apart from dot `.` and underscore `_`
+-   Use them, however, if the string is only a dot `"."`
+-   Use them as well, if you want to force a value to be a string. The `calling.code` in the example below would be read as the positive number `33` without quotation marks.
+-   The same rules apply to keys and values, i.e., the part in front and after the colon `"``key": "value"`
+-   If reading your metadata leads to a `Loading YAML metadata failed!` error with the line number of the problem's location, try wrapping it in quotation marks as your first debugging activity.
 
 ``` yaml
 name: France
@@ -90,6 +99,8 @@ countries:
     - Munich
     - Cologne
 ```
+
+YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `xx()` and edited in R Studio. Therefore, the use of R Studio is recommended. See `xx` for more information on how to create your metadata.
 
 ## Metadata design principles
 
