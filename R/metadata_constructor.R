@@ -9,9 +9,14 @@ metadata_constructor <- function(file) {
   #yaml.str.options(yaml_input)
 
   S7::new_object(S7::S7_object(),
+                 study.name = yaml_input$options$study.name,
                  id.var = yaml_input$options$id.var,
                  vars = names(yaml_input$var.list))
 }
+
+
+
+
 
 yaml.read <- function(x, arg = rlang::caller_arg(x),
                       call = rlang::caller_env()) {

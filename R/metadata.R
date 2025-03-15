@@ -5,32 +5,23 @@ NULL
 
 #' Metadata objects
 #'
-#' Constructor function for S3 class `epicdata_meta`.
+#' S7 class `epicmodel::metadata`
 #'
-#' @details `epicdata_meta` objects are lists containing 5 data.frames.
-#'   These data.frames are described below:
+#' @param file Path to yaml file
 #'
-#'   `options` contains
-#'
-#'   `var.list` contains
-#'
-#'   `na.codes` contains
-#'
-#'   `na.rules` contains
-#'
-#'   `contras` contains
-#'
-#' @param file Path to yaml
-#'
-#' @returns A `epicdata_meta` object. Its structure is described in
-#'   Details.
+#' @returns An S7 `epicdata::metadata` object
 #'
 #' @export
 #'
 metadata <- S7::new_class("metadata",
   properties = list(
+    # options
+    study.name = prop.study.name,
     id.var = prop.id.var,
+    # variables
     vars = S7::class_character
+    # workflow modules
+
   ),
   validator = metadata_validator,
   constructor = metadata_constructor
