@@ -12,22 +12,31 @@ RoxygenNote: 7.3.2
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
 Imports: 
     checkmate,
     cli,
-    logger,
     magrittr,
     rlang,
+    S7,
     stringr,
     usethis,
-    withr,
-    yaml,
-    yum
+    yaml
 URL: https://github.com/forsterepi/epicdata
 BugReports: https://github.com/forsterepi/epicdata/issues
 Depends: 
     R (>= 2.10)
 LazyData: true
 VignetteBuilder: knitr
+Collate: 
+    'create_projects.R'
+    'data.R'
+    'epicdata-package.R'
+    'metadata_properties.R'
+    'metadata_validator.R'
+    'metadata_constructor.R'
+    'metadata.R'
+    'utils-pipe.R'
+    'zzz.R'

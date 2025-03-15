@@ -51,7 +51,7 @@ When to use quotation marks `""`:
 -   Use them, however, if you start a value with a special symbol (non-letter and non-number) apart from dot `.` and underscore `_`
 -   Use them, however, if the string is only a dot `"."`
 -   Use them as well, if you want to force a value to be a string. The `calling.code` in the example below would be read as the positive number `33` without quotation marks.
--   The same rules apply to keys and values, i.e., the part in front and after the colon `"``key": "value"`
+-   The same rules apply to keys and values, i.e., the part in front and after the colon ``` "``key": "value" ```
 -   If reading your metadata leads to a `Loading YAML metadata failed!` error with the line number of the problem's location, try wrapping it in quotation marks as your first debugging activity.
 
 ``` yaml
@@ -297,6 +297,63 @@ var.list:
   label:
 ```
 
+## Component: na.codes
+
+In the final processed datasets, NAs are usually replaced by missing codes. These codes represent a certain type or reason of missingness. In the component `na.codes`, certain values are declared as missing codes in order to allow `epicdata` to treat them appropriately, e.g., by including them in the data dictionary. In `na.codes`, no reference to certain variables is made yet. Here, only the declaration is done.
+
+Every missing code is declared as one key-value pair with the code being the key and the description being the value.
+
+``` yaml
+na.codes:
+  9001: Not answered
+  9002: Not enough blood for analysis
+  8001: Skipped because question is not applicable
+  9001-01-01: Not answered (date)
+  90h01m00s: Not answered (time hms)
+```
+
+The missing codes used in the final dataset must be of the same type (text, cat, num, date, datetime, time) as the variable. We therefore recommend to use integers, as they can be used in the same form for variables of type text, cat, and num. When an integer is used for date, datetime, or time, it is automatically transformed by the following rules:
+
+**Single digit, e.g.,** `9`**:**
+
+-   `date`: Add value in years to the date 9000-01-01, e.g., `9009-01-01`
+-   `datetime`: Add value in years to the datetime 9000-01-01 00:00:00, e.g., `9009-01-01 00:00:00`
+-   `time` (format: `hms`): Use the value in every digit, e.g., `99:99:99`, `99h99m99s`
+-   `time` (format: `hm`): Use the value in every digit, e.g., `99:99`, `99h99m`
+-   `time` (format: `ms`): Use the value in every digit, e.g., `99:99`, `99m99s`
+
+**Two digits, e.g.,** `99`**:**
+
+-   `date`: Add value in years to the date 9000-01-01, e.g., `9099-01-01`
+-   `datetime`: Add value in years to the datetime 9000-01-01 00:00:00, e.g., `9099-01-01 00:00:00`
+-   `time` (format: `hms`): Use the value for hours, minutes, and seconds, e.g., `99:99:99`, `99h99m99s`
+-   `time` (format: `hm`): Use the value for hours and minutes, e.g., `99:99`, `99h99m`
+-   `time` (format: `ms`): Use the value for minutes, and seconds, e.g., `99:99`, `99m99s`
+
+**Three digits, e.g.,** `101`**:**
+
+-   `date`: Add value in years to the date 9000-01-01, e.g., `9101-01-01`
+-   `datetime`: Add value in years to the datetime 9000-01-01 00:00:00, e.g., `9101-01-01 00:00:00`
+-   `time` (format: `hms`): Add the first digit in hours and the last two digits in minutes to the time 90:00:00, e.g., `91:01:00`, `91h01m00s`
+-   `time` (format: `hm`): Add the first digit in hours and the last two digits in minutes to the time 90:00, e.g., `91:01`, `91h01m`
+-   `time` (format: `ms`): Add the first digit in minutes and the last two digits in seconds to the time 90:00, e.g., `91:01`, `91m01s`
+
+**Four digits, e.g.,** `9001`**:**
+
+-   `date`: Use the value as the year of the date xxxx-01-01, e.g., `9001-01-01`
+-   `datetime`: Use the value as the year of the datetime xxxx-01-01 00:00:00, e.g., `9001-01-01 00:00:00`
+-   `time` (format: `hms`): Use the value for hours and minutes, e.g., `90:01:00`, `90h01m00s`
+-   `time` (format: `hm`): Use the value for hours and minutes, e.g., `90:01`, `90h01m`
+-   `time` (format: `ms`): Use the value for minutes, and seconds, e.g., `90:01`, `90m01s`
+
+If the automatic transformation does not provide values that make sense for missing codes (values that cannot be confused with real values), you can provide date, datetime, and time values for missing codes as well. The values you choose must be in the same format as the corresponding variable, e.g., `9001-01-01` for format `ymd` and `01.01.9001` for format `dmy`. For time formats, we recommend using the letters `h` (for hours), `m` (for minutes), and `s` (for seconds) after the corresponding number, e.g., `90h01m00s`, `90h01m`, `01m00s`.
+
+## Components: na.rules
+
+## Components: contras
+
+## Components: changes
+
 ## Defaults
 
 Defaults are the values that are used if the key is not specified at all. Not all keys have defaults.
@@ -323,7 +380,7 @@ Defaults are the values that are used if the key is not specified at all. Not al
 ### var.list
 
 | Key | Default |
-|------------------------------------|------------------------------------|
+|----|----|
 | `id` | \- |
 | `old.id` | \- |
 | `label` | \- |

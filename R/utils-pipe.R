@@ -25,12 +25,3 @@ NULL
 #' @return The result of calling `lhs <- rhs(lhs)`.
 #' @noRd
 NULL
-
-# Avoid the devtools::check() NOTE that the . used in piping is a non-declaree variable
-utils::globalVariables(".")
-
-# devtools::check() does not realize that package withr is used in examples
-# Strategy suggested in R packages (2e), 11.4.1.1 How to not use a package in Imports
-ignore_unused_imports <- function() {
-  withr::defer()
-}

@@ -98,7 +98,7 @@ Desc
 #### 2.4) Apply old.id (Sub-Module ID: VAR/OLD.ID)
 
 | Status | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -130,7 +130,7 @@ Desc
 #### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW/FILTER)
 
 | Status | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
@@ -200,20 +200,26 @@ generalize to more than 2 IDs, e.g., mention all three different values maybe ev
 
 ### 6) Multiple choice (Module ID: MC/)
 
-#### 6.1) Adjust multiple choice questions
+#### 6.1) All 0s to NA
 
-### 7) Other: please specify (Module ID: OPS/)
+#### 6.2) NAs to 0
 
-8) Format
+### 7) Individual changes
 
-9) Change type
+### 8) Other: please specify (Module ID: OPS/)
 
-10) Create new variables
+9)  Format
 
-11) Missings
+10) Change type
 
-12) Limits
+11) Create new variables
 
-13) Contradictions
+12) Missings
 
-14) Data Dictionary
+13) Limits
+
+14) Contradictions
+
+15) Cat to factor
+
+16) Data Dictionary
