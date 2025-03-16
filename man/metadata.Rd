@@ -7,26 +7,11 @@
 metadata(file)
 }
 \arguments{
-\item{file}{Path to yaml}
+\item{file}{Path to yaml file}
 }
 \value{
-A \code{epicdata_meta} object. Its structure is described in
-Details.
+An S7 \code{epicdata::metadata} object
 }
 \description{
-Constructor function for S3 class \code{epicdata_meta}.
-}
-\details{
-\code{epicdata_meta} objects are lists containing 5 data.frames.
-These data.frames are described below:
-
-\code{options} contains
-
-\code{var.list} contains
-
-\code{na.codes} contains
-
-\code{na.rules} contains
-
-\code{contras} contains
+S7 class \code{epicmodel::metadata}
 }

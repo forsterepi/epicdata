@@ -16,12 +16,13 @@ NULL
 metadata <- S7::new_class("metadata",
   properties = list(
     # options
-    study.name = prop.study.name,
-    id.var = prop.id.var,
+    study.name = meta.prop.study.name,
+    id.var = meta.prop.id.var,
     # variables
-    vars = S7::class_character
+    vars = S7::class_character,
     # workflow modules
-
+    DUP_NO.ID = meta.prop.DUP_NO.ID,
+    DUP_FREQ = meta.prop.DUP_FREQ
   ),
   validator = metadata_validator,
   constructor = metadata_constructor

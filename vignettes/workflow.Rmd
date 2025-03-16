@@ -40,7 +40,7 @@ During the workflow, some sub-modules or variants need **user input**. There are
 
 ### 1) Load (Module ID: LOAD)
 
-#### 1.1) Load (Sub-Module ID: LOAD/)
+#### 1.1) Load (Sub-Module ID: LOAD\_)
 
 Load the dataset that you want to process into R. This dataset is called "the data" in the remainder of this vignette.
 
@@ -52,17 +52,17 @@ Load the dataset that you want to process into R. This dataset is called "the da
 |                        |           |
 | inactive               | never     |
 
-#### 1.2) Check loaded file (Sub-Module ID: LOAD/CHECK)
+#### 1.2) Check loaded file (Sub-Module ID: LOAD_CHECK)
 
 df or tibble; special characters
 
-#### 1.3) All values to character (Sub-Module ID: LOAD/)
+#### 1.3) All values to character (Sub-Module ID: LOAD\_)
 
-#### 1.4 Combine multiple datasets (Sub-Module ID: LOAD/)
+#### 1.4 Combine multiple datasets (Sub-Module ID: LOAD\_)
 
 ### 2) Variables (Module ID: VAR)
 
-#### 2.1) Notice variables that are in the data but not in meta (Sub-Module ID: VAR/DF!META.NOTE)
+#### 2.1) Notice variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.NOTE)
 
 | Status   | Condition |
 |----------|-----------|
@@ -73,7 +73,7 @@ Desc
 
 `User input`: *Requires confirmation that variables should be missing.*
 
-#### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR/DF!META.RM)
+#### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.RM)
 
 | Status   | Condition                           |
 |----------|-------------------------------------|
@@ -84,7 +84,7 @@ Desc
 
 `User input`: *Requires confirmation that variables should be removed.*
 
-#### 2.3) Notice variables that are in meta but not in the data (Sub-Module ID: VAR/META!DF.NOTE)
+#### 2.3) Notice variables that are in meta but not in the data (Sub-Module ID: VAR_META!DF.NOTE)
 
 | Status   | Condition |
 |----------|-----------|
@@ -95,10 +95,10 @@ Desc
 
 `User input`: *Requires confirmation that variables should be missing.*
 
-#### 2.4) Apply old.id (Sub-Module ID: VAR/OLD.ID)
+#### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
 
 | Status | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -106,7 +106,7 @@ Desc
 
 ### 3) Rows (Module ID: ROW)
 
-#### 3.1) Remove rows based on id.pattern (Sub-Module ID: ROW/ID.PATTERN)
+#### 3.1) Remove rows based on id.pattern (Sub-Module ID: ROW_ID.PATTERN)
 
 | Status   | Condition                           |
 |----------|-------------------------------------|
@@ -117,7 +117,7 @@ Desc
 
 `User input`: *Requires confirmation that IDs should be removed.*
 
-#### 3.2) Remove based on invalid.ids or valid.ids/id.list (Sub-Module ID: ROW/RM.ID)
+#### 3.2) Remove based on invalid.ids or valid.ids/id.list (Sub-Module ID: ROW_RM.ID)
 
 | Status                    | Condition |
 |---------------------------|-----------|
@@ -127,10 +127,10 @@ Desc
 
 : Desc, no user input because list is provided and intentio nis clear
 
-#### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW/FILTER)
+#### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW_FILTER)
 
 | Status | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
@@ -139,7 +139,7 @@ Desc
 
 `User input`: *Requires confirmation that rows should be removed.*
 
-#### 3.4) Remove based on informed consent (Sub-Module ID: ROW/IC)
+#### 3.4) Remove based on informed consent (Sub-Module ID: ROW_IC)
 
 | Status   | Condition |
 |----------|-----------|
@@ -150,7 +150,7 @@ Desc
 
 ### 4) Cells (Module ID: CELL)
 
-#### 4.1) Remove new lines/tabs (Sub-Module ID: CELL/NEW.LINE)
+#### 4.1) Remove new lines/tabs (Sub-Module ID: CELL_NEW.LINE)
 
 | Status   | Condition |
 |----------|-----------|
@@ -159,11 +159,11 @@ Desc
 
 : Desc
 
-#### 4.2) NA variants to NA (Sub-Module ID: CELL/TO.NA)
+#### 4.2) NA variants to NA (Sub-Module ID: CELL_TO.NA)
 
 ### 5) Duplicates (Module ID: DUP)
 
-#### 5.1 Check for exact duplicates (Sub-Module ID: DUP/NO.ID)
+#### 5.1 Check for exact duplicates (Sub-Module ID: DUP_NO.ID)
 
 | Status   | Condition                       |
 |----------|---------------------------------|
@@ -172,7 +172,7 @@ Desc
 
 Desc
 
-#### 5.2 Evaluate ID frequency (Sub-Module ID: DUP/FREQ)
+#### 5.2 Evaluate ID frequency (Sub-Module ID: DUP_FREQ)
 
 | Status   | Condition                       |
 |----------|---------------------------------|
@@ -183,7 +183,7 @@ Desc
 
 `User input`: *Requires confirmation that every ID has the expected frequency.*
 
-#### 5.3 Data comparison (Sub-Module ID: DUP/COMPARE)
+#### 5.3 Data comparison (Sub-Module ID: DUP_COMPARE)
 
 | Status   | Condition           |
 |----------|---------------------|
@@ -198,7 +198,7 @@ generalize to more than 2 IDs, e.g., mention all three different values maybe ev
 
 `User input`: *Requires decisions regarding differences between entries of the same ID.*
 
-### 6) Multiple choice (Module ID: MC/)
+### 6) Multiple choice (Module ID: MC\_)
 
 #### 6.1) All 0s to NA
 
@@ -206,7 +206,7 @@ generalize to more than 2 IDs, e.g., mention all three different values maybe ev
 
 ### 7) Individual changes
 
-### 8) Other: please specify (Module ID: OPS/)
+### 8) Other: please specify (Module ID: OPS\_)
 
 9)  Format
 

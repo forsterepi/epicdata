@@ -31,7 +31,7 @@ some [text]{style="background-color: blue"}
 
 ## Format (YAML)
 
-In `epicdata`, metadata is specified in **YAML** format. YAML has been designed to be readable for both humans and computers. This is accomplished by **indentations**, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information. (Usually, the next layer is 2 spaces or a tab towards the right.)
+In `epicdata`, metadata is specified in **YAML** format. YAML has been designed to be readable for both humans and computers. This is accomplished by **indentations**, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information. (Usually, the next layer is 2 spaces or a tab towards the right. RStudio provides an "indentation guide" that visually highlights the indentation. To activate it, go to Tools/Global Options/Code/Display. If nothing changes, adjust your theme in Tools/Global Options/Appearance.)
 
 ``` yaml
 First.layer
@@ -193,35 +193,60 @@ options:
 
 ## Component: var.list
 
-The list of variables `var.list` is the core of the metadata and a mandatory part of it. List all key-value pairs on the second layer. The same keys are re-used for each variable. Use a dash for only the first key of every new variable. In the list of variable keys below, allowed values for the corresponding key are found in the brackets after each key. Many keys only apply to certain variable types. Do not specify keys that apply to other types of variables. The list below is structured by the type of variable the keys apply to.
+The list of variables `var.list` is the core of the metadata and a mandatory part of it. The second layer contains the variable names. The third layer contains key-value pairs that provide information regarding the corresponding variable. The same keys are re-used for each variable.
+
+``` yaml
+var.list:
+  var1:
+    key: value
+    ...
+  var2:
+    key: value
+    ...
+```
+
+Note that, in the example above, `var1` and `var2` are the variable names and that there is no value after the colon `:` in their lines. Variable names must be syntactically valid names (see `?make.names` for details). The key-value pairs below `var1` describe the characteristics of `var1`, while the key-value pairs below `var2` describe characteristics of `var2`. Many keys only apply to certain variable types. Do not specify keys that apply to other types of variables. The list below is structured by the type of variable the keys apply to.
 
 **Keys that apply to all variables:**
 
--   `id` (a syntactically valid name, see `?make.names` for details): The name of the variable. `id` must be specified for every variable. All variable names in the data set must be specified either in `id` or in `old.id`.
+-   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`): The variable `type` is the main variable characteristic and the only key that is always **required**. There are 6 different types:
 
--   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and the new name in `id`. All variable names in the data set must be specified either in `id` or in `old.id`. Cannot be used together with `new`.
+    -   `text`: This type is for variables that holds text or IDs.
+    -   `cat`: This type is for categorical variables. Categorical variables have integer codes that each refer to one category, e.g., `0` refers to `no` and `1` refers to `yes`. By default, the variables are of type `integer` in the final dataset with the category descriptions, i.e., labels, described in the data dictionary. However, you can choose to transform them to `factor`.
+    -   `num`: This type is for numeric variables, i.e., variables that you define as numbers. Likert scale variables or their sum score, e.g., might be defined as type `cat` or `num`.
+    -   `date`: This type is for variables that are dates without a time component, e.g., birthdays. They consist of day, month, and year, but you can select specific format (see below).
+    -   `time`: This type is for variables that describe a time of day without a date or a duration in hours, minutes, and/or seconds. There are three versions: hours and minutes, minutes and seconds, hours and minutes and seconds.
+    -   `datetime`: This type is for variables that have both a date and a time component as described above.
 
--   `label` (Text):
+-   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and the new name in `id`. All variable names in the data set must be specified either in `id` or in `old.id`. Cannot be used together with `new`. See also section "Variable names in the dataset" below.
 
--   `label.eng` (Text): If the label is not in English, enter its English translation here for use in the data dictionnary.
+-   `label` (Text): A description of the variable. `label` is not mandatory but highly recommended. Each variable should have a `label`. If your variable comes from a questionnaire, use the question as the label. If your questionnaire is not in English, use the original version and specify an English translation in key `label.eng`.
 
--   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`):
-
--   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specifed always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
+-   `label.eng` (Text): If the `label` is not in English, enter its English translation here for use in the data dictionnary. `label.eng` can only be used if `label` is specified as well.
 
 -   `to.na` (text):
 
 -   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`): If `no`, all `NA`s, after applying `to.na`, will remain as `NA`. If `yes`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `yes`.
 
+-   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specifed always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
+
+-   `na.rules` ():
+
+-   `na.switch` ():
+
+-   `na.keep` ():
+
+-   `na.replace` ():
+
 -   `new` (): Create new variables based on existing variables by specifying `new`. If `new` is specified, `id` must not be in the data set. Also, `old.id` cannot be used. New variables are created with `dplyr::mutate()`, where the variable definition is specified as a name-value pair using tidy evaluation with data masking. For `new`, specify the value of this name-value pair. As an example, variable `mass_norm` would be created by `data.frame %>% mutate(mass_norm = mass / mean(mass, na.rm = TRUE))`. To recreate the creation of `mass_norm` in `epicdata`, `mass` must be a variable specified in `var.list`, `mass_norm` is the value for `id` for your new variable, while `mass / mean(mass, na.rm = TRUE)` is specified for `new`. If your value causes an error, try to wrap it in quotation marks.
 
 ``` yaml
 var.list:
-- id: mass
-  ...
-- id: mass_norm
-  ...
-  new: mass / mean(mass, na.rm = TRUE)
+  mass:
+    ...
+  mass_norm:
+    ...
+    new: mass / mean(mass, na.rm = TRUE)
 ```
 
 **Text variables:**
@@ -233,13 +258,46 @@ var.list:
 
 -   `cats` ():
 
+``` yaml
+var.list:
+  var1:
+    type: cat
+    cats:
+    - 0 = no
+    - 1 = yes
+```
+
+You don't need to remember if the integer or the label goes first, as `epicdata` understands both. You can even mix them up. It can also handle different amounts of whitespace between the components. Just make sure you include a single space after the dash in the front.
+
+``` yaml
+var.list:
+  var1:
+    type: cat
+    cats:
+    - no=0
+    - 1 =yes
+    - maybe      =   2
+```
+
 -   `cats.eng` ():
+
+``` yaml
+var.list:
+  var1:
+    type: cat
+    cats:
+    - 0 = nein
+    - 1 = ja
+    cats.eng:
+    - 0 = no
+    - 1 = yes
+```
 
 -   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, tranforms the variable to factor.
 
 -   `factor.name` or `name.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
 
--   `mc.set` (a syntactically valid name, see `?make.names` for details): cannot be a value used in any `id.var`,
+-   `mc.set` (a syntactically valid name, see `?make.names` for details): cannot be a value used in any variable names.
 
 **Numeric (num) variables:**
 
@@ -289,8 +347,40 @@ var.list:
 
 ``` yaml
 var.list:
-- id:
-  label:
+  id:
+    label: identifier
+```
+
+**Variable names in the dataset:**
+
+The dataset must contain a certain set of variables based on the metadata specification:
+
+-   In general, all variable names (the values on the second layer, i.e., `var1`, `var2`, `var3`, `var4`, `var5`) have to be variables in the dataset. There are, however, exceptions.
+-   If `old.id` has been specified, the variable name must **not** be in the dataset. Instead, the value specified for `old.id` has to.
+-   If `new` has been specified, the variable name must **not** be in the dataset. You cannot specify `new` and `old.id` for the same variable.
+-   If you specify `factor.name` or `mc.set`, the corresponding values must **not** be variables in the dataset.
+
+In the example below, the dataset, therfore, must contain exactly the following variables: `var1`, `VAR_TWO`, `var4`. (`var5` and `VAR_FIVE` are invalid. If you would want to use this metadata, you would need to delete `var5` first, as it would cause an error.)
+
+``` yaml
+# in dataset?
+var.list:
+  var1: # yes
+    type: num
+  var2: # no
+    type: text
+    old.id: VAR_TWO # yes
+  var3: # no
+    type: num
+    new: log(var1)
+  var4: # yes
+    type: cat
+    factor.name: var4_factor # no
+    mc.set: set1 # no
+  var5: # invalid (cannot mix old.id and new)
+    type: num
+    old.id: VAR_FIVE
+    new: 2 * var1
 ```
 
 ## Component: na.codes
@@ -344,11 +434,7 @@ The missing codes used in the final dataset must be of the same type (text, cat,
 
 If the automatic transformation does not provide values that make sense for missing codes (values that cannot be confused with real values), you can provide date, datetime, and time values for missing codes as well. The values you choose must be in the same format as the corresponding variable, e.g., `9001-01-01` for format `ymd` and `01.01.9001` for format `dmy`. For time formats, we recommend using the letters `h` (for hours), `m` (for minutes), and `s` (for seconds) after the corresponding number, e.g., `90h01m00s`, `90h01m`, `01m00s`.
 
-## Components: na.rules
-
 ## Components: contras
-
-## Components: changes
 
 ## Defaults
 
@@ -377,7 +463,6 @@ Defaults are the values that are used if the key is not specified at all. Not al
 
 | Key | Default |
 |------------------------------------|------------------------------------|
-| `id` | \- |
 | `old.id` | \- |
 | `label` | \- |
 | `label.eng` | \- |
