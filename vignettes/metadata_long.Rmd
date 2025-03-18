@@ -299,6 +299,8 @@ var.list:
 
 -   `mc.set` (a syntactically valid name, see `?make.names` for details): cannot be a value used in any variable names.
 
+-   `mc.exclusive` (boolean, i.e., `true`, `yes`, `false`, `no`): If the variable is part of a multiple choice (mc) set, it can be defined as an exclusive answer. A common example is a multple choice set with option "none of the other options". It is implausible that "none of the other options" and another option are both selected. Setting `mc.exclusive` to `yes` automatically includes the corresponding contradictions. Contradictions are only included if the mc variables have only categories `0` and `1` while `1` is assumed to indicate selection of the corresponding option. If the exclusive variable is called `var_exclusive` and another variable in the same mc set is called `var_mc1`, then the following contradiction is added: `var_exclusive == 1 & var_mc1 == 1`. This type of contradiction is added for all other mc variables in the set. Only specify `mc.exclusive`, if you also specified `mc.set`.
+
 **Numeric (num) variables:**
 
 -   `from` ():
@@ -468,14 +470,17 @@ Defaults are the values that are used if the key is not specified at all. Not al
 | `label.eng` | \- |
 | `type` | \- |
 | `na.else` | \- |
+| na. |  |
 | `to.na` | option `to.na` |
 | `touch.na` | option `touch.na` |
 | `new` | \- |
 | `ops` | `no` |
 | `cats` | \- |
 | `cats.eng` | \- |
-| `to.factor` | yes, if `factor.name` or `name.factor` has been specified, otherwise option `to.factor` |
+| `to.factor` | `yes`, if `factor.name` or `name.factor` has been specified, otherwise option `to.factor` |
 | `factor.name` or `name.factor` | \- |
+| `mc.set` | \- |
+| `mc.exclusive` | If `mc.set` has been specified, defaults to `no` |
 | `from` | $-\infty$ (number, date, time, or datetime) |
 | `from.exclude` | $-\infty$ (number, date, time, or datetime) |
 | `to` | $\infty$ (number, date, time, or datetime) |
