@@ -133,6 +133,7 @@ In `epicdata`, metadata consists of several components:
 -   `var.list`: A list of all variables, where variable-specific information is specified.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `contras`: A list of implausible combinations of values from two variables.
+-   `mc.sets`: A list of multiple-choice (mc) sets with information that applies to the set instead of individual variables.
 
 The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
 
@@ -144,6 +145,8 @@ var.list:
 na.codes:
   tbd
 contras:
+  tbd
+mc.sets:
   tbd
 ```
 
@@ -437,6 +440,65 @@ The missing codes used in the final dataset must be of the same type (text, cat,
 If the automatic transformation does not provide values that make sense for missing codes (values that cannot be confused with real values), you can provide date, datetime, and time values for missing codes as well. The values you choose must be in the same format as the corresponding variable, e.g., `9001-01-01` for format `ymd` and `01.01.9001` for format `dmy`. For time formats, we recommend using the letters `h` (for hours), `m` (for minutes), and `s` (for seconds) after the corresponding number, e.g., `90h01m00s`, `90h01m`, `01m00s`.
 
 ## Components: contras
+
+## Components: mc.sets
+
+In single-choice questions, questionnaire participants select one of the given options. In multiple-choice (mc) questions, they can select multiple options. While single-choice questions can be fit into a single categorical (type `cat`) variable with one category per option, multiple-choice questions need one variable per option. The multiple-choice questions are usually binary, i.e., type `cat` with two categories indicating selection and non-selection. In component `var.list`, you can indicate with key `mc.set` that the corresponing variable belongs to a multiple-choice set, i.e., is one of the multiple variables necessary to describe a multiple-choice question. Specifying the same value in `mc.set` tells `epicdata` that the variables belong to the same multiple-choice question.
+
+In component `mc.sets`, additional information can be provided for the set. Use the following keys:
+
+-   `label` (Text): Define a `label` for the mc.set. If a `label` is specified, the variables that belong to the set are documented together. We recommend to put the question in `label` in `mc.sets` and specify the option that each variable represents in `label` in `var.list`.
+
+-   `label.eng` (Text): Similar to `var.list`, specify here the English translation of the value in `label`, if it is not in English already. The English version can be used to create an English data dictionary.
+
+-   `cats` (): To shorten the specification of the multiple-choice variables in `var.list`, their categories can be specified in `mc.sets` and are applied to all variables in the set.
+
+-   `cats.eng` (): Similar to `var.list`, specify the English translations of the categories here to create an English version of the data dictionary, if the questionnaire is not in English already.
+
+-   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): Sets the default for all variables in the set to the specified value. Therefore, if `yes` is specified, `to.factor` of all variables in the mc.set is set to `yes` as well. You can overwrite the value for individual variables by setting their value in `var.list` back to `no`.
+
+``` yaml
+var.list:
+  sport1:
+    type: cat # always specify the variable type
+    label: football # only put in the option, the question is specified below
+    mc.set: sport # all variables with value "sport" bwlong together
+  sport2:
+    type: cat
+    label: swimming
+    mc.set: sport
+  sport3:
+    type: cat
+    label: running
+    mc.set: sport
+  sport4:
+    type: cat
+    label: none
+    mc.set: sport
+    mc.exclusive: yes
+  sport_where1:
+    type: cat
+    label: gym
+    mc.set: sport_where
+    cats:
+    - 0 = no
+    - 1 = yes
+  sport_where2:
+    type: cat
+    label: outside
+    mc.set: sport_where
+    cats: # specifying the categories in every variable is equal to specifying it in mc.sets
+    - 0 = no
+    - 1 = yes
+mc.sets:
+  sport:
+    label: What's your favourite sport? # specify the question for variables sport1-4
+    cats: # specify the categories for variables sport1-4
+    - 0 = no
+    - 1 = yes
+  sport_where:
+    label: Where do you exercise?
+```
 
 ## Defaults
 
