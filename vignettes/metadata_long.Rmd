@@ -62,7 +62,7 @@ eu.member: yes
 calling.code: "+33"
 ```
 
-Instead of individual key-value pairs, you can also map other objects to a key, e.g., several key-value pairs. This is achived by using indentations. In the example below, the key-value pairs of `capital`, `population.million`, `eu.member`, and `calling.code` are mapped to the corresponding country. Notice that no values appear in the same line as the keys `France` and `Germany`, because the indented key-value pairs are mapped to it. In addition, `France` and `Germany` with their key-value pairs are mapped to `countries`.
+Instead of individual key-value pairs, you can also map other objects to a key, e.g., several key-value pairs. This is achieved by using indentations. In the example below, the key-value pairs of `capital`, `population.million`, `eu.member`, and `calling.code` are mapped to the corresponding country. Notice that no values appear in the same line as the keys `France` and `Germany`, because the indented key-value pairs are mapped to it. In addition, `France` and `Germany` with their key-value pairs are mapped to `countries`.
 
 ``` yaml
 countries:
@@ -133,7 +133,7 @@ In `epicdata`, metadata consists of several components:
 -   `var.list`: A list of all variables, where variable-specific information is specified.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `contras`: A list of implausible combinations of values from two variables.
--   `mc.sets`: A list of multiple-choice (mc) sets with information that applies to the set instead of individual variables.
+-   `var.groups`: A list of variable groups with information that applies to the group instead of individual variables.
 
 The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
 
@@ -146,7 +146,7 @@ na.codes:
   tbd
 contras:
   tbd
-mc.sets:
+var.groups:
   tbd
 ```
 
@@ -167,8 +167,6 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 -   `id.list` ((boolean, i.e., `true`, `yes`, `false`, `no`):
 
 -   `load.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
-
--   `mc.handling` ():
 
 -   `double.entry` (boolean, i.e., `true`, `yes`, `false`, `no`):
 
@@ -212,26 +210,26 @@ Note that, in the example above, `var1` and `var2` are the variable names and th
 
 **Keys that apply to all variables:**
 
--   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`): The variable `type` is the main variable characteristic and the only key that is always **required**. There are 6 different types:
+-   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`): The variable `type` is the main variable characteristic and the only key that is **always** **required**. There are 6 different types:
 
     -   `text`: This type is for variables that holds text or IDs.
-    -   `cat`: This type is for categorical variables. Categorical variables have integer codes that each refer to one category, e.g., `0` refers to `no` and `1` refers to `yes`. By default, the variables are of type `integer` in the final dataset with the category descriptions, i.e., labels, described in the data dictionary. However, you can choose to transform them to `factor`.
+    -   `cat`: This type is for categorical variables. Categorical variables have integer codes that each refer to one category, e.g., `0` refers to `no` and `1` refers to `yes`. By default, the variables are of type `integer` in the final data set with the category descriptions, i.e., labels, described in the data dictionary. However, you can choose to transform them to `factor`.
     -   `num`: This type is for numeric variables, i.e., variables that you define as numbers. Likert scale variables or their sum score, e.g., might be defined as type `cat` or `num`.
     -   `date`: This type is for variables that are dates without a time component, e.g., birthdays. They consist of day, month, and year, but you can select specific format (see below).
     -   `time`: This type is for variables that describe a time of day without a date or a duration in hours, minutes, and/or seconds. There are three versions: hours and minutes, minutes and seconds, hours and minutes and seconds.
     -   `datetime`: This type is for variables that have both a date and a time component as described above.
 
--   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and the new name in `id`. All variable names in the data set must be specified either in `id` or in `old.id`. Cannot be used together with `new`. See also section "Variable names in the dataset" below.
+-   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and the new name in `id`. All variable names in the data set must be specified either in `id` or in `old.id`. Cannot be used together with `new`. See also section "Variable names in the data set" below.
 
 -   `label` (Text): A description of the variable. `label` is not mandatory but highly recommended. Each variable should have a `label`. If your variable comes from a questionnaire, use the question as the label. If your questionnaire is not in English, use the original version and specify an English translation in key `label.eng`.
 
--   `label.eng` (Text): If the `label` is not in English, enter its English translation here for use in the data dictionnary. `label.eng` can only be used if `label` is specified as well.
+-   `label.eng` (Text): If the `label` is not in English, enter its English translation here for use in the data dictionary. `label.eng` can only be used if `label` is specified as well.
 
 -   `to.na` (text):
 
 -   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`): If `no`, all `NA`s, after applying `to.na`, will remain as `NA`. If `yes`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `yes`.
 
--   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specifed always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
+-   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specified always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
 
 -   `na.rules` ():
 
@@ -240,6 +238,23 @@ Note that, in the example above, `var1` and `var2` are the variable names and th
 -   `na.keep` ():
 
 -   `na.replace` ():
+
+-   `group` (a syntactically valid name, see `?make.names` for details): The name of the variable group, to which the variable belongs. Each variable can only belong to one variable group, but it doesn't have to. All variables with the same value for key `group`, i.e., group name, belong to the same group. Use the group name in component `var.groups` to specify group-specific attributes and defaults, and to trigger documentation of the group together instead of each variable separately.
+
+``` yaml
+var.list:
+  sport_1:
+    type: cat
+    label: Football
+    group: sport
+  sport_2:
+    type: cat
+    labe: Swimming
+    group: sport
+var.groups:
+  sport:
+    group.label: What's your favourite sport?
+```
 
 -   `new` (): Create new variables based on existing variables by specifying `new`. If `new` is specified, `id` must not be in the data set. Also, `old.id` cannot be used. New variables are created with `dplyr::mutate()`, where the variable definition is specified as a name-value pair using tidy evaluation with data masking. For `new`, specify the value of this name-value pair. As an example, variable `mass_norm` would be created by `data.frame %>% mutate(mass_norm = mass / mean(mass, na.rm = TRUE))`. To recreate the creation of `mass_norm` in `epicdata`, `mass` must be a variable specified in `var.list`, `mass_norm` is the value for `id` for your new variable, while `mass / mean(mass, na.rm = TRUE)` is specified for `new`. If your value causes an error, try to wrap it in quotation marks.
 
@@ -254,7 +269,7 @@ var.list:
 
 **Text variables:**
 
--   `ops` (a variable or mc.set name):
+-   `ops` (a variable or group name): add separation of one variable that contains both the checkbox value and the free text, as in modern limesurvey
 -   `dict` ():
 
 **Categorical (cat) variables:**
@@ -270,7 +285,7 @@ var.list:
     - 1 = yes
 ```
 
-You don't need to remember if the integer or the label goes first, as `epicdata` understands both. You can even mix them up. It can also handle different amounts of whitespace between the components. Just make sure you include a single space after the dash in the front.
+You don't need to remember if the integer or the label goes first, as `epicdata` understands both. You can even mix them up. It can also handle different amounts of white space between the components. Just make sure you include a single space after the dash in the front.
 
 ``` yaml
 var.list:
@@ -296,13 +311,9 @@ var.list:
     - 1 = yes
 ```
 
--   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, tranforms the variable to factor.
+-   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, transforms the variable to factor.
 
 -   `factor.name` or `name.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
-
--   `mc.set` (a syntactically valid name, see `?make.names` for details): cannot be a value used in any variable names.
-
--   `mc.exclusive` (boolean, i.e., `true`, `yes`, `false`, `no`): If the variable is part of a multiple choice (mc) set, it can be defined as an exclusive answer. A common example is a multple choice set with option "none of the other options". It is implausible that "none of the other options" and another option are both selected. Setting `mc.exclusive` to `yes` automatically includes the corresponding contradictions. Contradictions are only included if the mc variables have only categories `0` and `1` while `1` is assumed to indicate selection of the corresponding option. If the exclusive variable is called `var_exclusive` and another variable in the same mc set is called `var_mc1`, then the following contradiction is added: `var_exclusive == 1 & var_mc1 == 1`. This type of contradiction is added for all other mc variables in the set. Only specify `mc.exclusive`, if you also specified `mc.set`.
 
 **Numeric (num) variables:**
 
@@ -356,16 +367,16 @@ var.list:
     label: identifier
 ```
 
-**Variable names in the dataset:**
+**Variable names in the data set:**
 
-The dataset must contain a certain set of variables based on the metadata specification:
+The data set must contain a certain set of variables based on the metadata specification:
 
--   In general, all variable names (the values on the second layer, i.e., `var1`, `var2`, `var3`, `var4`, `var5`) have to be variables in the dataset. There are, however, exceptions.
--   If `old.id` has been specified, the variable name must **not** be in the dataset. Instead, the value specified for `old.id` has to.
--   If `new` has been specified, the variable name must **not** be in the dataset. You cannot specify `new` and `old.id` for the same variable.
--   If you specify `factor.name` or `mc.set`, the corresponding values must **not** be variables in the dataset.
+-   In general, all variable names (the values on the second layer, i.e., `var1`, `var2`, `var3`, `var4`, `var5`) have to be variables in the data set. There are, however, exceptions.
+-   If `old.id` has been specified, the variable name must **not** be in the data set. Instead, the value specified for `old.id` has to.
+-   If `new` has been specified, the variable name must **not** be in the data set. You cannot specify `new` and `old.id` for the same variable.
+-   If you specify `factor.name` or `group`, the corresponding values must **not** be variables in the data set.
 
-In the example below, the dataset, therfore, must contain exactly the following variables: `var1`, `VAR_TWO`, `var4`. (`var5` and `VAR_FIVE` are invalid. If you would want to use this metadata, you would need to delete `var5` first, as it would cause an error.)
+In the example below, the data set, therefore, must contain exactly the following variables: `var1`, `VAR_TWO`, `var4`. (`var5` and `VAR_FIVE` are invalid. If you would want to use this metadata, you would need to delete `var5` first, as it would cause an error.)
 
 ``` yaml
 # in dataset?
@@ -381,16 +392,74 @@ var.list:
   var4: # yes
     type: cat
     factor.name: var4_factor # no
-    mc.set: set1 # no
+    group: set1 # no
   var5: # invalid (cannot mix old.id and new)
     type: num
     old.id: VAR_FIVE
     new: 2 * var1
 ```
 
+**Summary of variable keys:**
+
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| Key               | Alternative names                                     | Length       | Do not specify together with ... | Only specify together with ... |
++===================+=======================================================+==============+==================================+================================+
+| `type`            |                                                       | 1 (required) |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `old.id`          |                                                       | 1            | `new`                            |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `label`           |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `label.eng`       |                                                       | 1            |                                  | `label`                        |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.else`         |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.rules`        |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.switch`       |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.keep`         |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.replace`      |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.na`           |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `touch.na`        |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `group`           |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `new`             |                                                       | 1            | `old.id`                         |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `ops`             |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `dict`            |                                                       | \>1          |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `cats`            |                                                       | \>1          |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `cats.eng`        |                                                       | \>1          |                                  | `cats`                         |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.factor`       |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `factor.name`     | `name.factor`                                         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `from`            |                                                       | 1            | `from.exclude`                   |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `from.exclude`    |                                                       | 1            | `from`                           |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to`              |                                                       | 1            | `to.exclude`                     |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.exclude`      |                                                       | 1            | `to`                             |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `date.format`     | `format.date`, `format` (if `type` is `date`)         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `time.format`     | `format.time`, `format` (if `type` is `time`)         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+
 ## Component: na.codes
 
-In the final processed datasets, NAs are usually replaced by missing codes. These codes represent a certain type or reason of missingness. In the component `na.codes`, certain values are declared as missing codes in order to allow `epicdata` to treat them appropriately, e.g., by including them in the data dictionary. In `na.codes`, no reference to certain variables is made yet. Here, only the declaration is done.
+In the final processed data sets, NAs are usually replaced by missing codes. These codes represent a certain type or reason of missingness. In the component `na.codes`, certain values are declared as missing codes in order to allow `epicdata` to treat them appropriately, e.g., by including them in the data dictionary. In `na.codes`, no reference to certain variables is made yet. Here, only the declaration is done.
 
 Every missing code is declared as one key-value pair with the code being the key and the description being the value.
 
@@ -403,7 +472,7 @@ na.codes:
   90h01m00s: Not answered (time hms)
 ```
 
-The missing codes used in the final dataset must be of the same type (text, cat, num, date, datetime, time) as the variable. We therefore recommend to use integers, as they can be used in the same form for variables of type text, cat, and num. When an integer is used for date, datetime, or time, it is automatically transformed by the following rules:
+The missing codes used in the final data set must be of the same type (text, cat, num, date, datetime, time) as the variable. We therefore recommend to use integers, as they can be used in the same form for variables of type text, cat, and num. When an integer is used for date, datetime, or time, it is automatically transformed by the following rules:
 
 **Single digit, e.g.,** `9`**:**
 
@@ -441,15 +510,21 @@ If the automatic transformation does not provide values that make sense for miss
 
 ## Components: contras
 
-## Components: mc.sets
+## Components: var.groups
 
-In single-choice questions, questionnaire participants select one of the given options. In multiple-choice (mc) questions, they can select multiple options. While single-choice questions can be fit into a single categorical (type `cat`) variable with one category per option, multiple-choice questions need one variable per option. The multiple-choice questions are usually binary, i.e., type `cat` with two categories indicating selection and non-selection. In component `var.list`, you can indicate with key `mc.set` that the corresponing variable belongs to a multiple-choice set, i.e., is one of the multiple variables necessary to describe a multiple-choice question. Specifying the same value in `mc.set` tells `epicdata` that the variables belong to the same multiple-choice question.
+Often, variables in the same group are of the same type, e.g., `cat`, but they don't have to be. The specified defaults for type-specific keys of course only apply the variables of the corresponding type.
+
+In the data dictionary, the variables appear in the same order as in the YAML input. Analogously, within a variable group,
+
+In single-choice questions, questionnaire participants select one of the given options. In multiple-choice (mc) questions, they can select multiple options. While single-choice questions can be fit into a single categorical (type `cat`) variable with one category per option, multiple-choice questions need one variable per option. The multiple-choice questions are usually binary, i.e., type `cat` with two categories indicating selection and non-selection. In component `var.list`, you can indicate with key `mc.set` that the corresponding variable belongs to a multiple-choice set, i.e., is one of the multiple variables necessary to describe a multiple-choice question. Specifying the same value in `mc.set` tells `epicdata` that the variables belong to the same multiple-choice question.
 
 In component `mc.sets`, additional information can be provided for the set. Use the following keys:
 
--   `label` (Text): Define a `label` for the mc.set. If a `label` is specified, the variables that belong to the set are documented together. We recommend to put the question in `label` in `mc.sets` and specify the option that each variable represents in `label` in `var.list`.
+-   `group.label` (Text): Define a `label` for the mc.set. If a `label` is specified, the variables that belong to the set are documented together. We recommend to put the question in `label` in `mc.sets` and specify the option that each variable represents in `label` in `var.list`.
 
--   `label.eng` (Text): Similar to `var.list`, specify here the English translation of the value in `label`, if it is not in English already. The English version can be used to create an English data dictionary.
+-   `group.label.eng` (Text): Similar to `var.list`, specify here the English translation of the value in `label`, if it is not in English already. The English version can be used to create an English data dictionary.
+
+-   `mc.exclusive` (boolean, i.e., `true`, `yes`, `false`, `no`): If the variable is part of a multiple choice (mc) set, it can be defined as an exclusive answer. A common example is a multiple choice set with option "none of the other options". It is implausible that "none of the other options" and another option are both selected. Setting `mc.exclusive` to `yes` automatically includes the corresponding contradictions. Contradictions are only included if the mc variables have only categories `0` and `1` while `1` is assumed to indicate selection of the corresponding option. If the exclusive variable is called `var_exclusive` and another variable in the same mc set is called `var_mc1`, then the following contradiction is added: `var_exclusive == 1 & var_mc1 == 1`. This type of contradiction is added for all other mc variables in the set. Only specify `mc.exclusive`, if you also specified `mc.set`.
 
 -   `cats` (): To shorten the specification of the multiple-choice variables in `var.list`, their categories can be specified in `mc.sets` and are applied to all variables in the set.
 
@@ -462,91 +537,152 @@ var.list:
   sport1:
     type: cat # always specify the variable type
     label: football # only put in the option, the question is specified below
-    mc.set: sport # all variables with value "sport" bwlong together
+    group: sport # all variables with value "sport" belong together
   sport2:
     type: cat
     label: swimming
-    mc.set: sport
+    group: sport
   sport3:
     type: cat
     label: running
-    mc.set: sport
+    group: sport
   sport4:
     type: cat
     label: none
-    mc.set: sport
-    mc.exclusive: yes
+    group: sport
   sport_where1:
     type: cat
     label: gym
-    mc.set: sport_where
+    group: sport_where
     cats:
     - 0 = no
     - 1 = yes
   sport_where2:
     type: cat
     label: outside
-    mc.set: sport_where
-    cats: # specifying the categories in every variable is equal to specifying it in mc.sets
+    group: sport_where
+    cats: # specifying the categories in every variable is equal to specifying it in var.groups
     - 0 = no
     - 1 = yes
-mc.sets:
+var.groups:
   sport:
-    label: What's your favourite sport? # specify the question for variables sport1-4
+    group.label: What's your favourite sport? # specify the question for variables sport1-4
     cats: # specify the categories for variables sport1-4
     - 0 = no
     - 1 = yes
+    mc.exclusive: sport4 #if sport4 is selected no other variable in the group should
   sport_where:
-    label: Where do you exercise?
+    group.label: Where do you exercise?
 ```
 
 ## Defaults
 
-Defaults are the values that are used if the key is not specified at all. Not all keys have defaults.
+In `epicdata`, not specifying a value also holds information. This is accomplished by default values. `epicdata` selects values by going through a following **cascade of defaults**:
 
-### options
+1.  Use value specified in `var.list`
+2.  If 1. is `NULL`, i.e., not specified, use value specified in `var.groups`
+3.  If 2. is `NULL`, i.e., not specified, use value specified in `options`
+4.  If 3. is `NULL`, i.e., not specified, use the pre-defined default
+5.  If 4. is `NULL`, the final value is `NULL`
 
-| Key | Default |
-|----|----|
-| `study.name` | `my_study` |
-| `id.var` | `id.var` (with values 1:N) |
-| `id.pattern` | \- |
-| `id.list` | `no` |
-| `load.from` | `folder` |
-| `consent` | `yes`, if `id.var` has been specified, otherwise `no` |
-| `mc.handling` | `none` |
-| `double.entry` | `no` |
-| `date.format` or `format.date` | \- |
-| `time.format` or `format.time` | \- |
-| `datetime.format` or `format.datetime` | \- |
-| `to.na` | \- |
-| `touch.na` | `yes` |
-| `to.factor` | `no` |
+For group-specific keys, i.e., keys that do not appear in `var.list` but only in `var.groups`, step 1 is, of course, skipped. For options, i.e., keys that do not appear in `var.list` and `var.groups`, steps 1 & 2 are, of course, skipped.
 
-### var.list
+**Pre-defined defaults** are default values specified in `epicdata` itself. Some pre-defined defaults are different based on a certain condition.
 
-| Key | Default |
-|------------------------------------|------------------------------------|
-| `old.id` | \- |
-| `label` | \- |
-| `label.eng` | \- |
-| `type` | \- |
-| `na.else` | \- |
-| na. |  |
-| `to.na` | option `to.na` |
-| `touch.na` | option `touch.na` |
-| `new` | \- |
-| `ops` | `no` |
-| `cats` | \- |
-| `cats.eng` | \- |
-| `to.factor` | `yes`, if `factor.name` or `name.factor` has been specified, otherwise option `to.factor` |
-| `factor.name` or `name.factor` | \- |
-| `mc.set` | \- |
-| `mc.exclusive` | If `mc.set` has been specified, defaults to `no` |
-| `from` | $-\infty$ (number, date, time, or datetime) |
-| `from.exclude` | $-\infty$ (number, date, time, or datetime) |
-| `to` | $\infty$ (number, date, time, or datetime) |
-| `to.exclude` | $\infty$ (number, date, time, or datetime) |
-| `format` or `date.format` or `format.date` | option `date.format` or `format.date` |
-| `format` or `time.format` or `format.time` | option `time.format` or `format.time` |
-| `format` or `datetime.format` or `format.datetime` | option `datetime.format` or `format.datetime` |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| var.list                                                               | var.groups        | options           | pre-defined                                                                                     |
++========================================================================+===================+===================+=================================================================================================+
+| \-                                                                     | \-                | `study.name`      | `my_study`                                                                                      |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `id.var`          | Adds a variable called `.id.var`, which contains numbers from 1 to N. It is deleted in the end. |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `id.pattern`      | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `id.list`         | `FALSE`                                                                                         |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `load.from`       | `folder`                                                                                        |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `consent`         | IF `id.var` has been specified: `TRUE`; ELSE: `FALSE`                                           |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `double.entry`    | `FALSE`                                                                                         |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | `group.label`     | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | `group.label.eng` | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | `mc.exclusive`    | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `type`                                                                 | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `old.id`                                                               | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `label`                                                                | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `label.eng`                                                            | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `na.else`                                                              | `na.else`         | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `na.rules`                                                             | `na.rules`        | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `na.switch`                                                            | `na.switch`       | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `na.keep`                                                              | `na.keep`         | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `na.replace`                                                           | `na.replace`      | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `to.na`                                                                | `to.na`           | `to.na`           | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `touch.na`                                                             | `touch.na`        | `touch.na`        | `TRUE`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `group`                                                                | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `new`                                                                  | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `ops`                                                                  | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `dict`                                                                 | `dict`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `cats`                                                                 | `cats`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `cats.eng`                                                             | `cats.eng`        | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| IF `to.factor` is `NULL` and `factor.name` has been specified: `TRUE`\ | `to.factor`       | `to.factor`       | `FALSE`                                                                                         |
+| ELSE: `to.factor`                                                      |                   |                   |                                                                                                 |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `factor.name`                                                          | `NULL`            | `NULL`            | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `from`                                                                 | `from`            | `NULL`            | $-\infty$ (number, date, time, or datetime)                                                     |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `from.exclude`                                                         | `from.exclude`    | `NULL`            | $-\infty$ (number, date, time, or datetime)                                                     |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `to`                                                                   | `to`              | `NULL`            | $\infty$ (number, date, time, or datetime)                                                      |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `to.exclude`                                                           | `to.exclude`      | `NULL`            | $\infty$ (number, date, time, or datetime)                                                      |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `date.format`                                                          | `date.format`     | `date.format`     | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `time.format`                                                          | `time.format`     | `time.format`     | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| `datetime.format`                                                      | `datetime.format` | `datetime.format` | `NULL`                                                                                          |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+
+For keys that can be **lists**, i.e., can contain 2 or more values, the default is replaced completely with the specified value. Default and specified value are **not** combined. Otherwise, it would not be possible to de-select default values. In the example below, variable key `example` can be a list and it's default `example.dafault` has been set to `A, B`. Variable `var1` overwrites the default and its final value for `example` is only `C`; it's not the combination of default and value `A, B, C`. For variable `var2`, `example` has not been specified, so the default value is used instead, i.e., `A, B`. For variable `var3`, we actually want to include the values specified as the default. Therefore, we need to include them in the list when specifying the value. To summarize, the values of key `example` for all three variables are: `var1`: `C`; `var2`: `A, B`; `var3`: `A, B, C`.
+
+``` yaml
+options:
+  example.dafault:
+  - A
+  - B
+var.list:
+  var1:
+    type: text
+    example: C
+  var2:
+    type: text
+  var3:
+    type: text
+    example:
+    - A
+    - B
+    - C
+```

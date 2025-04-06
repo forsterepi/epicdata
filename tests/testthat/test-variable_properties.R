@@ -45,6 +45,10 @@ test_that("setter.variable.cats works", {
   expect_error(setter.variable.cats(cats = cats, name = "var"),
                class = "error.setter.variable.cats.9")
 
+  cats <- c("0 = male")
+  expect_error(setter.variable.cats(cats = cats, name = "var"),
+               class = "error.setter.variable.cats.10")
+
   out <- data.frame(level = c(0L, 1L), label = c("no", "yes"))
   cats <- c("0= no", "yes=1 ")
   expect_equal(setter.variable.cats(cats = cats, name = "var"), out)

@@ -11,7 +11,9 @@ variable(
   label = NULL,
   label.eng = NULL,
   cats = NULL,
-  cats.eng = NULL
+  cats.eng = NULL,
+  touch.na = NULL,
+  touch.na.options.default = NULL
 )
 }
 \arguments{

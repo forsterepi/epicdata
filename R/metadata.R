@@ -18,8 +18,13 @@ metadata <- S7::new_class("metadata",
     # options
     study.name = meta.prop.study.name,
     id.var = meta.prop.id.var,
+    id.pattern = meta.prop.id.pattern,
+    touch.na = meta.prop.touch.na,
     # variables
-    vars = S7::class_character,
+    var.list = meta.prop.var.list,
+    vars = meta.prop.vars,
+    # groups
+    var.groups = meta.prop.var.groups,
     # workflow modules
     DUP_NO.ID = meta.prop.DUP_NO.ID,
     DUP_FREQ = meta.prop.DUP_FREQ

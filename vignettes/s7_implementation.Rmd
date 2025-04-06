@@ -1,0 +1,86 @@
+---
+title: "s7_implementation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{s7_implementation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Class
+
+If `NULL` is a valid value for a certain property, `NULL` needs to be added to the class, i.e., the property's class needs to be a union of the correct base type, e.g., character, and `NULL`. If `NULL` needs to be defined as the default value, argument `default` in the property function cannot be used. Instead, `NULL` needs to be named first in the specification of the union in argument `class` of the property function.
+
+``` r
+class = NULL | S7::class_character
+```
+
+If there is a setter function that transforms the input from one type to another, e.g., from a character vector to a data.frame, the class needs to fit to the type of the object that is returned by the setter, i.e., class is checked after the setter.
+
+## Length
+
+Length of an input is checked in the validator of the property function.
+
+``` r
+validator = function(value) {
+    if (!(is.null(value) | length(value) == 1L)) {
+      "must have length 1"
+    }
+  }
+```
+
+If a property has a complex setter function, length is checked in this setter function.
+
+## Options
+
+There are three types of options:
+
+-   Study information, i.e., information on the study-level
+-   Workflow module selection, which is necessary if modules cannot be selected based on other information alone
+-   Global variable defaults, i.e., the 3rd layer of the default cascade
+
+Note that there is no formal definition of the option type. The definition is indirect by what they do in the code.
+
+Option types "study information" and "workflow module selection" are implemented as individual properties of class metadata.
+
+## Defaults
+
+### Options of type "study information" and "workflow module selection"
+
+Their default is defined in the setter of the corresponding property function in class metadata. The basic structure of the setter is:
+
+``` r
+  setter = function(self, value) {
+    if (is.null(value)) {
+      self@example.option <- "example.default.value"
+    } else {
+      self@example.option <- value
+    }
+    self
+  }
+```
+
+If the option has no default, no additional code is necessary, because extracting a non-existing element from a list returns value `NULL`, which is the intended value.
+
+## Workflow
+
+Every module and sub-module of the workflow has a corresponding property in class metadata. These properties are read-only. This is implemented by using property functions that only contain a getter, which results in `TRUE` or `FALSE` based on other properties. See the example for sub-module `DUP_FREQ` below. Note that class has not been specified.
+
+``` r
+meta.prop.DUP_FREQ <- S7::new_property(
+  getter = function(self) {
+    if (is.null(self@id.var)) {
+      FALSE
+    } else {
+      TRUE
+    }
+  }
+)
+```

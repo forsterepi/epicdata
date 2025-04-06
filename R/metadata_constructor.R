@@ -7,11 +7,15 @@ metadata_constructor <- function(file) {
   yaml_input %<>% yaml.forgive.component.name()
   yaml.str.component(yaml_input)
   #yaml.str.options(yaml_input)
+  yaml_input %<>% yaml.add.name() # Finalize and test this function
 
   S7::new_object(S7::S7_object(),
                  study.name = yaml_input$options$study.name,
                  id.var = yaml_input$options$id.var,
-                 vars = names(yaml_input$var.list))
+                 id.pattern = yaml_input$options$id.pattern,
+                 touch.na = yaml_input$options$touch.na,
+                 var.list = yaml_input$var.list,
+                 var.groups = yaml_input$var.groups)
 }
 
 
@@ -71,7 +75,7 @@ yaml.str.input <- function(x, arg = rlang::caller_arg(x),
 yaml.str.component <- function(x, arg = rlang::caller_arg(x),
                                call = rlang::caller_env()) {
 
-  components.list <- c("options","var.list","na.codes","contras")
+  components.list <- c("options","var.list","var.groups","na.codes","contras")
 
   rlang::try_fetch({
     # START: actual check
@@ -164,23 +168,28 @@ yaml.forgive.component.name <- function(x) {
   forgive.options <- c("option")
   forgive.var.list <- c("varlist","varslist","vars.list","list.var","list.vars",
                         "variable.list","variables.list")
+  forgive.var.groups <- c("groups")
   forgive.na.codes <- c("codes.na")
-  forgive.na.rules <- c("rules.na")
   forgive.contras <- c("contra","contradiction","contradictions")
-  forgive.changes <- c("change")
 
   names(x)[names(x) %in% forgive.options] <- "options"
   names(x)[names(x) %in% forgive.var.list] <- "var.list"
+  names(x)[names(x) %in% forgive.var.groups] <- "var.groups"
   names(x)[names(x) %in% forgive.na.codes] <- "na.codes"
-  names(x)[names(x) %in% forgive.na.rules] <- "na.rules"
   names(x)[names(x) %in% forgive.contras] <- "contras"
-  names(x)[names(x) %in% forgive.changes] <- "changes"
 
   x
 }
 
 
+yaml.add.name <- function(x) {
 
+  for (i in seq_along(x$var.list)) {
+    x$var.list[[i]]$name <- names(x$var.list)[i]
+  }
+
+  x
+}
 
 
 

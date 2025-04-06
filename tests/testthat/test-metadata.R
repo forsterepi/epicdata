@@ -79,3 +79,5 @@ test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
   expect_snapshot(error = TRUE, m@DUP_NO.ID <- FALSE)
   expect_snapshot(error = TRUE, m@DUP_FREQ <- TRUE)
 })
+
+# add tests for id.pattern

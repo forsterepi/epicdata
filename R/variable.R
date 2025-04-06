@@ -23,7 +23,9 @@ variable <- S7::new_class("variable",
     label = var.prop.label,
     label.eng = var.prop.label,
     cats = var.prop.cats,
-    cats.eng = var.prop.cats.eng
+    cats.eng = var.prop.cats.eng,
+    touch.na = var.prop.touch.na,
+    touch.na.options.default = NULL | S7::class_logical
   ),
   validator = function(self) {
     # old.id
