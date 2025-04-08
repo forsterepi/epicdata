@@ -54,25 +54,32 @@ meta.prop.touch.na <- S7::new_property(
 )
 
 meta.prop.var.list <- S7::new_property(
-  class = S7::class_list,
+  class = S7::class_list, # var.list cannot be NULL
   setter = function(self, value) {
 
+    # Loop over all variables
     for (i in seq_along(value)) {
-      names(value)[i] <- value[[i]]$name
+      # Make element var.name and the name of the list element consistent
+      names(value)[i] <- value[[i]]$var.name
 
+      # Process cats input
       if (!is.data.frame(value[[i]]$cats)) {
         value[[i]]$cats <- setter.variable.cats(cats = value[[i]]$cats,
-                                                name = value[[i]]$name,
+                                                name = value[[i]]$var.name,
                                                 eng = FALSE)
       }
     }
 
+    # Update default.group elements when changing group
+    value %<>% setter.variable.update.default.group(self)
+
+    # Set the new value
     self@var.list <- value
     self
   }
 )
 
-meta.prop.vars <- S7::new_property(
+meta.prop.var.names <- S7::new_property(
   getter = function(self) {
     names(self@var.list)
   }
@@ -80,12 +87,79 @@ meta.prop.vars <- S7::new_property(
 
 
 meta.prop.var.groups <- S7::new_property(
-  class = S7::class_list,
+  class = NULL | S7::class_list,
   setter = function(self, value) {
 
+    # If the last element is removed, remove the empty list as well
+    if (is.list(value) & length(value) == 0) {
+      value <- NULL
+    }
 
+    # Update names
+    for (i in seq_along(value)) {
+      # Make element group.name and the name of the list element consistent
+      rlang::try_fetch({names(value)[i] <- value[[i]]$group.name},
+        error = function(cnd) {
+          cli::cli_abort(c("Element {.var group.name} cannot be set to {.var NULL}",
+                           "i" = "To delete a group, set @var.groups$[group.name]
+                           to {.var NULL}."),
+                         call = rlang::caller_env(), class = "tbd")
+          ## SOLVE CALLER_ENV PROBLEMS
+        }
+      )
+    }
+
+    # Identify changes
+    changes <- setter.group.identify.changes(value, self)
+
+    # Update based on changes
+    if (!is.null(changes)) {
+      # Get copy of var.list to update
+      updated.var.list <- self@var.list
+
+      # Loop over all default.group variables
+      for (i in seq_along(changes)) {
+        # Loop over all relevant groups
+        for (j in 1:nrow(changes)) {
+          # Only proceed if there has been a change
+          if (changes[j,i]) {
+            # Get current group name
+            current_group <- rownames(changes)[j]
+            # Loop over all variables
+            for (k in seq_along(updated.var.list)) {
+              # Check if group has been specified
+              if (!is.null(updated.var.list[[k]]$group)) {
+                # Check if the specified group is the current group
+                if (updated.var.list[[k]]$group == current_group) {
+                  # Update
+                  updated.var.list[[k]]$touch.na.default.group <- value[[current_group]]$touch.na
+                  # ADD MORE DEFAULTS HERE
+                }
+              }
+            }
+          }
+        }
+      }
+      # Update var.list
+      self@var.list <- updated.var.list
+    }
+
+    # Set all default.group elements in var.list to NULL if value is NULL
+    if (is.null(value)) {
+      for (i in seq_along(self@var.list)) {
+        self@var.list[[i]]$touch.na.default.group <- NULL
+      }
+    }
+
+    # Set the new values
     self@var.groups <- value
     self
+  }
+)
+
+meta.prop.group.names <- S7::new_property(
+  getter = function(self) {
+    names(self@var.groups)
   }
 )
 
@@ -347,4 +421,117 @@ setter.variable.cats <- function(cats, name, eng = FALSE,
 
   # Return
   out
+}
+
+setter.variable.update.default.group <- function(value, self) {
+
+  # Loop over all variables in the updated var.list, i.e., value
+  for (i in seq_along(value)) {
+    # Start with change == FALSE, just for safety
+    change <- FALSE
+
+    # Check if the value for group in variable i actually changed
+    if (is.null(self@var.list[[i]]$group) & is.null(value[[i]]$group)) {
+      change <- FALSE
+    } else if (is.null(self@var.list[[i]]$group) & !is.null(value[[i]]$group)) {
+      change <- TRUE
+    } else if (!is.null(self@var.list[[i]]$group) & is.null(value[[i]]$group)) {
+      change <- TRUE
+    } else if (!is.null(self@var.list[[i]]$group) & !is.null(value[[i]]$group)) {
+      if (self@var.list[[i]]$group == value[[i]]$group) {
+        change <- FALSE
+      } else {
+        change <- TRUE
+      }
+    }
+
+    # Only make adjustments if the value for group actually changed
+    if (change) {
+      ## If group is now NULL, turn all default.group elements to NULL as well
+      if (is.null(value[[i]]$group)) {
+        value[[i]]$touch.na.default.group <- NULL
+        # ADD MORE DEFAULTS HERE
+      } else {
+        ### Check if the new group actually exists
+        if (value[[i]]$group %in% self@group.names) {
+          #### If the new group exists, search for the correct group
+          for (j in seq_along(self@var.groups)) {
+            if (self@var.groups[[j]]$group.name == value[[i]]$group) {
+              value[[i]]$touch.na.default.group <- self@var.groups[[j]]$touch.na
+              # ADD MORE DEFAULTS HERE
+            }
+          }
+        } else {
+          #### If the new group does not exist, turn the default back to NULL
+          value[[i]]$touch.na.default.group <- NULL
+          # ADD MORE DEFAULTS HERE
+        }
+      }
+    }
+  }
+
+  value
+}
+
+
+setter.group.identify.changes <- function(value, self) {
+
+  if (is.null(value)) {
+    return(NULL)
+  } else {
+
+    # Check if groups were added or deleted (this should include name changes)
+    ## Using names() below only works if this function goes after making
+    ## element group.name and the name of the list element consistent
+    old_names <- names(self@var.groups)
+    new_names <- names(value)
+
+    deleted_groups <- old_names[!(old_names %in% new_names)]
+    new_groups <- new_names[!(new_names %in% old_names)]
+
+    # List the elements, for which changes need to be identified
+    default_group_elements <- c("touch.na") # ADD MORE DEFAULTS HERE
+
+    # Create empty container
+    all_groups <- c(new_names, deleted_groups)
+    changes <- matrix(rep(FALSE,
+                          length(all_groups) * length(default_group_elements)),
+                      nrow = length(all_groups),
+                      ncol = length(default_group_elements)) %>%
+      as.data.frame() %>%
+      magrittr::set_colnames(default_group_elements) %>%
+      magrittr::set_rownames(all_groups)
+
+    # Loop over all groups
+    for (i in seq_along(changes)) {
+      for (j in 1:nrow(changes)) {
+        current_group <- rownames(changes)[j]
+        if (current_group %in% c(deleted_groups, new_groups)) {
+          changes[j,i] <- TRUE
+        } else {
+          if (is.null(self@var.groups[[current_group]]$touch.na) &
+              is.null(value[[current_group]]$touch.na)) {
+            changes[j,i] <- FALSE
+          } else if (is.null(self@var.groups[[current_group]]$touch.na) &
+                     !is.null(value[[current_group]]$touch.na)) {
+            changes[j,i] <- TRUE
+          } else if (!is.null(self@var.groups[[current_group]]$touch.na) &
+                     is.null(value[[current_group]]$touch.na)) {
+            changes[j,i] <- TRUE
+          } else if (!is.null(self@var.groups[[current_group]]$touch.na) &
+                     !is.null(value[[current_group]]$touch.na)) {
+            if (self@var.groups[[current_group]]$touch.na == value[[current_group]]$touch.na) {
+              changes[j,i] <- FALSE
+            } else {
+              changes[j,i] <- TRUE
+            }
+          }
+          # ADD MORE DEFAULTS HERE
+        }
+
+      }
+    }
+  }
+
+  return(changes)
 }

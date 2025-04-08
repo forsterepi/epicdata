@@ -22,9 +22,10 @@ metadata <- S7::new_class("metadata",
     touch.na = meta.prop.touch.na,
     # variables
     var.list = meta.prop.var.list,
-    vars = meta.prop.vars,
+    var.names = meta.prop.var.names,
     # groups
     var.groups = meta.prop.var.groups,
+    group.names = meta.prop.group.names,
     # workflow modules
     DUP_NO.ID = meta.prop.DUP_NO.ID,
     DUP_FREQ = meta.prop.DUP_FREQ

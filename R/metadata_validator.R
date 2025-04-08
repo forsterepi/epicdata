@@ -1,6 +1,6 @@
 metadata_validator <- function(self) {
   if (!is.null(self@id.var)) {
-    if (!(self@id.var %in% self@vars)) {
+    if (!(self@id.var %in% self@var.names)) {
       return("@id.var must be a variable specified in var.list")
     }
   }
@@ -20,3 +20,6 @@ metadata_validator <- function(self) {
     }
   }
 }
+
+
+# group.names must be unique

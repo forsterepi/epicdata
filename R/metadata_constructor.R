@@ -185,7 +185,13 @@ yaml.forgive.component.name <- function(x) {
 yaml.add.name <- function(x) {
 
   for (i in seq_along(x$var.list)) {
-    x$var.list[[i]]$name <- names(x$var.list)[i]
+    x$var.list[[i]]$var.name <- names(x$var.list)[i]
+  }
+
+  if (!is.null(x$var.groups)) {
+    for (i in seq_along(x$var.groups)) {
+      x$var.groups[[i]]$group.name <- names(x$var.groups)[i]
+    }
   }
 
   x
