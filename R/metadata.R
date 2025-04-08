@@ -30,6 +30,6 @@ metadata <- S7::new_class("metadata",
     DUP_NO.ID = meta.prop.DUP_NO.ID,
     DUP_FREQ = meta.prop.DUP_FREQ
   ),
-  validator = metadata_validator,
-  constructor = metadata_constructor
+  validator = metadata.validator,
+  constructor = metadata.constructor
 )

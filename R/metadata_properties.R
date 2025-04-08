@@ -1,3 +1,6 @@
+#' @include metadata_validator.R
+NULL
+
 # options
 
 meta.prop.study.name <- S7::new_property(
@@ -55,6 +58,7 @@ meta.prop.touch.na <- S7::new_property(
 
 meta.prop.var.list <- S7::new_property(
   class = S7::class_list, # var.list cannot be NULL
+  validator = var.list.validator,
   setter = function(self, value) {
 
     # Loop over all variables
@@ -88,6 +92,7 @@ meta.prop.var.names <- S7::new_property(
 
 meta.prop.var.groups <- S7::new_property(
   class = NULL | S7::class_list,
+  validator = var.groups.validator,
   setter = function(self, value) {
 
     # If the last element is removed, remove the empty list as well

@@ -1,4 +1,4 @@
-metadata_constructor <- function(file) {
+metadata.constructor <- function(file) {
   # Read in YAML file
   yaml_input <- yaml.read(file)
 
