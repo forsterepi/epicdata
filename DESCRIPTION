@@ -11,6 +11,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Suggests: 
     knitr,
+    learnr,
     rmarkdown,
     testthat (>= 3.0.0),
     withr
@@ -35,7 +36,6 @@ Collate:
     'create_projects.R'
     'data.R'
     'epicdata-package.R'
-    'get_value.R'
     'metadata_validator.R'
     'metadata_properties.R'
     'metadata_constructor.R'

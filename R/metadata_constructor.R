@@ -1,4 +1,6 @@
 metadata.constructor <- function(file) {
+  test.mode("metadata.constructor")
+
   # Read in YAML file
   yaml_input <- yaml.read(file)
 
@@ -10,12 +12,12 @@ metadata.constructor <- function(file) {
   yaml_input %<>% yaml.add.name() # Finalize and test this function
 
   S7::new_object(S7::S7_object(),
+                 var.list = yaml_input$var.list, # Run the setter of var.list first
+                 var.groups = yaml_input$var.groups, # Run var.groups always after var.list
+                 touch.na = yaml_input$options$touch.na, # Global default options need to be listed after var.list
                  study.name = yaml_input$options$study.name,
                  id.var = yaml_input$options$id.var,
-                 id.pattern = yaml_input$options$id.pattern,
-                 touch.na = yaml_input$options$touch.na,
-                 var.list = yaml_input$var.list,
-                 var.groups = yaml_input$var.groups)
+                 id.pattern = yaml_input$options$id.pattern)
 }
 
 

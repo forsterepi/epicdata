@@ -16,3 +16,12 @@ utils::globalVariables(".")
 ignore_unused_imports <- function() {
   withr::defer()
 }
+
+test.mode <- function(part) {
+  if (exists(x = "test_mode", rlang::global_env())) {
+    if (test_mode) {
+      print(part)
+      #print(as.numeric(Sys.time()), digits = 15)
+    }
+  }
+}

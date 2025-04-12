@@ -1,16 +1,21 @@
 #' @include metadata_validator.R
 NULL
 
-# options
+
+# Options -----------------------------------------------------------------
 
 meta.prop.study.name <- S7::new_property(
   class = S7::class_character | NULL,
   validator = function(value) {
+    test.mode("option.study.name.validator")
+
     if (!(length(value) == 1L)) {
       "must have length 1"
     }
   },
   setter = function(self, value) {
+    test.mode("option.study.name.setter")
+
     if (is.null(value)) {
       self@study.name <- "my_study"
     } else {
@@ -23,6 +28,8 @@ meta.prop.study.name <- S7::new_property(
 meta.prop.id.var <- S7::new_property(
   class = S7::class_character | NULL,
   validator = function(value) {
+    test.mode("option.id.var.validator")
+
     if (!(is.null(value) | length(value) == 1L)) {
       "must have length 1"
     }
@@ -32,6 +39,8 @@ meta.prop.id.var <- S7::new_property(
 meta.prop.id.pattern <- S7::new_property(
   class = S7::class_character | NULL,
   validator = function(value) {
+    test.mode("option.id.pattern.validator")
+
     if (!(is.null(value) | length(value) == 1L)) {
       "must have length 1"
     }
@@ -42,24 +51,34 @@ meta.prop.id.pattern <- S7::new_property(
 meta.prop.touch.na <- S7::new_property(
   class = NULL | S7::class_logical,
   validator = function(value) {
+    test.mode("option.touch.na.validator")
+
     if (!(is.null(value) | length(value) == 1L)) {
       "must have length 1"
     }
   },
   setter = function(self, value) {
-    for (i in seq_along(self@var.list)) {
-      self@var.list[[i]]$touch.na.default.option <- value
+    test.mode("option.touch.na.setter")
+
+    updated.var.list <- self@var.list
+    for (i in seq_along(updated.var.list)) {
+      updated.var.list[[i]]$touch.na.default.option <- value
     }
+    self@var.list <- updated.var.list
 
     self@touch.na <- value
     self
   }
 )
 
+
+# var.list ----------------------------------------------------------------
+
 meta.prop.var.list <- S7::new_property(
   class = S7::class_list, # var.list cannot be NULL
   validator = var.list.validator,
   setter = function(self, value) {
+    test.mode("var.list.setter")
 
     # Loop over all variables
     for (i in seq_along(value)) {
@@ -77,6 +96,31 @@ meta.prop.var.list <- S7::new_property(
     # Update default.group elements when changing group
     value %<>% setter.variable.update.default.group(self)
 
+    # Create .final values
+    ## Define pre-defined defaults
+    pre.defined.touch.na <- TRUE
+    # ADD MORE DEFAULTS HERE
+
+    ## Apply defaults
+    for (i in seq_along(value)) {
+      # touch.na
+      if (!is.null(value[[i]][["touch.na"]])) {
+        value[[i]][["touch.na.final"]] <- value[[i]][["touch.na"]]
+      } else {
+        if (!is.null(value[[i]][["touch.na.default.group"]])) {
+          value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.group"]]
+        } else {
+          if (!is.null(value[[i]][["touch.na.default.option"]])) {
+            value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.option"]]
+          } else {
+            value[[i]][["touch.na.final"]] <- pre.defined.touch.na
+          }
+        }
+      }
+
+      # ADD MORE DEFAULTS HERE
+    }
+
     # Set the new value
     self@var.list <- value
     self
@@ -85,15 +129,20 @@ meta.prop.var.list <- S7::new_property(
 
 meta.prop.var.names <- S7::new_property(
   getter = function(self) {
+    test.mode("var.names.getter")
+
     names(self@var.list)
   }
 )
 
 
+# var.groups --------------------------------------------------------------
+
 meta.prop.var.groups <- S7::new_property(
   class = NULL | S7::class_list,
   validator = var.groups.validator,
   setter = function(self, value) {
+    test.mode("var.groups.setter")
 
     # If the last element is removed, remove the empty list as well
     if (is.list(value) & length(value) == 0) {
@@ -117,35 +166,9 @@ meta.prop.var.groups <- S7::new_property(
     # Identify changes
     changes <- setter.group.identify.changes(value, self)
 
-    # Update based on changes
+    # Update var.list
     if (!is.null(changes)) {
-      # Get copy of var.list to update
-      updated.var.list <- self@var.list
-
-      # Loop over all default.group variables
-      for (i in seq_along(changes)) {
-        # Loop over all relevant groups
-        for (j in 1:nrow(changes)) {
-          # Only proceed if there has been a change
-          if (changes[j,i]) {
-            # Get current group name
-            current_group <- rownames(changes)[j]
-            # Loop over all variables
-            for (k in seq_along(updated.var.list)) {
-              # Check if group has been specified
-              if (!is.null(updated.var.list[[k]]$group)) {
-                # Check if the specified group is the current group
-                if (updated.var.list[[k]]$group == current_group) {
-                  # Update
-                  updated.var.list[[k]]$touch.na.default.group <- value[[current_group]]$touch.na
-                  # ADD MORE DEFAULTS HERE
-                }
-              }
-            }
-          }
-        }
-      }
-      # Update var.list
+      updated.var.list <- setter.group.update.var.list(changes, self, value)
       self@var.list <- updated.var.list
     }
 
@@ -164,14 +187,19 @@ meta.prop.var.groups <- S7::new_property(
 
 meta.prop.group.names <- S7::new_property(
   getter = function(self) {
+    test.mode("group.names.getter")
+
     names(self@var.groups)
   }
 )
 
-# Modules
+
+# Modules -----------------------------------------------------------------
 
 meta.prop.DUP_NO.ID <- S7::new_property(
   getter = function(self) {
+    test.mode("DUP_NO.ID.getter")
+
     if (is.null(self@id.var)) {
       TRUE
     } else {
@@ -182,6 +210,8 @@ meta.prop.DUP_NO.ID <- S7::new_property(
 
 meta.prop.DUP_FREQ <- S7::new_property(
   getter = function(self) {
+    test.mode("DUP_FREQ.getter")
+
     if (is.null(self@id.var)) {
       FALSE
     } else {
@@ -429,6 +459,8 @@ setter.variable.cats <- function(cats, name, eng = FALSE,
 }
 
 setter.variable.update.default.group <- function(value, self) {
+  # Get group names
+  group_names <- self@group.names # Run outside the loop so that the getter function of @group.names only runs once
 
   # Loop over all variables in the updated var.list, i.e., value
   for (i in seq_along(value)) {
@@ -458,7 +490,7 @@ setter.variable.update.default.group <- function(value, self) {
         # ADD MORE DEFAULTS HERE
       } else {
         ### Check if the new group actually exists
-        if (value[[i]]$group %in% self@group.names) {
+        if (value[[i]]$group %in% group_names) {
           #### If the new group exists, search for the correct group
           for (j in seq_along(self@var.groups)) {
             if (self@var.groups[[j]]$group.name == value[[i]]$group) {
@@ -539,4 +571,42 @@ setter.group.identify.changes <- function(value, self) {
   }
 
   return(changes)
+}
+
+setter.group.update.var.list <- function(changes, self, value) {
+  # Get copy of var.list to update
+  updated.var.list <- self@var.list
+
+  # Loop over all default.group variables
+  for (i in seq_along(changes)) {
+    # Loop over all relevant groups
+    for (j in 1:nrow(changes)) {
+      # Only proceed if there has been a change
+      if (changes[j,i]) {
+        # Get current group name
+        current_group <- rownames(changes)[j]
+        # Get current key name
+        current_key <- colnames(changes)[i]
+        # Loop over all variables
+        for (k in seq_along(updated.var.list)) {
+          # Check if group has been specified
+          if (!is.null(updated.var.list[[k]][["group"]])) {
+            # Check if the specified group is the current group
+            if (updated.var.list[[k]][["group"]] == current_group) {
+              # touch.na
+              if (current_key == "touch.na") {
+                # Update default.group
+                updated.var.list[[k]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
+              }
+
+              # ADD MORE DEFAULTS HERE
+
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return(updated.var.list)
 }

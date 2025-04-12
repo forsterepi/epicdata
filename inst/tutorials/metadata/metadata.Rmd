@@ -1,0 +1,24 @@
+---
+title: "Learn to create metadata"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Topic 1
+
+### Exercise 
+
+*Write some YAML*
+
+One variable called `vari` of type `text`, with label `testi`.
+
+```{yaml test, exercise=TRUE}
+
+```
+
+

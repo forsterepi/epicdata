@@ -28,6 +28,7 @@ some [text]{style="background-color: blue"}
 -   Automate as much as possible: The user only needs to provide metadata and decide what to do with problematic data values. `epicdata` creates the code, applies your decisions, and creates a data dictionary.
 -   Interactive: Even though `epicdata` automates as much as possible, it is still run interactively, i.e., while the user is on the other side of the keyboard. During the process, the user needs to confirm the results of different workflow steps. If you are looking for a automated data validation process, try packages `pointblank` or `dataquieR`.
 -   Usable for non-veteran R users: Metadata is specified in human readable YAML format. `epicdata` creates R code. User decisions can be inputted in user-friendly ways.
+-   Seperate data manager and expert roles: There are often situations in which the data manager is not making decisions on how to proceed with problematic values. `epicdata` therefore provides a mode, in which decision-making can be separated from data cleaning. Decision-makers are not assumed to be R users.
 
 ## Format (YAML)
 
@@ -51,7 +52,7 @@ When to use quotation marks `""`:
 -   Use them, however, if you start a value with a special symbol (non-letter and non-number) apart from dot `.` and underscore `_`
 -   Use them, however, if the string is only a dot `"."`
 -   Use them as well, if you want to force a value to be a string. The `calling.code` in the example below would be read as the positive number `33` without quotation marks.
--   The same rules apply to keys and values, i.e., the part in front and after the colon ``` "``key": "value" ```
+-   The same rules apply to keys and values, i.e., the part in front and after the colon `"key": "value"`
 -   If reading your metadata leads to a `Loading YAML metadata failed!` error with the line number of the problem's location, try wrapping it in quotation marks as your first debugging activity.
 
 ``` yaml
@@ -130,10 +131,10 @@ options:
 In `epicdata`, metadata consists of several components:
 
 -   `options`: A list of options specifying study information, e.g. `study.name`, selecting workflow modules, e.g. `double.entry`, and defining global variable defaults, e.g. `date.format`.
--   `var.list`: A list of all variables, where variable-specific information is specified.
+-   `var.list`: A list of all variables, where variable-specific information is provided.
+-   `var.groups`: A list of variable groups with information that applies to the group instead of individual variables.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
 -   `contras`: A list of implausible combinations of values from two variables.
--   `var.groups`: A list of variable groups with information that applies to the group instead of individual variables.
 
 The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
 
@@ -142,11 +143,11 @@ options:
   tbd
 var.list:
   tbd
+var.groups:
+  tbd
 na.codes:
   tbd
 contras:
-  tbd
-var.groups:
   tbd
 ```
 
@@ -160,7 +161,7 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `id.var` (Name of variable specified in `var.list`): The name of the ID variable, which is used to identify observations. Allowed are the variable names specified in `var.list` as `id`. Duplicate values in the ID variable are allowed only if `double.entry: yes`. If missing, a generic ID variable will be added temporarily. Mandatory when `double.entry: yes` or `id.pattern` has been specified.
 
--   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. **Surround with quotation marks**, e.g., `"[:digit:]{5}"`!
+-   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. **Wrap the value in quotation marks**, e.g., `"[:digit:]{5}"`!
 
 **Workflow module selection**
 
@@ -215,11 +216,11 @@ Note that, in the example above, `var1` and `var2` are the variable names and th
     -   `text`: This type is for variables that holds text or IDs.
     -   `cat`: This type is for categorical variables. Categorical variables have integer codes that each refer to one category, e.g., `0` refers to `no` and `1` refers to `yes`. By default, the variables are of type `integer` in the final data set with the category descriptions, i.e., labels, described in the data dictionary. However, you can choose to transform them to `factor`.
     -   `num`: This type is for numeric variables, i.e., variables that you define as numbers. Likert scale variables or their sum score, e.g., might be defined as type `cat` or `num`.
-    -   `date`: This type is for variables that are dates without a time component, e.g., birthdays. They consist of day, month, and year, but you can select specific format (see below).
+    -   `date`: This type is for variables that are dates without a time component, e.g., birthdays. They consist of day, month, and year, but you can select specific formats (see below).
     -   `time`: This type is for variables that describe a time of day without a date or a duration in hours, minutes, and/or seconds. There are three versions: hours and minutes, minutes and seconds, hours and minutes and seconds.
     -   `datetime`: This type is for variables that have both a date and a time component as described above.
 
--   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and the new name in `id`. All variable names in the data set must be specified either in `id` or in `old.id`. Cannot be used together with `new`. See also section "Variable names in the data set" below.
+-   `old.id` or `id.old` (a syntactically valid name, see `?make.names` for details): If you want to change the name of a variable, put the old name in `old.id` and use the new name as the variables name. Cannot be used together with `new`. See also section "Variable names in the data set" below.
 
 -   `label` (Text): A description of the variable. `label` is not mandatory but highly recommended. Each variable should have a `label`. If your variable comes from a questionnaire, use the question as the label. If your questionnaire is not in English, use the original version and specify an English translation in key `label.eng`.
 
@@ -256,7 +257,7 @@ var.groups:
     group.label: What's your favourite sport?
 ```
 
--   `new` (): Create new variables based on existing variables by specifying `new`. If `new` is specified, `id` must not be in the data set. Also, `old.id` cannot be used. New variables are created with `dplyr::mutate()`, where the variable definition is specified as a name-value pair using tidy evaluation with data masking. For `new`, specify the value of this name-value pair. As an example, variable `mass_norm` would be created by `data.frame %>% mutate(mass_norm = mass / mean(mass, na.rm = TRUE))`. To recreate the creation of `mass_norm` in `epicdata`, `mass` must be a variable specified in `var.list`, `mass_norm` is the value for `id` for your new variable, while `mass / mean(mass, na.rm = TRUE)` is specified for `new`. If your value causes an error, try to wrap it in quotation marks.
+-   `new` (): Create new variables based on existing variables by specifying `new`. If `new` is specified, its name must not be in the data set. Also, `old.id` cannot be used. New variables are created with `dplyr::mutate()`, where the variable definition is specified as a name-value pair using tidy evaluation with data masking. For `new`, specify the value of this name-value pair. As an example, variable `mass_norm` would be created by `data.frame %>% mutate(mass_norm = mass / mean(mass, na.rm = TRUE))`. To recreate the creation of `mass_norm` in `epicdata`, `mass` must be a variable specified in `var.list`, `mass_norm` is the name for your new variable, while `mass / mean(mass, na.rm = TRUE)` is specified for `new`. If your value causes an error, try to wrap it in quotation marks.
 
 ``` yaml
 var.list:
@@ -361,12 +362,6 @@ var.list:
 
 -   `to.exclude` ():
 
-``` yaml
-var.list:
-  id:
-    label: identifier
-```
-
 **Variable names in the data set:**
 
 The data set must contain a certain set of variables based on the metadata specification:
@@ -401,34 +396,61 @@ var.list:
 
 **Summary of variable keys:**
 
-| Key | Alternative names | Length | Do not specify together with ... | Only specify together with ... |
-|----|----|----|----|----|
-| `type` |  | 1 (required) |  |  |
-| `old.id` |  | 1 | `new` |  |
-| `label` |  | 1 |  |  |
-| `label.eng` |  | 1 |  | `label` |
-| `na.else` |  | 1 |  |  |
-| `na.rules` |  | \>=1 |  |  |
-| `na.switch` |  | \>=1 |  |  |
-| `na.keep` |  | \>=1 |  |  |
-| `na.replace` |  | \>=1 |  |  |
-| `to.na` |  | \>=1 |  |  |
-| `touch.na` |  | 1 |  |  |
-| `group` |  | 1 |  |  |
-| `new` |  | 1 | `old.id` |  |
-| `ops` |  | 1 |  |  |
-| `dict` |  | \>1 |  |  |
-| `cats` |  | \>1 |  |  |
-| `cats.eng` |  | \>1 |  | `cats` |
-| `to.factor` |  | 1 |  |  |
-| `factor.name` | `name.factor` | 1 |  |  |
-| `from` |  | 1 | `from.exclude` |  |
-| `from.exclude` |  | 1 | `from` |  |
-| `to` |  | 1 | `to.exclude` |  |
-| `to.exclude` |  | 1 | `to` |  |
-| `date.format` | `format.date`, `format` (if `type` is `date`) | 1 |  |  |
-| `time.format` | `format.time`, `format` (if `type` is `time`) | 1 |  |  |
-| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1 |  |  |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| Key               | Alternative names                                     | Length       | Do not specify together with ... | Only specify together with ... |
++===================+=======================================================+==============+==================================+================================+
+| `type`            |                                                       | 1 (required) |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `old.id`          | `id.old`                                              | 1            | `new`                            |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `label`           |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `label.eng`       | `eng.label`                                           | 1            |                                  | `label`                        |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.else`         |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.rules`        |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.switch`       |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.keep`         |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.replace`      |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.na`           |                                                       | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `touch.na`        |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `group`           |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `new`             |                                                       | 1            | `old.id`                         |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `ops`             |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `dict`            |                                                       | \>1          |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `cats`            |                                                       | \>1          |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `cats.eng`        | `eng.cats`                                            | \>1          |                                  | `cats`                         |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.factor`       |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `factor.name`     | `name.factor`                                         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `from`            |                                                       | 1            | `from.exclude`                   |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `from.exclude`    |                                                       | 1            | `from`                           |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to`              |                                                       | 1            | `to.exclude`                     |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.exclude`      |                                                       | 1            | `to`                             |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `date.format`     | `format.date`, `format` (if `type` is `date`)         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `time.format`     | `format.time`, `format` (if `type` is `time`)         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
 
 ## Component: na.codes
 
@@ -624,13 +646,13 @@ For group-specific keys, i.e., keys that do not appear in `var.list` but only in
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | `factor.name`                                                          | `NULL`            | `NULL`            | `NULL`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
-| `from`                                                                 | `from`            | `NULL`            | $-\infty$ (number, date, time, or datetime)                                                     |
+| `from`                                                                 | `from`            | `NULL`            | `-Inf`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
-| `from.exclude`                                                         | `from.exclude`    | `NULL`            | $-\infty$ (number, date, time, or datetime)                                                     |
+| `from.exclude`                                                         | `from.exclude`    | `NULL`            | `-Inf`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
-| `to`                                                                   | `to`              | `NULL`            | $\infty$ (number, date, time, or datetime)                                                      |
+| `to`                                                                   | `to`              | `NULL`            | `Inf`                                                                                           |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
-| `to.exclude`                                                           | `to.exclude`      | `NULL`            | $\infty$ (number, date, time, or datetime)                                                      |
+| `to.exclude`                                                           | `to.exclude`      | `NULL`            | `Inf`                                                                                           |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | `date.format`                                                          | `date.format`     | `date.format`     | `NULL`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
