@@ -14,6 +14,14 @@ knitr::opts_chunk$set(
 )
 ```
 
+This vignette is about the implementation of metadata as an S7 class. It is only important for developers and `epicdata` users can safely skip it.
+
+## Basics
+
+-   Throughout the code, `[[` is used instead of `$` to avoid partial matching.
+-   The order, in which the properties are included in the call of `S7::new_object()` in the metadata constructor, matters. Start with `var.list`, then `var.groups`.
+-   Defaults and alternative names of keys need extra code.
+
 ## Class
 
 If `NULL` is a valid value for a certain property, `NULL` needs to be added to the class, i.e., the property's class needs to be a union of the correct base type, e.g., character, and `NULL`. If `NULL` needs to be defined as the default value, argument `default` in the property function cannot be used. Instead, `NULL` needs to be named first in the specification of the union in argument `class` of the property function.
@@ -22,7 +30,7 @@ If `NULL` is a valid value for a certain property, `NULL` needs to be added to t
 class = NULL | S7::class_character
 ```
 
-If there is a setter function that transforms the input from one type to another, e.g., from a character vector to a data.frame, the class needs to fit to the type of the object that is returned by the setter, i.e., class is checked after the setter.
+If there is a setter function that transforms the input from one type to another, e.g., from a character vector to a data.frame, the class needs to fit to the type of the object that is returned by the setter, i.e., class is checked after the setter. Similarly, the validator is also run after the setter.
 
 ## Length
 
@@ -30,13 +38,12 @@ Length of an input is checked in the validator of the property function.
 
 ``` r
 validator = function(value) {
-    if (!(is.null(value) | length(value) == 1L)) {
-      "must have length 1"
-    }
+  if (!checkmate::test_character(value, len = 1, min.chars = 1,
+                                any.missing = FALSE, null.ok = TRUE)) {
+    return("must have length 1 and must not be empty or NA")
   }
+}
 ```
-
-If a property has a complex setter function, length is checked in this setter function.
 
 ## Options
 
@@ -46,11 +53,21 @@ There are three types of options:
 -   Workflow module selection, which is necessary if modules cannot be selected based on other information alone
 -   Global variable defaults, i.e., the 3rd layer of the default cascade
 
-Note that there is no formal definition of the option type. The definition is indirect by what they do in the code.
-
-Option types "study information" and "workflow module selection" are implemented as individual properties of class metadata.
+Note that there is no formal definition of the option type. The definition is indirect by what they do in the code. All three types are implemented as individual properties of class metadata.
 
 ## Defaults
+
+### Which elements of metadata do not need default handling?
+
+In the defaults table of vignette "metadata_long", all metadata elements are shown. However, some have only NULL values towards the right, i.e.,
+
+-   Variable-specific keys with NULL in columns var.groups, options, and pre-defined. Some of these keys are by definition specific to the corresponding variable and a default therefore makes no sense, namely `old.id`, `label`, `label.eng`, `new`, and `factor.name`. There are also no defaults for `group` and `ops` because valid values are names of other variables and groups. There is also no default for `type` since it is required.
+
+-   Group-specific keys with NULL in columns options, and pre-defined. Some of these keys are by definition specific to the corresponding group and a default therefore makes no sense, namely `group.label`, `group.label.eng`, `mc.exclusive`.
+
+-   Options with NULL in column pre-defined.
+
+These elements don't need extra code to implement that there are no defaults. No extra code automatically means "no defaults".
 
 ### Options of type "study information" and "workflow module selection"
 
@@ -69,6 +86,246 @@ Their default is defined in the setter of the corresponding property function in
 
 If the option has no default, no additional code is necessary, because extracting a non-existing element from a list returns value `NULL`, which is the intended value.
 
+### Group-specific keys
+
+x
+
+### Variable-specific keys with group default and option default
+
+This description is currently based on the implemented of `touch.na`.
+
+There are no individual properties for variables. All of them are summarized in property `var.list`. `var.list` is a list of variables. Each variable is a list of keys. In `var.list`, three internal keys are added:
+
+-   A key that holds the corresponding global default with suffix `.default.option`
+-   A key that holds the correpsong group default with suffix `.default.group`
+-   A key that combines value and defaults to the actually assigned value with suffix `.final`. In the `print()` function of S7 class `epicdata::metadata` objects, only the .`final` value is reported, but without the suffix.
+
+By R script:
+
+-   **metadata**: The corresponding option of type "global variable default" needs to be added to the metadata-defining function. It gets it own property function. Example for `touch.na`:
+
+    ``` r
+    metadata <- S7::new_class("metadata",
+      properties = list(
+        ...,
+        touch.na = meta.prop.touch.na,
+        ...
+      ),
+      validator = metadata.validator,
+      constructor = metadata.constructor
+    )
+    ```
+
+-   **metadata_properties**:
+
+    -   The property function of the "global variable default" needs to be defined. It gets a setter, in which the `.default.option` key in `var.list` are updated. Example for `touch.na`:
+
+        ``` r
+        setter = function(self, value) {
+          updated.var.list <- self@var.list
+          
+          for (i in seq_along(updated.var.list)) {
+            updated.var.list[[i]]$touch.na.default.option <- value
+          }
+          self@var.list <- updated.var.list
+          
+          self@touch.na <- value
+          self
+          }
+        ```
+
+    -   The setter of property `var.list` needs to be updated. The setter itself outsources the correpsonding code to functions `setter.variable.update.default.group()` and `setter.variable.create.final()`.
+
+        -   `setter.variable.update.default.group()`: This function updates `.default.group` keys when the `group` key in `var.list` has been changed. All keys are treated in this function, therefore, no new function has to be created, but instead, the new keys have to be added to this function. In the second alf of the loop, new keys need to be added in three locations. Example for `touch.na`:
+
+            ``` r
+            # Only make adjustments if the value for group actually changed
+            if (change) {
+              # If group is now NULL, turn all .default.group elements to NULL as well
+              if (is.null(value[[i]][["group"]])) {
+                value[[i]]$touch.na.default.group <- NULL
+                
+                # ADD MORE DEFAULTS HERE
+                
+              } else {
+                # Check if the new group actually exists in var.groups
+                if (value[[i]][["group"]] %in% group_names) {
+                  # If the new group exists, search for the correct group
+                  for (j in seq_along(self@var.groups)) {
+                    if (self@var.groups[[j]][["group.name"]] == value[[i]][["group"]]) {
+                      # Update the .default.group value
+                      value[[i]][["touch.na.default.group"]] <- self@var.groups[[j]][["touch.na"]]
+                      
+                      # ADD MORE DEFAULTS HERE
+                    }
+                  }
+                } else {
+                  # If the new group does not exist, turn .default.group back to NULL
+                  value[[i]][["touch.na.default.group"]] <- NULL
+                  
+                  # ADD MORE DEFAULTS HERE
+                }
+              }
+            }
+            ```
+
+        -   `setter.variable.create.final()`: This function updates `.final` keys. Two pieces need to be added to this function. First, the pre-defined default is specified here (and only here). Also define it, if it is `NULL`. Second, the default cascade needs to be defined. Example for `touch.na`:
+
+            ``` r
+            # Define pre-defined defaults
+            pre.defined.touch.na <- TRUE
+
+            # ADD MORE DEFAULTS HERE
+
+            # Apply defaults
+            for (i in seq_along(value)) {
+              # touch.na
+              if (!is.null(value[[i]][["touch.na"]])) {
+                value[[i]][["touch.na.final"]] <- value[[i]][["touch.na"]]
+              } else {
+                if (!is.null(value[[i]][["touch.na.default.group"]])) {
+                  value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.group"]]
+                } else {
+                  if (!is.null(value[[i]][["touch.na.default.option"]])) {
+                    value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.option"]]
+                  } else {
+                    value[[i]][["touch.na.final"]] <- pre.defined.touch.na
+                  }
+                }
+              }
+                # ADD MORE DEFAULTS HERE
+            }
+            ```
+
+    -   The setter of property `var.groups` needs to be updated. Two pieces need to be added, one in the actual setter function and on in the outsourced `setter.group.update.var.list()` function.
+
+        -   The setter itself: If the value of `var.group` is `NULL`, the setter changes all `.default.group` keys to `NULL` as well. Example for `touch.na`:
+
+            ``` r
+            # Update .default.group keys in var.list
+            if (is.null(value)) {
+              for (i in seq_along(self@var.list)) {
+                self@var.list[[i]]$touch.na.default.group <- NULL
+                  
+                # ADD MORE DEFAULTS HERE
+              }
+            } else {
+              updated.var.list <- setter.group.update.var.list(self, value)
+              self@var.list <- updated.var.list
+            }
+            ```
+
+        -   `setter.group.update.var.list()`: This function updates `.default.group` keys in `var.list` when the corresponding group keys change. New defaults need to be added to the function's loop. Example for `touch.na`:
+
+            ``` r
+            # Loop over all .default.group variables
+            for (i in seq_along(group_names)) {
+              # Get current group name
+              current_group <- group_names[i]
+              # Loop over all variables
+              for (j in seq_along(updated.var.list)) {
+                # Check if group has been specified
+                if (!is.null(updated.var.list[[j]][["group"]])) {
+                  # Check if the specified group is the current group
+                  if (updated.var.list[[j]][["group"]] == current_group) {
+                    # Update .default.group values
+                    updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
+                    
+                    # ADD MORE DEFAULTS HERE
+                  }
+                }
+              }
+            }
+            ```
+
+-   **metadata_validator**:
+
+    -   In the metadata validator, the consistency of the internal keys in `var.list` and the corresponding key in `var.group` as well as the corresponding option need to be checked. This ensures that the internal keys cannot be changed directly by the user. Consistency checks for `.final` keys are not necessary, because whenever a user tries to change a `.final` key, it is re-calculated as part of the updating process and therefore ends up with the correct value again, i.e., the user can change the `.final` key without error or warning but it has no effect. The implementation has two pieces:
+        -   `validator.metadata.default.key()`: A new function has to be created, which does to consistency checks. It is called `validator.metadata.default.key()`, e.g., `validator.metadata.default.touch.na()` for `touch.na`. Example for `touch.na`:
+
+            ``` r
+            validator.metadata.default.touch.na <- function(self, current_var) {
+              test.mode(paste0("validate.default.consistency.",current_var))
+
+              # Check consistency of self@touch.na and $touch.na.default.option
+              if (is.null(self@touch.na)) {
+                if (!is.null(self@var.list[[current_var]][["touch.na.default.option"]])) {
+                  return(paste0("Do not change @var.list$",current_var,
+                        "$touch.na.default.option directly. Change @touch.na instead."))
+                }
+              } else {
+                if (is.null(self@var.list[[current_var]][["touch.na.default.option"]])) {
+                  return(paste0("Do not change @var.list$",current_var,
+                        "$touch.na.default.option directly. Change @touch.na instead."))
+                }
+                if (self@var.list[[current_var]][["touch.na.default.option"]] != self@touch.na) {
+                  return(paste0("Do not change @var.list$",current_var,
+                        "$touch.na.default.option directly. Change @touch.na instead."))
+                }
+              }
+
+              # Check consistency of var.group$touch.na and $touch.na.default.group
+              if (is.null(self@var.list[[current_var]][["group"]])) {
+                if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
+                  return(paste0("Do not change @var.list$",current_var,
+                        "$touch.na.default.group directly. Change @var.groups instead."))
+                }
+              } else {
+                current_group <- self@var.list[[current_var]][["group"]]
+
+                if (is.null(self@var.groups[[current_group]][["touch.na"]])) {
+                  if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
+                    return(paste0("Do not change @var.list$",current_var,
+                          "$touch.na.default.group directly. Change @var.groups instead."))
+                  }
+                } else {
+                  if (is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
+                    return(paste0("Do not change @var.list$",current_var,
+                          "$touch.na.default.group directly. Change @var.groups instead."))
+                  }
+                  if (self@var.list[[current_var]][["touch.na.default.group"]] != self@var.groups[[current_group]][["touch.na"]]) {
+                      return(paste0("Do not change @var.list$",current_var,
+                            "$touch.na.default.group directly. Change @var.groups instead."))
+                  }
+                }
+              }
+            }
+            ```
+
+        -   Metadata validator: The function mentioned above needs to be included in `metadata.validator()`. Example for `touch.na`:
+
+            ``` r
+            # Avoid direct change of automatically generated default-related variables
+            for (i in seq_along(self@var.list)) {
+              current_var <- self@var.list[[i]][["var.name"]]
+
+              # touch.na
+              check_result <- validator.metadata.default.touch.na(self, current_var)
+              if (!is.null(check_result)) {
+                return(check_result)
+              }
+
+              # ADD MORE DEFAULTS HERE
+            }
+            ```
+    -   In the `var.list` validator, the internal keys need to be added to the list of valid keys. In addition ´, the internal keys as well as the main key itself need to be validated with corresponding `checkmate` functions.
+    -   In the var.groups validator, the group default key needs to be validated with a corresponding `checkmate` function.
+
+-   **metadata_constructor**: In the metadata constructor, the corresponding option of type "global variable default" needs to be added to the call of `S7::new_object()`. Include it below `var.list` and `var.groups`. Example for `touch.na`:
+
+    ``` r
+    S7::new_object(S7::S7_object(),
+      # Run the setter of var.list first
+      var.list = yaml_input$var.list,
+      # Run var.groups always after var.list
+      var.groups = yaml_input$var.groups, 
+      # Global default options need to be listed after var.list and var.groups
+      touch.na = yaml_input$options$touch.na, 
+      ...)
+    ```
+
+-   **test-metadata**: Include detailed tests.
+
 ## Workflow
 
 Every module and sub-module of the workflow has a corresponding property in class metadata. These properties are read-only. This is implemented by using property functions that only contain a getter, which results in `TRUE` or `FALSE` based on other properties. See the example for sub-module `DUP_FREQ` below. Note that class has not been specified.
@@ -84,3 +341,21 @@ meta.prop.DUP_FREQ <- S7::new_property(
   }
 )
 ```
+
+## How to implement...
+
+### ... a new option of type "study information"
+
+x
+
+### ... a new option of type "workflow module selection"
+
+x
+
+### ... a new group-specific key
+
+x
+
+### ... a new variable-specific key
+
+x

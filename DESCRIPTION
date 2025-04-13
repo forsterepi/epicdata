@@ -41,6 +41,4 @@ Collate:
     'metadata_constructor.R'
     'metadata.R'
     'utils-pipe.R'
-    'variable_properties.R'
-    'variable.R'
     'zzz.R'

@@ -9,8 +9,9 @@ meta.prop.study.name <- S7::new_property(
   validator = function(value) {
     test.mode("option.study.name.validator")
 
-    if (!(length(value) == 1L)) {
-      "must have length 1"
+    if (!checkmate::test_character(value, len = 1, min.chars = 1,
+                                  any.missing = FALSE, null.ok = TRUE)) {
+      return("must have length 1 and must not be empty or NA")
     }
   },
   setter = function(self, value) {
@@ -30,8 +31,14 @@ meta.prop.id.var <- S7::new_property(
   validator = function(value) {
     test.mode("option.id.var.validator")
 
-    if (!(is.null(value) | length(value) == 1L)) {
-      "must have length 1"
+    if (!checkmate::test_character(value, len = 1, min.chars = 1,
+                                  any.missing = FALSE, null.ok = TRUE)) {
+      return("must have length 1 and must not be empty or NA")
+    }
+    if (!is.null(value)) {
+      if (make.names(value) != value) {
+        return("must be a syntactically valid name")
+      }
     }
   }
 )
@@ -41,11 +48,12 @@ meta.prop.id.pattern <- S7::new_property(
   validator = function(value) {
     test.mode("option.id.pattern.validator")
 
-    if (!(is.null(value) | length(value) == 1L)) {
-      "must have length 1"
+    if (!checkmate::test_character(value, len = 1, min.chars = 1,
+                                  any.missing = FALSE, null.ok = TRUE)) {
+      return("must have length 1 and must not be empty or NA")
     }
   }
-  # add to validator a check for valid regex
+  # add to validator a check for valid regex (test the value in the function that is actually used in the workflow)
 )
 
 meta.prop.touch.na <- S7::new_property(
@@ -53,8 +61,9 @@ meta.prop.touch.na <- S7::new_property(
   validator = function(value) {
     test.mode("option.touch.na.validator")
 
-    if (!(is.null(value) | length(value) == 1L)) {
-      "must have length 1"
+    if (!checkmate::test_logical(value, len = 1, any.missing = FALSE,
+                                null.ok = TRUE)) {
+      return("must have length 1 and must not be NA")
     }
   },
   setter = function(self, value) {
@@ -80,46 +89,38 @@ meta.prop.var.list <- S7::new_property(
   setter = function(self, value) {
     test.mode("var.list.setter")
 
-    # Loop over all variables
-    for (i in seq_along(value)) {
-      # Make element var.name and the name of the list element consistent
-      names(value)[i] <- value[[i]]$var.name
-
-      # Process cats input
-      if (!is.data.frame(value[[i]]$cats)) {
-        value[[i]]$cats <- setter.variable.cats(cats = value[[i]]$cats,
-                                                name = value[[i]]$var.name,
-                                                eng = FALSE)
+    # Check for newly created variables
+    if (!is.null(self@var.list)) {
+      if (length(value) > length(self@var.list)) {
+        cli::cli_abort(c("Error in creating new variables",
+          "i" = "Please create new variables via the YAML file."),
+          call = rlang::caller_env(), class = "error.meta.prop.var.list.1")
+        ## SOLVE CALLER_ENV PROBLEMS
       }
     }
+
+    # Update names
+    for (i in seq_along(value)) {
+      # Make element group.name and the name of the list element consistent
+      rlang::try_fetch({names(value)[i] <- value[[i]]$var.name},
+        error = function(cnd) {
+          cli::cli_abort(c("Key {.var var.name} cannot be set to {.var NULL}",
+            "i" = "To delete the variable, set @var.list${names(value)[i]}
+            to {.var NULL}."),
+          call = rlang::caller_env(), class = "error.meta.prop.var.list.2")
+      ## SOLVE CALLER_ENV PROBLEMS
+        }
+      )
+    }
+
+    # Process inputs
+    value %<>% setter.variable.process.inputs()
 
     # Update default.group elements when changing group
     value %<>% setter.variable.update.default.group(self)
 
-    # Create .final values
-    ## Define pre-defined defaults
-    pre.defined.touch.na <- TRUE
-    # ADD MORE DEFAULTS HERE
-
-    ## Apply defaults
-    for (i in seq_along(value)) {
-      # touch.na
-      if (!is.null(value[[i]][["touch.na"]])) {
-        value[[i]][["touch.na.final"]] <- value[[i]][["touch.na"]]
-      } else {
-        if (!is.null(value[[i]][["touch.na.default.group"]])) {
-          value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.group"]]
-        } else {
-          if (!is.null(value[[i]][["touch.na.default.option"]])) {
-            value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.option"]]
-          } else {
-            value[[i]][["touch.na.final"]] <- pre.defined.touch.na
-          }
-        }
-      }
-
-      # ADD MORE DEFAULTS HERE
-    }
+    # Create .final keys
+    value %<>% setter.variable.create.final()
 
     # Set the new value
     self@var.list <- value
@@ -154,29 +155,27 @@ meta.prop.var.groups <- S7::new_property(
       # Make element group.name and the name of the list element consistent
       rlang::try_fetch({names(value)[i] <- value[[i]]$group.name},
         error = function(cnd) {
-          cli::cli_abort(c("Element {.var group.name} cannot be set to {.var NULL}",
-                           "i" = "To delete a group, set @var.groups$[group.name]
-                           to {.var NULL}."),
-                         call = rlang::caller_env(), class = "tbd")
+          cli::cli_abort(c("Error in creating/deleting {.var var.group}.",
+            "i" = "To delete a group, set @var.groups${names(value)[i]}
+            <- NULL.",
+            "i" = 'To create a new group, set @var.groups${names(value)[i]}$group.name
+            <- "{names(value)[i]}"'),
+          call = rlang::caller_env(), class = "error.meta.prop.var.groups.1")
           ## SOLVE CALLER_ENV PROBLEMS
         }
       )
     }
 
-    # Identify changes
-    changes <- setter.group.identify.changes(value, self)
-
-    # Update var.list
-    if (!is.null(changes)) {
-      updated.var.list <- setter.group.update.var.list(changes, self, value)
-      self@var.list <- updated.var.list
-    }
-
-    # Set all default.group elements in var.list to NULL if value is NULL
+    # Update .default.group keys in var.list
     if (is.null(value)) {
       for (i in seq_along(self@var.list)) {
         self@var.list[[i]]$touch.na.default.group <- NULL
+
+        # ADD MORE DEFAULTS HERE
       }
+    } else {
+      updated.var.list <- setter.group.update.var.list(self, value)
+      self@var.list <- updated.var.list
     }
 
     # Set the new values
@@ -225,7 +224,7 @@ meta.prop.DUP_FREQ <- S7::new_property(
 
 #' Process `cats` and `cats.eng`
 #'
-#' Used in the constructor of S7 class `epicdata::variable`
+#' Used in function `setter.variable.process.inputs()`
 #'
 #' @param cats A character vector containing the category specification from the
 #' YAML input.
@@ -235,6 +234,9 @@ meta.prop.DUP_FREQ <- S7::new_property(
 #' messages. IF TRUE, "cats.eng" is used in error messages.
 #' @param call The caller environment used in error messages to supply the right
 #' call to the user.
+#'
+#' @returns A data.frame, which contains the processed information of the
+#' character input for variable keys `cats` and `cats.eng`.
 #'
 #' @noRd
 setter.variable.cats <- function(cats, name, eng = FALSE,
@@ -458,9 +460,54 @@ setter.variable.cats <- function(cats, name, eng = FALSE,
   out
 }
 
+#' Process inputs in `@var.list` setter function
+#'
+#' Sometimes, the input required in YAML does not correspond to the object
+#' saved in S7 class `epicdata::metadata`. This function summarizes processing
+#' efforts in the `@var.list` setter function.
+#'
+#' @param value The `value` argument of the setter function, i.e., the new value
+#' for `@var.list`.
+#'
+#' @returns An updated version of input `value`.
+#'
+#' @noRd
+setter.variable.process.inputs <- function(value) {
+  for (i in seq_along(value)) {
+    # Process cats input
+    if (!is.data.frame(value[[i]]$cats)) {
+      value[[i]]$cats <- setter.variable.cats(cats = value[[i]]$cats,
+                                              name = value[[i]]$var.name,
+                                              eng = FALSE)
+    }
+    # Process cats.eng input
+    if (!is.data.frame(value[[i]]$cats.eng)) {
+      value[[i]]$cats.eng <- setter.variable.cats(cats = value[[i]]$cats.eng,
+                                                  name = value[[i]]$var.name,
+                                                  eng = TRUE)
+    }
+  }
+
+  # Return
+  value
+}
+
+#' Update .default.group keys when changing the group key in `@var.list`
+#'
+#' Usually, the .default.group keys change when the corresponding values in
+#' `@var.groups` change. Hoewever, when the group key of variables change, the
+#' .default.group values need to updated as well.
+#'
+#' @param value The `value` argument of the setter function, i.e., the new value
+#' for `@var.list`.
+#'
+#' @returns An updated version of input `value`.
+#'
+#' @noRd
 setter.variable.update.default.group <- function(value, self) {
   # Get group names
-  group_names <- self@group.names # Run outside the loop so that the getter function of @group.names only runs once
+  # Run outside the loop so that the @group.names getter function only runs once
+  group_names <- self@group.names
 
   # Loop over all variables in the updated var.list, i.e., value
   for (i in seq_along(value)) {
@@ -468,14 +515,14 @@ setter.variable.update.default.group <- function(value, self) {
     change <- FALSE
 
     # Check if the value for group in variable i actually changed
-    if (is.null(self@var.list[[i]]$group) & is.null(value[[i]]$group)) {
+    if (is.null(self@var.list[[i]][["group"]]) & is.null(value[[i]][["group"]])) {
       change <- FALSE
-    } else if (is.null(self@var.list[[i]]$group) & !is.null(value[[i]]$group)) {
+    } else if (is.null(self@var.list[[i]][["group"]]) & !is.null(value[[i]][["group"]])) {
       change <- TRUE
-    } else if (!is.null(self@var.list[[i]]$group) & is.null(value[[i]]$group)) {
+    } else if (!is.null(self@var.list[[i]][["group"]]) & is.null(value[[i]][["group"]])) {
       change <- TRUE
-    } else if (!is.null(self@var.list[[i]]$group) & !is.null(value[[i]]$group)) {
-      if (self@var.list[[i]]$group == value[[i]]$group) {
+    } else if (!is.null(self@var.list[[i]][["group"]]) & !is.null(value[[i]][["group"]])) {
+      if (self@var.list[[i]][["group"]] == value[[i]][["group"]]) {
         change <- FALSE
       } else {
         change <- TRUE
@@ -484,129 +531,171 @@ setter.variable.update.default.group <- function(value, self) {
 
     # Only make adjustments if the value for group actually changed
     if (change) {
-      ## If group is now NULL, turn all default.group elements to NULL as well
-      if (is.null(value[[i]]$group)) {
+      # If group is now NULL, turn all .default.group elements to NULL as well
+      if (is.null(value[[i]][["group"]])) {
         value[[i]]$touch.na.default.group <- NULL
         # ADD MORE DEFAULTS HERE
       } else {
-        ### Check if the new group actually exists
-        if (value[[i]]$group %in% group_names) {
-          #### If the new group exists, search for the correct group
+        # Check if the new group actually exists in var.groups
+        if (value[[i]][["group"]] %in% group_names) {
+          # If the new group exists, search for the correct group
           for (j in seq_along(self@var.groups)) {
-            if (self@var.groups[[j]]$group.name == value[[i]]$group) {
-              value[[i]]$touch.na.default.group <- self@var.groups[[j]]$touch.na
+            if (self@var.groups[[j]][["group.name"]] == value[[i]][["group"]]) {
+              # Update the .default.group value
+              value[[i]][["touch.na.default.group"]] <- self@var.groups[[j]][["touch.na"]]
               # ADD MORE DEFAULTS HERE
             }
           }
         } else {
-          #### If the new group does not exist, turn the default back to NULL
-          value[[i]]$touch.na.default.group <- NULL
+          # If the new group does not exist, turn .default.group back to NULL
+          value[[i]][["touch.na.default.group"]] <- NULL
           # ADD MORE DEFAULTS HERE
         }
       }
     }
   }
 
+  # Return
   value
 }
 
+#' Create .final keys in `@var.list`
+#'
+#' After collecting all information from global and group defaults, it needs to
+#' be summarized to the actual assigned values, namely the .final keys.
+#'
+#' @param value The `value` argument of the setter function, i.e., the new value
+#' for `@var.list`.
+#'
+#' @returns An updated version of input `value`.
+#'
+#' @noRd
+setter.variable.create.final <- function(value) {
+  # Define pre-defined defaults
+  pre.defined.touch.na <- TRUE
+  # ADD MORE DEFAULTS HERE
 
-setter.group.identify.changes <- function(value, self) {
-
-  if (is.null(value)) {
-    return(NULL)
-  } else {
-
-    # Check if groups were added or deleted (this should include name changes)
-    ## Using names() below only works if this function goes after making
-    ## element group.name and the name of the list element consistent
-    old_names <- names(self@var.groups)
-    new_names <- names(value)
-
-    deleted_groups <- old_names[!(old_names %in% new_names)]
-    new_groups <- new_names[!(new_names %in% old_names)]
-
-    # List the elements, for which changes need to be identified
-    default_group_elements <- c("touch.na") # ADD MORE DEFAULTS HERE
-
-    # Create empty container
-    all_groups <- c(new_names, deleted_groups)
-    changes <- matrix(rep(FALSE,
-                          length(all_groups) * length(default_group_elements)),
-                      nrow = length(all_groups),
-                      ncol = length(default_group_elements)) %>%
-      as.data.frame() %>%
-      magrittr::set_colnames(default_group_elements) %>%
-      magrittr::set_rownames(all_groups)
-
-    # Loop over all groups
-    for (i in seq_along(changes)) {
-      for (j in 1:nrow(changes)) {
-        current_group <- rownames(changes)[j]
-        if (current_group %in% c(deleted_groups, new_groups)) {
-          changes[j,i] <- TRUE
+  # Apply defaults
+  for (i in seq_along(value)) {
+    # touch.na
+    if (!is.null(value[[i]][["touch.na"]])) {
+      value[[i]][["touch.na.final"]] <- value[[i]][["touch.na"]]
+    } else {
+      if (!is.null(value[[i]][["touch.na.default.group"]])) {
+        value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.group"]]
+      } else {
+        if (!is.null(value[[i]][["touch.na.default.option"]])) {
+          value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.option"]]
         } else {
-          if (is.null(self@var.groups[[current_group]]$touch.na) &
-              is.null(value[[current_group]]$touch.na)) {
-            changes[j,i] <- FALSE
-          } else if (is.null(self@var.groups[[current_group]]$touch.na) &
-                     !is.null(value[[current_group]]$touch.na)) {
-            changes[j,i] <- TRUE
-          } else if (!is.null(self@var.groups[[current_group]]$touch.na) &
-                     is.null(value[[current_group]]$touch.na)) {
-            changes[j,i] <- TRUE
-          } else if (!is.null(self@var.groups[[current_group]]$touch.na) &
-                     !is.null(value[[current_group]]$touch.na)) {
-            if (self@var.groups[[current_group]]$touch.na == value[[current_group]]$touch.na) {
-              changes[j,i] <- FALSE
-            } else {
-              changes[j,i] <- TRUE
-            }
-          }
-          # ADD MORE DEFAULTS HERE
+          value[[i]][["touch.na.final"]] <- pre.defined.touch.na
         }
-
       }
     }
+
+    # ADD MORE DEFAULTS HERE
   }
 
-  return(changes)
+  # Return
+  value
 }
 
-setter.group.update.var.list <- function(changes, self, value) {
+#' Update .default.group keys in `@var.list`
+#'
+#' When changing values in `@var.groups`, the corresponding .default.group keys
+#' in `@var.list` need to be updated.
+#'
+#' @param self The `self` argument of the setter function, i.e., the complete
+#' metadata object before updating.
+#' @param value The `value` argument of the setter function, i.e., the new value
+#' for `@var.groups`.
+#'
+#' @returns An updated version of `@var.list`.
+#'
+#' @noRd
+setter.group.update.var.list <- function(self, value) {
+  # Check if groups were added or deleted (this should include name changes)
+  ## Using names() below only works if this function is used after making
+  ## element group.name and the name of the list element consistent
+  old_names <- names(self@var.groups)
+  new_names <- names(value)
+
+  group_names <- c(old_names, new_names) %>% unique()
+
   # Get copy of var.list to update
   updated.var.list <- self@var.list
 
-  # Loop over all default.group variables
-  for (i in seq_along(changes)) {
-    # Loop over all relevant groups
-    for (j in 1:nrow(changes)) {
-      # Only proceed if there has been a change
-      if (changes[j,i]) {
-        # Get current group name
-        current_group <- rownames(changes)[j]
-        # Get current key name
-        current_key <- colnames(changes)[i]
-        # Loop over all variables
-        for (k in seq_along(updated.var.list)) {
-          # Check if group has been specified
-          if (!is.null(updated.var.list[[k]][["group"]])) {
-            # Check if the specified group is the current group
-            if (updated.var.list[[k]][["group"]] == current_group) {
-              # touch.na
-              if (current_key == "touch.na") {
-                # Update default.group
-                updated.var.list[[k]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
-              }
-
-              # ADD MORE DEFAULTS HERE
-
-            }
-          }
+  # Loop over all .default.group variables
+  for (i in seq_along(group_names)) {
+    # Get current group name
+    current_group <- group_names[i]
+    # Loop over all variables
+    for (j in seq_along(updated.var.list)) {
+      # Check if group has been specified
+      if (!is.null(updated.var.list[[j]][["group"]])) {
+        # Check if the specified group is the current group
+        if (updated.var.list[[j]][["group"]] == current_group) {
+          # Update .default.group values
+          updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
+          # ADD MORE DEFAULTS HERE
         }
       }
     }
   }
 
-  return(updated.var.list)
+  # Return
+  updated.var.list
 }
+
+
+# variable property remains
+
+# var.prop.name <- S7::new_property(
+#   class = S7::class_character,
+#   default = quote(stop("@name is required")),
+#   validator = function(value) {
+#     if (length(value) != 1L) {
+#       "must be length 1"
+#     } else if (make.names(value) != value) {
+#       "must be a syntactically valid name"
+#     }
+#   }
+# )
+#
+# var.prop.type <- S7::new_property(
+#   class = S7::class_character,
+#   default = quote(stop("@type is required")),
+#   validator = function(value) {
+#     if (length(value) != 1L) {
+#       "must be length 1"
+#     } else if (!(value %in% c("text","cat","num","date","time","datetime"))) {
+#       "must be one of 'text','cat','num','date','time','datetime'"
+#     }
+#   }
+# )
+#
+# var.prop.old.id <- S7::new_property(
+#   class = NULL | S7::class_character,
+#   validator = function(value) {
+#     if (!(is.null(value) | length(value) == 1L)) {
+#       "must have length 1"
+#     }
+#   }
+# )
+#
+# var.prop.label <- S7::new_property(
+#   class = NULL | S7::class_character,
+#   validator = function(value) {
+#     if (!(is.null(value) | length(value) == 1L)) {
+#       "must have length 1"
+#     }
+#   }
+# )
+#
+# var.prop.touch.na <- S7::new_property(
+#   class = NULL | S7::class_logical,
+#   validator = function(value) {
+#     if (!(is.null(value) | length(value) == 1L)) {
+#       "must have length 1"
+#     }
+#   }
+# )

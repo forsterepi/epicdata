@@ -4,7 +4,7 @@
       m@id.var <- c("a", "b")
     Condition
       Error:
-      ! <epicdata::metadata>@id.var must have length 1
+      ! <epicdata::metadata>@id.var must have length 1 and must not be empty or NA
 
 ---
 
@@ -30,4 +30,67 @@
     Condition
       Error:
       ! Can't set read-only property <epicdata::metadata>@DUP_FREQ
+
+# touch.na works
+
+    Code
+      m@var.list$b$touch.na.default.option <- TRUE
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.option directly. Change @touch.na instead.
+
+---
+
+    Code
+      m@var.list$b$touch.na.default.option <- NULL
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.option directly. Change @touch.na instead.
+
+---
+
+    Code
+      m@var.list$b$touch.na.default.option <- TRUE
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.option directly. Change @touch.na instead.
+
+---
+
+    Code
+      m@var.list$b$touch.na.default.group <- FALSE
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.group directly. Change @var.groups instead.
+
+---
+
+    Code
+      m@var.list$b$touch.na.default.group <- NULL
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.group directly. Change @var.groups instead.
+
+---
+
+    Code
+      m@var.list$b$touch.na.default.group <- TRUE
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.group directly. Change @var.groups instead.
+
+---
+
+    Code
+      m@var.list$b$touch.na.default.group <- TRUE
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - Do not change @var.list$b$touch.na.default.group directly. Change @var.groups instead.
 
