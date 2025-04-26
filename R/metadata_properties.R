@@ -17,11 +17,7 @@ meta.prop.study.name <- S7::new_property(
   setter = function(self, value) {
     test.mode("option.study.name.setter")
 
-    if (is.null(value)) {
-      self@study.name <- "my_study"
-    } else {
-      self@study.name <- value
-    }
+    self@study.name <- setter.select.default(option = value, pre = "my_study")
     self
   }
 )
@@ -54,6 +50,30 @@ meta.prop.id.pattern <- S7::new_property(
     }
   }
   # add to validator a check for valid regex (test the value in the function that is actually used in the workflow)
+)
+
+meta.prop.consent <- S7::new_property(
+  class = NULL | S7::class_logical,
+  validator = function(value) {
+    test.mode("option.consent.validator")
+
+    if (!checkmate::test_logical(value, len = 1, any.missing = FALSE,
+                                 null.ok = TRUE)) {
+      return("must have length 1 and must not be NA")
+    }
+  }
+)
+
+meta.prop.consent.final <- S7::new_property(
+  getter = function(self) {
+    test.mode("consent.final.getter")
+
+    if (is.null(self@id.var)) {
+      setter.select.default(option = self@consent, pre = FALSE)
+    } else {
+      setter.select.default(option = self@consent, pre = TRUE)
+    }
+  }
 )
 
 meta.prop.touch.na <- S7::new_property(
@@ -115,6 +135,9 @@ meta.prop.var.list <- S7::new_property(
 
     # Process inputs
     value %<>% setter.variable.process.inputs()
+
+    # Alternative names
+    value %<>% setter.variable.update.alternative.names(self)
 
     # Update default.group elements when changing group
     value %<>% setter.variable.update.default.group(self)
@@ -492,6 +515,37 @@ setter.variable.process.inputs <- function(value) {
   value
 }
 
+setter.variable.update.alternative.names <- function(value, self) {
+  for (i in seq_along(value)) {
+    # Get var.name
+    current_var <- value[[i]][["var.name"]]
+
+    # touch.na / na.touch
+    ## Check if touch.na changed
+    change.touch.na <- setter.variable.did.key.change(self = self,
+                        value = value, current_var = current_var,
+                        key = "touch.na")
+    ## Apply changes to na.touch
+    if (change.touch.na) {
+      value[[i]][["na.touch"]] <- value[[i]][["touch.na"]]
+    }
+    ## Check if na.touch changed
+    change.na.touch <- setter.variable.did.key.change(self = self,
+                        value = value, current_var = current_var,
+                        key = "na.touch")
+    ## Apply changes to touch.na
+    if (change.na.touch) {
+      value[[i]][["touch.na"]] <- value[[i]][["na.touch"]]
+    }
+
+  }
+
+  # Return
+  value
+}
+
+
+
 #' Update .default.group keys when changing the group key in `@var.list`
 #'
 #' Usually, the .default.group keys change when the corresponding values in
@@ -511,29 +565,16 @@ setter.variable.update.default.group <- function(value, self) {
 
   # Loop over all variables in the updated var.list, i.e., value
   for (i in seq_along(value)) {
-    # Start with change == FALSE, just for safety
-    change <- FALSE
-
     # Check if the value for group in variable i actually changed
-    if (is.null(self@var.list[[i]][["group"]]) & is.null(value[[i]][["group"]])) {
-      change <- FALSE
-    } else if (is.null(self@var.list[[i]][["group"]]) & !is.null(value[[i]][["group"]])) {
-      change <- TRUE
-    } else if (!is.null(self@var.list[[i]][["group"]]) & is.null(value[[i]][["group"]])) {
-      change <- TRUE
-    } else if (!is.null(self@var.list[[i]][["group"]]) & !is.null(value[[i]][["group"]])) {
-      if (self@var.list[[i]][["group"]] == value[[i]][["group"]]) {
-        change <- FALSE
-      } else {
-        change <- TRUE
-      }
-    }
+    current_var <- value[[i]][["var.name"]]
+    change <- setter.variable.did.key.change(self = self, value = value,
+                current_var = current_var, key = "group")
 
     # Only make adjustments if the value for group actually changed
     if (change) {
       # If group is now NULL, turn all .default.group elements to NULL as well
       if (is.null(value[[i]][["group"]])) {
-        value[[i]]$touch.na.default.group <- NULL
+        value[[i]][["touch.na.default.group"]] <- NULL
         # ADD MORE DEFAULTS HERE
       } else {
         # Check if the new group actually exists in var.groups
@@ -571,28 +612,37 @@ setter.variable.update.default.group <- function(value, self) {
 #'
 #' @noRd
 setter.variable.create.final <- function(value) {
-  # Define pre-defined defaults
-  pre.defined.touch.na <- TRUE
-  # ADD MORE DEFAULTS HERE
-
-  # Apply defaults
+  # Update values
   for (i in seq_along(value)) {
     # touch.na
-    if (!is.null(value[[i]][["touch.na"]])) {
-      value[[i]][["touch.na.final"]] <- value[[i]][["touch.na"]]
-    } else {
-      if (!is.null(value[[i]][["touch.na.default.group"]])) {
-        value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.group"]]
-      } else {
-        if (!is.null(value[[i]][["touch.na.default.option"]])) {
-          value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.option"]]
-        } else {
-          value[[i]][["touch.na.final"]] <- pre.defined.touch.na
-        }
-      }
-    }
-
+    value[[i]][["touch.na.final"]] <- setter.select.default(
+      var = value[[i]][["touch.na"]],
+      group = value[[i]][["touch.na.default.group"]],
+      option = value[[i]][["touch.na.default.option"]],
+      pre = TRUE
+    )
     # ADD MORE DEFAULTS HERE
+
+    # # to.factor: if factor.name has been specified, to.factor.final is overwritten to TRUE
+    # if (is.null(value[[i]][["factor.name"]])) {
+    #   value[[i]][["to.factor.final"]] <- setter.select.default(
+    #     var = value[[i]][["to.factor"]],
+    #     group = value[[i]][["to.factor.default.group"]],
+    #     option = value[[i]][["to.factor.default.option"]],
+    #     pre = FALSE
+    #   )
+    # } else {
+    #   # Version 1
+    #   value[[i]][["to.factor.final"]] <- setter.select.default(
+    #     var = TRUE,
+    #     group = value[[i]][["to.factor.default.group"]],
+    #     option = value[[i]][["to.factor.default.option"]],
+    #     pre = FALSE
+    #   )
+    #   # Version 2
+    #   value[[i]][["to.factor.final"]] <- TRUE
+    # }
+
   }
 
   # Return
@@ -646,6 +696,70 @@ setter.group.update.var.list <- function(self, value) {
   updated.var.list
 }
 
+#' Select the correct value from the default cascade
+#'
+#' @param var Value provided in `@var.list`.
+#' @param group Value provided in `@var.groups`.
+#' @param option Value provided in the corresponding option.
+#' @param pre Hard-coded pre-defined value.
+#'
+#' @returns One of the 4 provided values, based on which ones are available.
+#'
+#' @noRd
+setter.select.default <- function(var = NULL, group = NULL, option = NULL,
+                                  pre = NULL) {
+  if (!is.null(var)) {
+    out <- var
+  } else {
+    if (!is.null(group)) {
+      out <- group
+    } else {
+      if (!is.null(option)) {
+        out <- option
+      } else {
+        out <- pre
+      }
+    }
+  }
+
+  out
+}
+
+#' Check if a key in `@var.list` actually changed
+#'
+#' Check is specific to a certain key in a certain variable
+#'
+#' @param self The previous version of the object
+#' @param value The new version of `@var.list`
+#' @param current_var The variable in `@var.list` to check. Must be a single
+#' string.
+#' @param key The key to check. Must be a single string.
+#'
+#' @returns TRUE or FALSE
+#'
+#' @noRd
+setter.variable.did.key.change <- function(self, value, current_var, key) {
+  # Start with change == FALSE, just for safety
+  change <- FALSE
+
+  # Compare self and value
+  if (is.null(self@var.list[[current_var]][[key]]) & is.null(value[[current_var]][[key]])) {
+    change <- FALSE
+  } else if (is.null(self@var.list[[current_var]][[key]]) & !is.null(value[[current_var]][[key]])) {
+    change <- TRUE
+  } else if (!is.null(self@var.list[[current_var]][[key]]) & is.null(value[[current_var]][[key]])) {
+    change <- TRUE
+  } else if (!is.null(self@var.list[[current_var]][[key]]) & !is.null(value[[current_var]][[key]])) {
+    if (self@var.list[[current_var]][[key]] == value[[current_var]][[key]]) {
+      change <- FALSE
+    } else {
+      change <- TRUE
+    }
+  }
+
+  # Return
+  change
+}
 
 # variable property remains
 

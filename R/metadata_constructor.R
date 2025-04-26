@@ -20,7 +20,8 @@ metadata.constructor <- function(file) {
     touch.na = yaml_input$options$touch.na,
     study.name = yaml_input$options$study.name,
     id.var = yaml_input$options$id.var,
-    id.pattern = yaml_input$options$id.pattern)
+    id.pattern = yaml_input$options$id.pattern,
+    consent = yaml_input$options$consent)
 }
 
 
@@ -76,6 +77,25 @@ yaml.str.input <- function(x, arg = rlang::caller_arg(x),
                    class = "error.yaml.str.input.1")})
 }
 
+yaml.forgive.component.name <- function(x) {
+
+  names(x) %<>% stringr::str_to_lower()
+
+  forgive.options <- c("option")
+  forgive.var.list <- c("varlist","varslist","vars.list","list.var","list.vars",
+                        "variable.list","variables.list")
+  forgive.var.groups <- c("groups")
+  forgive.na.codes <- c("codes.na")
+  forgive.contras <- c("contra","contradiction","contradictions")
+
+  names(x)[names(x) %in% forgive.options] <- "options"
+  names(x)[names(x) %in% forgive.var.list] <- "var.list"
+  names(x)[names(x) %in% forgive.var.groups] <- "var.groups"
+  names(x)[names(x) %in% forgive.na.codes] <- "na.codes"
+  names(x)[names(x) %in% forgive.contras] <- "contras"
+
+  x
+}
 
 yaml.str.component <- function(x, arg = rlang::caller_arg(x),
                                call = rlang::caller_env()) {
@@ -165,27 +185,6 @@ yaml.str.options <- function(x, call = rlang::caller_env()) {
                    class = "error.yaml.str.options.1")})
 
 }
-
-yaml.forgive.component.name <- function(x) {
-
-  names(x) %<>% stringr::str_to_lower()
-
-  forgive.options <- c("option")
-  forgive.var.list <- c("varlist","varslist","vars.list","list.var","list.vars",
-                        "variable.list","variables.list")
-  forgive.var.groups <- c("groups")
-  forgive.na.codes <- c("codes.na")
-  forgive.contras <- c("contra","contradiction","contradictions")
-
-  names(x)[names(x) %in% forgive.options] <- "options"
-  names(x)[names(x) %in% forgive.var.list] <- "var.list"
-  names(x)[names(x) %in% forgive.var.groups] <- "var.groups"
-  names(x)[names(x) %in% forgive.na.codes] <- "na.codes"
-  names(x)[names(x) %in% forgive.contras] <- "contras"
-
-  x
-}
-
 
 yaml.add.name <- function(x) {
 

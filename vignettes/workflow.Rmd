@@ -58,6 +58,8 @@ df or tibble; special characters
 
 #### 1.3) All values to character (Sub-Module ID: LOAD\_)
 
+include in 1.1, i.e., variants with and without colclasses = "character" or similar???
+
 #### 1.4 Combine multiple datasets (Sub-Module ID: LOAD\_)
 
 ### 2) Variables (Module ID: VAR)
@@ -98,7 +100,7 @@ Desc
 #### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
 
 | Status | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -130,7 +132,7 @@ Desc
 #### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW_FILTER)
 
 | Status | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
@@ -141,10 +143,10 @@ Desc
 
 #### 3.4) Remove based on informed consent (Sub-Module ID: ROW_IC)
 
-| Status   | Condition |
-|----------|-----------|
-| active   |           |
-| inactive |           |
+| Status   | Condition                                                  |
+|----------|------------------------------------------------------------|
+| active   | `consent: yes` (default if `id.var` has been specified)    |
+| inactive | `consent: no` (default if `id.var` has not been specified) |
 
 : Desc, no user input because list is provided and intentio nis clear
 
@@ -170,7 +172,7 @@ Desc
 | active   | `id.var` has not been specified |
 | inactive | `id.var` has been specified     |
 
-Desc
+Desc, is here the dummy id created (see default of id.var)
 
 #### 5.2 Evaluate ID frequency (Sub-Module ID: DUP_FREQ)
 

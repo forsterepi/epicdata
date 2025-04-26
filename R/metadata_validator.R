@@ -4,9 +4,17 @@ metadata.validator <- function(self) {
   var_names <- self@var.names
   group_names <- self@group.names
 
+  # option: id.var
   if (!is.null(self@id.var)) {
     if (!(self@id.var %in% var_names)) {
       return("@id.var must be a variable specified in var.list")
+    }
+  }
+
+  # option: consent
+  if (is.null(self@id.var)) {
+    if (self@consent.final == TRUE) {
+      return("@consent can only be TRUE if @id.var has been specified")
     }
   }
 
@@ -37,7 +45,7 @@ var.list.validator <- function(value) {
   for (i in seq_along(value)) {
     if (!checkmate::test_subset(names(value[[i]]), empty.ok = FALSE,
                      choices = c("var.name","type","old.id","label",
-                     "label.eng","to.na","touch.na","na.else","na.rules",
+                     "label.eng","to.na","touch.na","na.touch","na.else","na.rules",
                      "na.switch","na.keep","na.replace","group","new",
                      "ops","dict","cats","cats.eng","to.factor","factor.name",
                      "name.factor","from","from.exclude","to","to.exclude",
@@ -71,18 +79,6 @@ var.list.validator <- function(value) {
                                  any.missing = FALSE, null.ok = TRUE)) {
       return("has touch.na keys in the wrong format")
     }
-    # if (!checkmate::test_logical(value[[i]][["touch.na.default.group"]], len = 1,
-    #                              any.missing = FALSE, null.ok = TRUE)) {
-    #   return("has touch.na.default.group keys in the wrong format")
-    # }
-    # if (!checkmate::test_logical(value[[i]][["touch.na.default.option"]], len = 1,
-    #                              any.missing = FALSE, null.ok = TRUE)) {
-    #   return("has touch.na keys.default.option in the wrong format")
-    # }
-    # if (!checkmate::test_logical(value[[i]][["touch.na.final"]], len = 1,
-    #                              any.missing = FALSE, null.ok = TRUE)) {
-    #   return("has touch.na.final keys in the wrong format")
-    # }
   }
 
   # Check that var.names are syntactically valid names

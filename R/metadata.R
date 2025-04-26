@@ -19,6 +19,8 @@ metadata <- S7::new_class("metadata",
     study.name = meta.prop.study.name,
     id.var = meta.prop.id.var,
     id.pattern = meta.prop.id.pattern,
+    consent = meta.prop.consent,
+    consent.final = meta.prop.consent.final,
     touch.na = meta.prop.touch.na,
     # variables
     var.list = meta.prop.var.list,

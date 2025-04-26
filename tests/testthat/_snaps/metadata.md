@@ -31,6 +31,32 @@
       Error:
       ! Can't set read-only property <epicdata::metadata>@DUP_FREQ
 
+# property consent works
+
+    Code
+      m@consent.final <- TRUE
+    Condition
+      Error:
+      ! Can't set read-only property <epicdata::metadata>@consent.final
+
+---
+
+    Code
+      m@consent <- TRUE
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - @consent can only be TRUE if @id.var has been specified
+
+---
+
+    Code
+      m@id.var <- NULL
+    Condition
+      Error:
+      ! <epicdata::metadata> object is invalid:
+      - @consent can only be TRUE if @id.var has been specified
+
 # touch.na works
 
     Code

@@ -80,6 +80,70 @@ test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
   expect_snapshot(error = TRUE, m@DUP_FREQ <- TRUE)
 })
 
+test_that("property consent works", {
+  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+    lines = c(
+    "options:",
+    "  id.var:",
+    "  consent:",
+    "var.list:",
+    "  id:",
+    "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+  expect_null(m@id.var)
+  expect_null(m@consent)
+  expect_false(m@consent.final)
+
+  expect_snapshot(error = TRUE, m@consent.final <- TRUE)
+  expect_snapshot(error = TRUE, m@consent <- TRUE)
+
+  m@id.var <- "id"
+  expect_equal(m@id.var, "id")
+  expect_null(m@consent)
+  expect_true(m@consent.final)
+
+  m@id.var <- NULL
+  expect_null(m@id.var)
+  expect_null(m@consent)
+  expect_false(m@consent.final)
+
+  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+    lines = c(
+    "options:",
+    "  id.var: id",
+    "  consent: no",
+    "var.list:",
+    "  id:",
+    "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+  expect_equal(m@id.var, "id")
+  expect_false(m@consent)
+  expect_false(m@consent.final)
+
+  m@consent <- NULL
+  expect_equal(m@id.var, "id")
+  expect_null(m@consent)
+  expect_true(m@consent.final)
+
+  m@consent <- FALSE
+  expect_equal(m@id.var, "id")
+  expect_false(m@consent)
+  expect_false(m@consent.final)
+
+  m@consent <- TRUE
+  expect_equal(m@id.var, "id")
+  expect_true(m@consent)
+  expect_true(m@consent.final)
+
+  expect_snapshot(error = TRUE, m@id.var <- NULL)
+})
+
 test_that("touch.na works", {
 
   file <- withr::local_tempfile(pattern = "test", fileext = "yml",

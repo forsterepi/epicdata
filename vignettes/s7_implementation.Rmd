@@ -21,16 +21,7 @@ This vignette is about the implementation of metadata as an S7 class. It is only
 -   Throughout the code, `[[` is used instead of `$` to avoid partial matching.
 -   The order, in which the properties are included in the call of `S7::new_object()` in the metadata constructor, matters. Start with `var.list`, then `var.groups`.
 -   Defaults and alternative names of keys need extra code.
-
-## Class
-
-If `NULL` is a valid value for a certain property, `NULL` needs to be added to the class, i.e., the property's class needs to be a union of the correct base type, e.g., character, and `NULL`. If `NULL` needs to be defined as the default value, argument `default` in the property function cannot be used. Instead, `NULL` needs to be named first in the specification of the union in argument `class` of the property function.
-
-``` r
-class = NULL | S7::class_character
-```
-
-If there is a setter function that transforms the input from one type to another, e.g., from a character vector to a data.frame, the class needs to fit to the type of the object that is returned by the setter, i.e., class is checked after the setter. Similarly, the validator is also run after the setter.
+-   If there is a setter function that transforms the input from one type to another, e.g., from a character vector to a data.frame, the class needs to fit to the type of the object that is returned by the setter, i.e., class is checked after the setter. Similarly, the validator is also run after the setter.
 
 ## Length
 
@@ -69,23 +60,6 @@ In the defaults table of vignette "metadata_long", all metadata elements are sho
 
 These elements don't need extra code to implement that there are no defaults. No extra code automatically means "no defaults".
 
-### Options of type "study information" and "workflow module selection"
-
-Their default is defined in the setter of the corresponding property function in class metadata. The basic structure of the setter is:
-
-``` r
-  setter = function(self, value) {
-    if (is.null(value)) {
-      self@example.option <- "example.default.value"
-    } else {
-      self@example.option <- value
-    }
-    self
-  }
-```
-
-If the option has no default, no additional code is necessary, because extracting a non-existing element from a list returns value `NULL`, which is the intended value.
-
 ### Group-specific keys
 
 x
@@ -97,7 +71,7 @@ This description is currently based on the implemented of `touch.na`.
 There are no individual properties for variables. All of them are summarized in property `var.list`. `var.list` is a list of variables. Each variable is a list of keys. In `var.list`, three internal keys are added:
 
 -   A key that holds the corresponding global default with suffix `.default.option`
--   A key that holds the correpsong group default with suffix `.default.group`
+-   A key that holds the corresponding group default with suffix `.default.group`
 -   A key that combines value and defaults to the actually assigned value with suffix `.final`. In the `print()` function of S7 class `epicdata::metadata` objects, only the .`final` value is reported, but without the suffix.
 
 By R script:
@@ -134,16 +108,16 @@ By R script:
           }
         ```
 
-    -   The setter of property `var.list` needs to be updated. The setter itself outsources the correpsonding code to functions `setter.variable.update.default.group()` and `setter.variable.create.final()`.
+    -   The setter of property `var.list` needs to be updated. The setter itself outsources the corresponding code to functions `setter.variable.update.default.group()` and `setter.variable.create.final()`.
 
-        -   `setter.variable.update.default.group()`: This function updates `.default.group` keys when the `group` key in `var.list` has been changed. All keys are treated in this function, therefore, no new function has to be created, but instead, the new keys have to be added to this function. In the second alf of the loop, new keys need to be added in three locations. Example for `touch.na`:
+        -   `setter.variable.update.default.group()`: This function updates `.default.group` keys when the `group` key in `var.list` has been changed. All keys are treated in this function, therefore, no new function has to be created, but instead, the new keys have to be added to this function. In the second half of the loop, new keys need to be added in three locations. Example for `touch.na`:
 
             ``` r
             # Only make adjustments if the value for group actually changed
             if (change) {
               # If group is now NULL, turn all .default.group elements to NULL as well
               if (is.null(value[[i]][["group"]])) {
-                value[[i]]$touch.na.default.group <- NULL
+                value[[i]][["touch.na.default.group"]] <- NULL
 
                 # ADD MORE DEFAULTS HERE
 
@@ -169,37 +143,25 @@ By R script:
             }
             ```
 
-        -   `setter.variable.create.final()`: This function updates `.final` keys. Two pieces need to be added to this function. First, the pre-defined default is specified here (and only here). Also define it, if it is `NULL`. Second, the default cascade needs to be defined. Example for `touch.na`:
+        -   `setter.variable.create.final()`: This function updates `.final` keys. The value is selected with function `setter.select.default()`, which takes one argument for every level in the cascade and returns the selected value. The default value for all four arguments in `setter.select.default()` is NULL, however, I recommend to spell out NULL, e.g., spell out `pre = NULL`, if the pre-defined value is actually NULL. Argument `pre` is where the pre-defined value is hard-coded. Example for `touch.na`:
 
             ``` r
-            # Define pre-defined defaults
-            pre.defined.touch.na <- TRUE
+              for (i in seq_along(value)) {
+                # touch.na
+                value[[i]][["touch.na.final"]] <- setter.select.default(
+                  var = value[[i]][["touch.na"]],
+                  group = value[[i]][["touch.na.default.group"]],
+                  option = value[[i]][["touch.na.default.option"]],
+                  pre = TRUE
+                )
 
-            # ADD MORE DEFAULTS HERE
-
-            # Apply defaults
-            for (i in seq_along(value)) {
-              # touch.na
-              if (!is.null(value[[i]][["touch.na"]])) {
-                value[[i]][["touch.na.final"]] <- value[[i]][["touch.na"]]
-              } else {
-                if (!is.null(value[[i]][["touch.na.default.group"]])) {
-                  value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.group"]]
-                } else {
-                  if (!is.null(value[[i]][["touch.na.default.option"]])) {
-                    value[[i]][["touch.na.final"]] <- value[[i]][["touch.na.default.option"]]
-                  } else {
-                    value[[i]][["touch.na.final"]] <- pre.defined.touch.na
-                  }
-                }
-              }
                 # ADD MORE DEFAULTS HERE
-            }
+              }
             ```
 
     -   The setter of property `var.groups` needs to be updated. Two pieces need to be added, one in the actual setter function and on in the outsourced `setter.group.update.var.list()` function.
 
-        -   The setter itself: If the value of `var.group` is `NULL`, the setter changes all `.default.group` keys to `NULL` as well. Example for `touch.na`:
+        -   In the setter itself: If the value of `var.group` is `NULL`, i.e., no groups exist, the setter changes all `.default.group` keys to `NULL` as well. Example for `touch.na`:
 
             ``` r
             # Update .default.group keys in var.list
@@ -241,7 +203,7 @@ By R script:
 -   **metadata_validator**:
 
     -   In the metadata validator, the consistency of the internal keys in `var.list` and the corresponding key in `var.group` as well as the corresponding option need to be checked. This ensures that the internal keys cannot be changed directly by the user. Consistency checks for `.final` keys are not necessary, because whenever a user tries to change a `.final` key, it is re-calculated as part of the updating process and therefore ends up with the correct value again, i.e., the user can change the `.final` key without error or warning but it has no effect. The implementation has two pieces:
-        -   `validator.metadata.default.key()`: A new function has to be created, which does to consistency checks. It is called `validator.metadata.default.key()`, e.g., `validator.metadata.default.touch.na()` for `touch.na`. Example for `touch.na`:
+        -   `validator.metadata.default.key()`: A new function has to be created, which does the consistency checks. It is called `validator.metadata.default.key()`, e.g., `validator.metadata.default.touch.na()` for `touch.na`. Example for `touch.na`:
 
             ``` r
             validator.metadata.default.touch.na <- function(self, current_var) {
@@ -308,8 +270,8 @@ By R script:
               # ADD MORE DEFAULTS HERE
             }
             ```
-    -   In the `var.list` validator, the internal keys need to be added to the list of valid keys. In addition ´, the internal keys as well as the main key itself need to be validated with corresponding `checkmate` functions.
-    -   In the var.groups validator, the group default key needs to be validated with a corresponding `checkmate` function.
+    -   In the `var.list` validator, the internal keys need to be added to the list of valid keys. In addition, the main key, e.g., `touch.na`, needs to be validated with the corresponding `checkmate` function. No validation is necessary for internal keys, i.e., `.default.option`, `.default.group`, and `.final`.
+    -   In the `var.groups` validator, the group default key needs to be added to the list of valid keys and validated with a corresponding `checkmate` function.
 
 -   **metadata_constructor**: In the metadata constructor, the corresponding option of type "global variable default" needs to be added to the call of `S7::new_object()`. Include it below `var.list` and `var.groups`. Example for `touch.na`:
 
@@ -344,18 +306,139 @@ meta.prop.DUP_FREQ <- S7::new_property(
 
 ## How to implement...
 
-### ... a new option of type "study information"
+### ... a new option of type "study information" or "workflow module selection"
 
-x
+-   **metadata**: Add the option to the metadata-defining function. It gets it own property function, called `meta.prop.[option]`.
 
-### ... a new option of type "workflow module selection"
+-   **metadata_properties**: Add the property function `meta.prop.[option]`. It has 3 parts:
 
-x
+    -   **class**: If `NULL` is a valid value, `NULL` needs to be added to the class, i.e., the property's class needs to be a union of the correct base type, e.g., character, and `NULL`. If `NULL` needs to be defined as the default value, argument `default` in the property function cannot be used. Instead, `NULL` needs to be named first in the specification of the union in argument `class` of the property function.
+
+        ``` r
+        class = NULL | S7::class_character
+        ```
+
+    -   **validator**: Use `checkmate::test_` functions inside of an `if` condition to validate properties. Include the following:
+
+        -   (Minimal) length
+        -   `null.ok = TRUE`
+        -   `any.missing = FALSE`
+        -   For characters: `min.chars = 1` to forbid empty strings
+
+        Return an error message. Remember that it will start automatically with `@option ...`
+
+        ``` r
+        validator = function(value) {
+          test.mode("option.study.name.validator")
+
+          if (!checkmate::test_character(value, len = 1, min.chars = 1,
+                                        any.missing = FALSE, null.ok = TRUE)) {
+            return("must have length 1 and must not be empty or NA")
+          }
+        }
+        ```
+
+    -   **setter**: A setter is only necessary if the pre-defined default value is [not]{.underline} NULL. Otherwise, no setter is necessary. The default is defined in the setter instead of the property function's argument `default` to enable application of the default when changes are made after creation, e.g., when the property is set from a value to NULL.
+
+        The value for the option is derived with function `setter.select.default()` without arguments `var` and `group`. Argument `option` is assigned the value, while the pre-defined default is hard-coded to argument `pre`. The value is then assigned to `self@option`, with `option` being replaced by the property name. Finally, `self` is returned, as is mandatory for setter functions.
+
+        ``` r
+        setter = function(self, value) {     
+          self@option <- setter.select.default(option = value, pre = "pre-defined default")     
+          self   
+        }
+        ```
+
+        If the default is conditional on another value, see below at **How to implement a new option of type "study information" or "workflow module selection" with conditional default**.
+
+-   **metadata_constructor**: In the metadata constructor, the option needs to be added to the call of `S7::new_object()`. The assigned value is taken from the `yaml_input`. Include it below `var.list`, `var.groups`, and below any properties that your default depends on.
+
+    ``` r
+    S7::new_object(S7::S7_object(),
+      
+      touch.na = yaml_input$options$touch.na,
+      
+    )
+    ```
+
+-   **metadata_validator**: Validation of property values is done in the property function in script `metadata_properties.R`. However, if combinations with other properties have to be validated, add them to the `metadata.validator()`.
+
+-   **test-metadata**: Include the following:
+
+    -   Reading from YAML and specifying all different values in YAML. Use `withr::local_tempfile()` and specify line by line (including indentations) in its `lines` argument.
+
+        ``` r
+        file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+          lines = c(
+            "options:",
+            "  study.name: test",
+            "var.list:",
+            "  id:",
+            "    type: text"
+          )
+        )
+
+        m <- metadata(file)
+        ```
+
+    -   Setting values in the S7 object. Make sure to switch from all values to all values, including NULL.
+
+    -   Check if validation works, i.e., if the expected errors are thrown.
+
+### **... a new option of type "study information" or "workflow module selection" with conditional default**
+
+If the pre-defined default of an option depends on some other value, implementation is more difficult. The following example of option `consent` explains why: Option `consent` is either `true` or `false` and its pre-defined default depends on the value of `id.var`. If `id.var` has been specified, the default is `true` and `false` otherwise. If an `id.var` has been specified initially in the YAML and `consent` has not been specified in the YAML, `consent` would become `true`. If `id.var` is then set to NULL, `consent` should become `false`, but `epicdata` can not differentiate anymore, if the current value `true` has been added as the default or if it has been specified by the user. Therefore, the specified value and the value on which the default is applied need to be separated. This is accomplished by defining a read-only property `option.final`, e.g., `consent.final`.
+
+For the main option, i.e., `consent` in the example above, follow the steps in **How to implement a new option of type "study information" or "workflow module selection"** above, with two exceptions:
+
+-   The property function `meta.prop.[option]` does [not]{.underline} need a setter.
+
+-   In `metadata.validator()`, the read-only `option.final` needs to be used. See the following example for `consent`, where `consent.final` is used instead of `consent` (Note that the error mesage refers to `consent`, because `consent.final` is hidden to the user):
+
+``` r
+if (is.null(self@id.var)) {
+  if (self@consent.final == TRUE) {
+    return("@consent can only be TRUE if @id.var has been specified")
+  }
+}
+```
+
+In addition, the following steps need to be conducted:
+
+-   **metadata**: Add the internal option to the metadata-defining function. It has suffix .`final`, e.g., `consent.final` for option `consent`. It gets it own property function, called `meta.prop.[option].final`.
+
+-   **metadata_properties**: Add the property function `meta.prop.[option].final`. It has only a getter. You don't need to specify class or a validator. The getter returns its value, unlike a setter which returns the updated `self`. Below, see the complete property function of `consent.final`. There is an `if-else` condition and both contain a call to `setter.select.default()`. Since the getter needs to return the value for `consent.final`, the function does not assign its output to any object. Arguments `var` and `group` are not used, similar to normal options with default described above. However, now the value assigned to `option` comes from `self` and `pre` contains different values in `if` and `else`.
+
+    ``` r
+    meta.prop.consent.final <- S7::new_property(
+      getter = function(self) {
+        test.mode("consent.final.getter")
+
+        if (is.null(self@id.var)) {
+          setter.select.default(option = self@consent, pre = FALSE)
+        } else {
+          setter.select.default(option = self@consent, pre = TRUE)
+        }
+      }
+    )
+    ```
+
+-   **metadata_constructor**: The constructor does not change, since read-only variables do not need to be added.
+
+-   **metadata_validator**: As mentioned above, all validations need to consider the value of `option.final` instead of `option`, e.g., `consent.final` instead of `consent`.
+
+-   `print()` **method**: The `print()` method needs to report `option.final` as `option`, while omitting the value for `option`, e.g., `print()` does not report the value in `consent`, but instead it reports the value of `consent.final` under the name `consent`.
+
+-   **test-metadata**: Additionally include different values of the property on which the default depends. Also check expectations for all three properties: `option`, `option.final`, and the property the defautl depends on, e.g., `consent`, `consent.final`, and `id.var`. Also check that `option.final` cannot be set, i.e., is actually read.only.
 
 ### ... a new group-specific key
 
 x
 
 ### ... a new variable-specific key
+
+x
+
+### ... a new workflow indicator
 
 x

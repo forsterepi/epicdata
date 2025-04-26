@@ -165,7 +165,9 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 **Workflow module selection**
 
--   `id.list` ((boolean, i.e., `true`, `yes`, `false`, `no`):
+-   `id.list` (boolean, i.e., `true`, `yes`, `false`, `no`): Indicate if a list with valid IDs is provided. An `id.list` makes sense if users are unsure how to specify an `id.pattern` with regular expressions, if the `id.pattern` is not sufficient to differentiate between valid and invalid IDs, i.e., some IDs with the specified pattern are valid and some are not, or if a list of all used IDs is easily available. Should not (Cannot??) be combined with `id.pattern`.
+
+-   `consent` (boolean, i.e., `true`, `yes`, `false`, `no`): Indicate if informed consent will be checked. Can only be `true`, if an `id.var` has been specified.
 
 -   `load.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
 
@@ -192,6 +194,23 @@ options:
   id.pattern: "[:digit:]{5}"
   date.format: dmy
 ```
+
+| Option | Alternative names | Length | Do not specify together with ... | Only specify together with ... |
+|----|----|----|----|----|
+| `study.name` |  | 1 |  |  |
+| `id.var` |  | 1 |  |  |
+| `id.pattern` |  | 1 | `id.list` | `id.var` |
+| `id.list` |  | 1 | `id.pattern` |  |
+| `consent` |  | 1 |  |  |
+| `load.from` |  | 1 |  |  |
+| `double.entry` |  | 1 |  |  |
+|  |  |  |  |  |
+| `date.format` | `format.date` | 1 |  |  |
+| `time.format` | `format.time` | 1 |  |  |
+| `datetime.format` | `format.datetime` | 1 |  |  |
+| `to.na` | `na.to` | \>=1 |  |  |
+| `touch.na` | `na.touch` | 1 |  |  |
+| `to.factor` |  | 1 |  |  |
 
 ## Component: var.list
 
@@ -226,9 +245,9 @@ Note that, in the example above, `var1` and `var2` are the variable names and th
 
 -   `label.eng` (Text): If the `label` is not in English, enter its English translation here for use in the data dictionary. `label.eng` can only be used if `label` is specified as well.
 
--   `to.na` (text):
+-   `to.na` or `na.to` (text):
 
--   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`): If `no`, all `NA`s, after applying `to.na`, will remain as `NA`. If `yes`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `yes`.
+-   `touch.na` or `na.touch` (boolean, i.e., `true`, `yes`, `false`, `no`): If `no`, all `NA`s, after applying `to.na`, will remain as `NA`. If `yes`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `yes`.
 
 -   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specified always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
 
@@ -396,34 +415,61 @@ var.list:
 
 **Summary of variable keys:**
 
-| Key | Alternative names | Length | Do not specify together with ... | Only specify together with ... |
-|----|----|----|----|----|
-| `type` |  | 1 (required) |  |  |
-| `old.id` | `id.old` | 1 | `new` |  |
-| `label` |  | 1 |  |  |
-| `label.eng` | `eng.label` | 1 |  | `label` |
-| `na.else` |  | 1 |  |  |
-| `na.rules` |  | \>=1 |  |  |
-| `na.switch` |  | \>=1 |  |  |
-| `na.keep` |  | \>=1 |  |  |
-| `na.replace` |  | \>=1 |  |  |
-| `to.na` |  | \>=1 |  |  |
-| `touch.na` |  | 1 |  |  |
-| `group` |  | 1 |  |  |
-| `new` |  | 1 | `old.id` |  |
-| `ops` |  | 1 |  |  |
-| `dict` |  | \>1 |  |  |
-| `cats` |  | \>1 |  |  |
-| `cats.eng` | `eng.cats` | \>1 |  | `cats` |
-| `to.factor` |  | 1 |  |  |
-| `factor.name` | `name.factor` | 1 |  |  |
-| `from` |  | 1 | `from.exclude` |  |
-| `from.exclude` |  | 1 | `from` |  |
-| `to` |  | 1 | `to.exclude` |  |
-| `to.exclude` |  | 1 | `to` |  |
-| `date.format` | `format.date`, `format` (if `type` is `date`) | 1 |  |  |
-| `time.format` | `format.time`, `format` (if `type` is `time`) | 1 |  |  |
-| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1 |  |  |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| Key               | Alternative names                                     | Length       | Do not specify together with ... | Only specify together with ... |
++===================+=======================================================+==============+==================================+================================+
+| `type`            |                                                       | 1 (required) |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `old.id`          | `id.old`                                              | 1            | `new`                            |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `label`           |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `label.eng`       | `eng.label`                                           | 1            |                                  | `label`                        |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.else`         | `else.na`                                             | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.rules`        | `rules.na`                                            | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.switch`       | `switch.na`                                           | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.keep`         | `keep.na`                                             | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `na.replace`      | `replace.na`                                          | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.na`           | `na.to`                                               | \>=1         |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `touch.na`        | `na.touch`                                            | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `group`           |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `new`             |                                                       | 1            | `old.id`                         |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `ops`             |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `dict`            |                                                       | \>1          |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `cats`            |                                                       | \>1          |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `cats.eng`        | `eng.cats`                                            | \>1          |                                  | `cats`                         |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.factor`       |                                                       | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `factor.name`     | `name.factor`                                         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `from`            |                                                       | 1            | `from.exclude`                   |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `from.exclude`    | `from.ex`                                             | 1            | `from`                           |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to`              |                                                       | 1            | `to.exclude`                     |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `to.exclude`      | `to.ex`                                               | 1            | `to`                             |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `date.format`     | `format.date`, `format` (if `type` is `date`)         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `time.format`     | `format.time`, `format` (if `type` is `time`)         | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
+| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1            |                                  |                                |
++-------------------+-------------------------------------------------------+--------------+----------------------------------+--------------------------------+
 
 ## Component: na.codes
 
