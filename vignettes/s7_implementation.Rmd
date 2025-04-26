@@ -123,12 +123,12 @@ By R script:
         ``` r
         setter = function(self, value) {
           updated.var.list <- self@var.list
-          
+
           for (i in seq_along(updated.var.list)) {
             updated.var.list[[i]]$touch.na.default.option <- value
           }
           self@var.list <- updated.var.list
-          
+
           self@touch.na <- value
           self
           }
@@ -144,9 +144,9 @@ By R script:
               # If group is now NULL, turn all .default.group elements to NULL as well
               if (is.null(value[[i]][["group"]])) {
                 value[[i]]$touch.na.default.group <- NULL
-                
+
                 # ADD MORE DEFAULTS HERE
-                
+
               } else {
                 # Check if the new group actually exists in var.groups
                 if (value[[i]][["group"]] %in% group_names) {
@@ -155,14 +155,14 @@ By R script:
                     if (self@var.groups[[j]][["group.name"]] == value[[i]][["group"]]) {
                       # Update the .default.group value
                       value[[i]][["touch.na.default.group"]] <- self@var.groups[[j]][["touch.na"]]
-                      
+
                       # ADD MORE DEFAULTS HERE
                     }
                   }
                 } else {
                   # If the new group does not exist, turn .default.group back to NULL
                   value[[i]][["touch.na.default.group"]] <- NULL
-                  
+
                   # ADD MORE DEFAULTS HERE
                 }
               }
@@ -206,7 +206,7 @@ By R script:
             if (is.null(value)) {
               for (i in seq_along(self@var.list)) {
                 self@var.list[[i]]$touch.na.default.group <- NULL
-                  
+
                 # ADD MORE DEFAULTS HERE
               }
             } else {
@@ -230,7 +230,7 @@ By R script:
                   if (updated.var.list[[j]][["group"]] == current_group) {
                     # Update .default.group values
                     updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
-                    
+
                     # ADD MORE DEFAULTS HERE
                   }
                 }
