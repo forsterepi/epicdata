@@ -100,7 +100,7 @@ Desc
 #### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
 
 | Status | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -132,7 +132,7 @@ Desc
 #### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW_FILTER)
 
 | Status | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |

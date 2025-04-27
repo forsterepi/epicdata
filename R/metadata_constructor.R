@@ -11,13 +11,26 @@ metadata.constructor <- function(file) {
   #yaml.str.options(yaml_input)
   yaml_input %<>% yaml.add.name() # Finalize and test this function
 
+  if (is.null(yaml_input$options$touch.na)) {
+    touch.na.input <- yaml_input$options$na.touch
+  } else {
+    touch.na.input <- yaml_input$options$touch.na
+  }
+
+  for (i in seq_along(yaml_input$var.list)) {
+    checkmate::assert_logical(yaml_input$var.list[[i]]$touch.na,
+                              len = 1, any.missing = FALSE, null.ok = TRUE)
+    checkmate::assert_logical(yaml_input$var.list[[i]]$na.touch.,
+                              len = 1, any.missing = FALSE, null.ok = TRUE)
+  }
+
   S7::new_object(S7::S7_object(),
     # Run the setter of var.list first
     var.list = yaml_input$var.list,
     # Run var.groups always after var.list
     var.groups = yaml_input$var.groups,
     # Global default options need to be listed after var.list and var.groups
-    touch.na = yaml_input$options$touch.na,
+    touch.na = touch.na.input,
     study.name = yaml_input$options$study.name,
     id.var = yaml_input$options$id.var,
     id.pattern = yaml_input$options$id.pattern,
@@ -25,12 +38,12 @@ metadata.constructor <- function(file) {
 }
 
 
-
+#!!Add test!!
 
 
 yaml.read <- function(x, arg = rlang::caller_arg(x),
                       call = rlang::caller_env()) {
-
+  # Read
   rlang::try_fetch({
     yaml_input <- yaml::read_yaml(x)
   },
@@ -38,10 +51,11 @@ yaml.read <- function(x, arg = rlang::caller_arg(x),
     cli::cli_abort(c("Loading YAML metadata failed!",
                      c("Loading failed due to an error in the YAML grammar. The
                       {.code yaml::read_yaml()} error message below reports its
-                      location.",
+                      location. (Check lines before and after as well.)",
                        cnd$message,
-                       "Did you forget quotation marks around
-                      {.var id.pattern}?") %>%
+                       "Check if you forgot any colons `:` or spaces after
+                       colons `key: value`. Otherwise, try adding quotation
+                       marks to keys and values with special characters.") %>%
                        magrittr::set_names(c("i","x","i")) %>%
                        magrittr::extract(c(
                          stringr::str_detect(cnd$message,"line"),
@@ -50,6 +64,9 @@ yaml.read <- function(x, arg = rlang::caller_arg(x),
                        )), # add info only if applicable
                    call = call,
                    class = "error.yaml.read.1")})
+
+  # Evaluate if spaces behind colons are missing
+
 
   yaml_input
 }

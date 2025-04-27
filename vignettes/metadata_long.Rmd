@@ -44,7 +44,7 @@ First.layer
   Second.layer
 ```
 
-Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. Always include a space after the colon. Usually no quotation marks `""` are necessary when specifying values. Some exceptions are listed below. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. **Always include a space after the colon.** Usually no quotation marks `""` are necessary when specifying values. Some exceptions are listed below. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
 
 When to use quotation marks `""`:
 
@@ -195,22 +195,37 @@ options:
   date.format: dmy
 ```
 
-| Option | Alternative names | Length | Do not specify together with ... | Only specify together with ... |
-|----|----|----|----|----|
-| `study.name` |  | 1 |  |  |
-| `id.var` |  | 1 |  |  |
-| `id.pattern` |  | 1 | `id.list` | `id.var` |
-| `id.list` |  | 1 | `id.pattern` |  |
-| `consent` |  | 1 |  |  |
-| `load.from` |  | 1 |  |  |
-| `double.entry` |  | 1 |  |  |
-|  |  |  |  |  |
-| `date.format` | `format.date` | 1 |  |  |
-| `time.format` | `format.time` | 1 |  |  |
-| `datetime.format` | `format.datetime` | 1 |  |  |
-| `to.na` | `na.to` | \>=1 |  |  |
-| `touch.na` | `na.touch` | 1 |  |  |
-| `to.factor` |  | 1 |  |  |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| Option            | Alternative names | Length      | Do not specify together with ... | Only specify together with ... |
++===================+===================+=============+==================================+================================+
+| `study.name`      |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.var`          |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.pattern`      |                   | 1           | `id.list`                        | `id.var`                       |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.list`         |                   | 1           | `id.pattern`                     |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `consent`         |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `load.from`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `double.entry`    |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+|                   |                   |             |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `date.format`     | `format.date`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `time.format`     | `format.time`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `datetime.format` | `format.datetime` | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `to.na`           | `na.to`           | \>=1        |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `touch.na`        | `na.touch`        | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `to.factor`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
 
 ## Component: var.list
 

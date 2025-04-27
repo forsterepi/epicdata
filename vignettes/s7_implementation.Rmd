@@ -355,9 +355,9 @@ meta.prop.DUP_FREQ <- S7::new_property(
 
     ``` r
     S7::new_object(S7::S7_object(),
-      
+
       touch.na = yaml_input$options$touch.na,
-      
+
     )
     ```
 
@@ -442,3 +442,117 @@ x
 ### ... a new workflow indicator
 
 x
+
+### ... a new alternative name for an option
+
+x
+
+-   **metadata**: Add the alternative name as a property to the metadata-defining function. It gets it own property function, called `meta.prop.[alternative name]`.
+
+-   **metadata_properties**: Here the property function of the option needs to be updated and the function of the alternative name needs to be created:
+
+    -   Create `meta.prop.[alternative name]()`: The property function of the alternative name gets the same class and validator as the property function of the option, as well as a setter. The setter sets the value of the alternative name and uptdates the value of the option, if it is different from its current value. If there are more than one alternative names, the other ones do not need to be considered here. See the complete property function of `na.touch`, the alternative name of `touch.na`:
+
+        ``` r
+        meta.prop.na.touch <- S7::new_property(
+          class = NULL | S7::class_logical,
+          setter = function(self, value) {
+            test.mode("option.na.touch.setter")
+
+            # Update na.touch
+            self@na.touch <- value
+
+            # Update touch.na, if different from na.touch
+            if (is.null(value)) {
+              if (!is.null(self@touch.na)) {
+                self@touch.na <- value
+              }
+            } else {
+              if (!is.null(self@touch.na)) {
+                if (self@touch.na != value) {
+                  self@touch.na <- value
+                }
+              } else {
+                self@touch.na <- value
+              }
+            }
+
+            # Return self
+            self
+          }
+        )
+        ```
+
+    -   Update the property function of the option: The setter should start with the assignment of the value to the option itself, so that the validator runs in the beginning before invalid values might be given to the alternative names (fails faster). Update the values of all alternative names if they are different. See the complete property function for option `touch.na`:
+
+        ``` r
+        meta.prop.touch.na <- S7::new_property(
+          class = NULL | S7::class_logical,
+          validator = function(value) {
+            test.mode("option.touch.na.validator")
+
+            if (!checkmate::test_logical(value, len = 1, any.missing = FALSE,
+                                        null.ok = TRUE)) {
+              return("must have length 1 and must not be NA")
+            }
+          },
+          setter = function(self, value) {
+            test.mode("option.touch.na.setter")
+
+            # Update touch.na (first, so that validator runs before changing var.list or na.touch)
+            self@touch.na <- value
+
+            # Update var.list
+            updated.var.list <- self@var.list
+            for (i in seq_along(updated.var.list)) {
+              updated.var.list[[i]]$touch.na.default.option <- value
+            }
+            self@var.list <- updated.var.list
+
+            # Update na.touch, if different from touch.na
+            if (is.null(value)) {
+              if (!is.null(self@na.touch)) {
+                self@na.touch <- value
+              }
+            } else {
+              if (!is.null(self@na.touch)) {
+                if (self@na.touch != value) {
+                  self@na.touch <- value
+                }
+              } else {
+                self@na.touch <- value
+              }
+            }
+
+            # Return self
+            self
+          }
+        )
+        ```
+
+-   **metadata_constructor**: In the constructor, before assigning the values in `S7::new_object()`, get one value from the option and all alternative names. This value is assigned to the option in `S7::new_object()`, while no values are assigned to the alternative names. See the parts of the constructor relevant to `touch.na`:
+
+    ``` r
+    if (is.null(yaml_input$options$touch.na)) {
+      touch.na.input <- yaml_input$options$na.touch
+    } else {
+      touch.na.input <- yaml_input$options$touch.na
+    }
+
+    S7::new_object(S7::S7_object(),
+      ...,
+      touch.na = touch.na.input,
+      ...)
+    ```
+
+-   **test_metadata**: Test together with defaults, etc.
+
+### ... a new alternative name for a key in var.list or var.groups
+
+x
+
+-   **metadata_properties**: Add to setter.variable.update.alternative.names() or setter.group.update.alternative.names()
+
+-   **metadata_validator**: Add alternative name to list of valid keys; add alternative name to the error message of the validation for the main key, copy validation in var.list.validator() for pre validation in the setter to work
+
+-   **test-metadata**: x

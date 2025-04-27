@@ -120,3 +120,243 @@
       ! <epicdata::metadata> object is invalid:
       - Do not change @var.list$b$touch.na.default.group directly. Change @var.groups instead.
 
+---
+
+    Code
+      m@touch.na <- 3
+    Condition
+      Error:
+      ! <epicdata::metadata>@touch.na must be <NULL> or <logical>, not <double>
+
+---
+
+    Code
+      m@touch.na <- NA
+    Condition
+      Error:
+      ! <epicdata::metadata>@touch.na must have length 1 and must not be NA
+
+---
+
+    Code
+      m@touch.na <- c(TRUE, FALSE)
+    Condition
+      Error:
+      ! <epicdata::metadata>@touch.na must have length 1 and must not be NA
+
+---
+
+    Code
+      m@touch.na <- c(TRUE, NA)
+    Condition
+      Error:
+      ! <epicdata::metadata>@touch.na must have length 1 and must not be NA
+
+---
+
+    Code
+      m@touch.na <- "TRUE"
+    Condition
+      Error:
+      ! <epicdata::metadata>@touch.na must be <NULL> or <logical>, not <character>
+
+---
+
+    Code
+      m@na.touch <- 3
+    Condition
+      Error:
+      ! <epicdata::metadata>@na.touch must be <NULL> or <logical>, not <double>
+
+---
+
+    Code
+      m@na.touch <- NA
+    Condition
+      Error:
+      ! <epicdata::metadata>@na.touch must have length 1 and must not be NA
+
+---
+
+    Code
+      m@na.touch <- c(TRUE, FALSE)
+    Condition
+      Error:
+      ! <epicdata::metadata>@na.touch must have length 1 and must not be NA
+
+---
+
+    Code
+      m@na.touch <- c(TRUE, NA)
+    Condition
+      Error:
+      ! <epicdata::metadata>@na.touch must have length 1 and must not be NA
+
+---
+
+    Code
+      m@na.touch <- "TRUE"
+    Condition
+      Error:
+      ! <epicdata::metadata>@na.touch must be <NULL> or <logical>, not <character>
+
+---
+
+    Code
+      m@var.list$a$touch.na <- 3
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$touch.na <- NA
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$touch.na <- c(TRUE, FALSE)
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$touch.na <- c(TRUE, NA)
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$touch.na <- "TRUE"
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$na.touch <- 3
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$na.touch <- NA
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$na.touch <- c(TRUE, FALSE)
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$na.touch <- c(TRUE, NA)
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.list$a$na.touch <- "TRUE"
+    Condition
+      Error:
+      ! @var.list has touch.na (or na.touch) keys in the wrong format in variable 'a'
+
+---
+
+    Code
+      m@var.groups$g$touch.na <- 3
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$touch.na <- NA
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$touch.na <- c(TRUE, FALSE)
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$touch.na <- c(TRUE, NA)
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$touch.na <- "TRUE"
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$na.touch <- 3
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$na.touch <- NA
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$na.touch <- c(TRUE, FALSE)
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$na.touch <- c(TRUE, NA)
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+
+---
+
+    Code
+      m@var.groups$g$na.touch <- "TRUE"
+    Condition
+      Error:
+      ! @var.groups has touch.na (or na.touch) keys in the wrong format in group 'g'
+

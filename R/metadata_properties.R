@@ -89,13 +89,68 @@ meta.prop.touch.na <- S7::new_property(
   setter = function(self, value) {
     test.mode("option.touch.na.setter")
 
+    # Update touch.na (first, so that validator runs before changing var.list or na.touch)
+    self@touch.na <- value
+
+    # Update var.list
     updated.var.list <- self@var.list
     for (i in seq_along(updated.var.list)) {
       updated.var.list[[i]]$touch.na.default.option <- value
     }
     self@var.list <- updated.var.list
 
-    self@touch.na <- value
+    # Update na.touch, if different from touch.na
+    if (is.null(value)) {
+      if (!is.null(self@na.touch)) {
+        self@na.touch <- value
+      }
+    } else {
+      if (!is.null(self@na.touch)) {
+        if (self@na.touch != value) {
+          self@na.touch <- value
+        }
+      } else {
+        self@na.touch <- value
+      }
+    }
+
+    # Return self
+    self
+  }
+)
+
+meta.prop.na.touch <- S7::new_property(
+  class = NULL | S7::class_logical,
+  validator = function(value) {
+    test.mode("option.na.touch.validator")
+
+    if (!checkmate::test_logical(value, len = 1, any.missing = FALSE,
+                                 null.ok = TRUE)) {
+      return("must have length 1 and must not be NA")
+    }
+  },
+  setter = function(self, value) {
+    test.mode("option.na.touch.setter")
+
+    # Update na.touch
+    self@na.touch <- value
+
+    # Update touch.na, if different from na.touch
+    if (is.null(value)) {
+      if (!is.null(self@touch.na)) {
+        self@touch.na <- value
+      }
+    } else {
+      if (!is.null(self@touch.na)) {
+        if (self@touch.na != value) {
+          self@touch.na <- value
+        }
+      } else {
+        self@touch.na <- value
+      }
+    }
+
+    # Return self
     self
   }
 )
@@ -131,6 +186,14 @@ meta.prop.var.list <- S7::new_property(
       ## SOLVE CALLER_ENV PROBLEMS
         }
       )
+    }
+
+    #Pre-validate
+    check_result <- var.list.validator(value)
+    if (!is.null(check_result)) {
+      cli::cli_abort(paste0("@var.list ",check_result),
+        call = rlang::caller_env(), class = "error.meta.prop.var.list.3")
+      ## SOLVE CALLER_ENV PROBLEMS
     }
 
     # Process inputs
@@ -188,6 +251,17 @@ meta.prop.var.groups <- S7::new_property(
         }
       )
     }
+
+    #Pre-validate
+    check_result <- var.groups.validator(value)
+    if (!is.null(check_result)) {
+      cli::cli_abort(paste0("@var.groups ",check_result),
+        call = rlang::caller_env(), class = "error.meta.prop.var.groups.2")
+      ## SOLVE CALLER_ENV PROBLEMS
+    }
+
+    # Alternative names
+    value %<>% setter.group.update.alternative.names(self)
 
     # Update .default.group keys in var.list
     if (is.null(value)) {
@@ -515,6 +589,13 @@ setter.variable.process.inputs <- function(value) {
   value
 }
 
+#' Title
+#'
+#' Desc.
+#'
+#' @param x Desc.
+#'
+#' @noRd
 setter.variable.update.alternative.names <- function(value, self) {
   for (i in seq_along(value)) {
     # Get var.name
@@ -544,6 +625,41 @@ setter.variable.update.alternative.names <- function(value, self) {
   value
 }
 
+#' Title
+#'
+#' Desc.
+#'
+#' @param x Desc.
+#'
+#' @noRd
+setter.group.update.alternative.names <- function(value, self) {
+  for (i in seq_along(value)) {
+    # Get var.name
+    current_group <- value[[i]][["group.name"]]
+
+    # touch.na / na.touch
+    ## Check if touch.na changed
+    change.touch.na <- setter.group.did.key.change(self = self,
+                        value = value, current_group = current_group,
+                        key = "touch.na")
+    ## Apply changes to na.touch
+    if (change.touch.na) {
+      value[[i]][["na.touch"]] <- value[[i]][["touch.na"]]
+    }
+    ## Check if na.touch changed
+    change.na.touch <- setter.group.did.key.change(self = self,
+                        value = value, current_group = current_group,
+                        key = "na.touch")
+    ## Apply changes to touch.na
+    if (change.na.touch) {
+      value[[i]][["touch.na"]] <- value[[i]][["na.touch"]]
+    }
+
+  }
+
+  # Return
+  value
+}
 
 
 #' Update .default.group keys when changing the group key in `@var.list`
@@ -751,6 +867,42 @@ setter.variable.did.key.change <- function(self, value, current_var, key) {
     change <- TRUE
   } else if (!is.null(self@var.list[[current_var]][[key]]) & !is.null(value[[current_var]][[key]])) {
     if (self@var.list[[current_var]][[key]] == value[[current_var]][[key]]) {
+      change <- FALSE
+    } else {
+      change <- TRUE
+    }
+  }
+
+  # Return
+  change
+}
+
+#' Check if a key in `@var.groups` actually changed
+#'
+#' Check is specific to a certain key in a certain group
+#'
+#' @param self The previous version of the object
+#' @param value The new version of `@var.groups`
+#' @param current_group The variable in `@var.groups` to check. Must be a single
+#' string.
+#' @param key The key to check. Must be a single string.
+#'
+#' @returns TRUE or FALSE
+#'
+#' @noRd
+setter.group.did.key.change <- function(self, value, current_group, key) {
+  # Start with change == FALSE, just for safety
+  change <- FALSE
+
+  # Compare self and value
+  if (is.null(self@var.groups[[current_group]][[key]]) & is.null(value[[current_group]][[key]])) {
+    change <- FALSE
+  } else if (is.null(self@var.groups[[current_group]][[key]]) & !is.null(value[[current_group]][[key]])) {
+    change <- TRUE
+  } else if (!is.null(self@var.groups[[current_group]][[key]]) & is.null(value[[current_group]][[key]])) {
+    change <- TRUE
+  } else if (!is.null(self@var.groups[[current_group]][[key]]) & !is.null(value[[current_group]][[key]])) {
+    if (self@var.groups[[current_group]][[key]] == value[[current_group]][[key]]) {
       change <- FALSE
     } else {
       change <- TRUE
