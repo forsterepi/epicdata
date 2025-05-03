@@ -27,3 +27,7 @@ test.mode <- function(part) {
   }
 }
 ## WHEN DELETING test.mode(), ALSO DELETE ABOVE LINE utils::globalVariables("test_mode")
+
+`%!in%` <- function(x, y) {
+  !(x %in% y)
+}

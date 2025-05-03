@@ -978,6 +978,98 @@ test_that("touch.na works", {
   expect_equal(m@var.list$b[["touch.na.final"]], TRUE)
 })
 
+test_that("cats and cats.eng work",{
+  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+                                lines = c(
+                                  "var.list:",
+                                  "  a:",
+                                  "    type: text"
+                                )
+  )
+
+  m <- metadata(file)
+
+  expect_equal(m@var.list$a$cats, NULL)
+  expect_equal(m@var.list$a$cats.eng, NULL)
+
+  # Add that cats and cats.eng can only be used with type "cat"
+  # expect_snapshot(error = TRUE, m@var.list$a$cats <- c("0=nein","1=ja"))
+  # expect_snapshot(error = TRUE, m@var.list$a$cats.eng <- c("0=no","1=yes"))
+
+  m@var.list$a$type <- "cat"
+  m@var.list$a$cats <- c("0=nein","1=ja")
+  out <- data.frame(level = c(0L, 1L), label = c("nein", "ja"))
+  expect_equal(m@var.list$a$cats, out)
+
+  # Add that cats.eng must have the same levels as cats
+  out.eng <- data.frame(level = c(0L, 1L, 2L), label = c("no", "yes", "maybe"))
+  # expect_snapshot(error = TRUE, m@var.list$a$cats.eng <- c("0=no","1=yes","2=maybe"))
+  # expect_snapshot(error = TRUE, m@var.list$a$cats.eng <- c("0=no","2=maybe"))
+
+  out.eng2 <- data.frame(level = c(0L, 1L), label = c("no", "yes"))
+  m@var.list$a$cats.eng <- c("1=yes","0=no")
+  expect_equal(m@var.list$a$cats.eng, out.eng2)
+
+  # Maybe add that cats can only be used for type "cat
+  # expect_snapshot(error = TRUE, m@var.list$a$type <- "num")
+
+  # Add that cats.eng must have the same levels as cats
+  # expect_snapshot(error = TRUE, m@var.list$a$cats <- c("0=nein","ja=1","2=vielleicht"))
+  m@var.list$a$cats.eng <- NULL
+  expect_equal(m@var.list$a$cats.eng, NULL)
+  m@var.list$a$cats <- c("0=nein","ja=1","2=vielleicht")
+  out2 <- data.frame(level = c(0L, 1L, 2L), label = c("nein", "ja", "vielleicht"))
+  expect_equal(m@var.list$a$cats, out2)
+  m@var.list$a$cats.eng <- c("0=no","1=yes","2=maybe")
+  expect_equal(m@var.list$a$cats.eng, out.eng)
+
+  m <- metadata(file)
+  m@var.list$a$type <- "cat"
+  expect_error(m@var.list$a$cats <- c("1=ja", NA), class = "error.process.cats.1")
+  expect_error(m@var.list$a$cats <- NA, class = "error.process.cats.1")
+  expect_error(m@var.list$a$cats <- 3, class = "error.process.cats.2")
+  expect_error(m@var.list$a$cats <- FALSE, class = "error.process.cats.2")
+  expect_error(m@var.list$a$cats <- "", class = "error.process.cats.3")
+  expect_error(m@var.list$a$cats <- c("0==male", "1=female"),
+               class = "error.process.cats.3")
+  expect_error(m@var.list$a$cats <- c(male = "0", female = "1"),
+               class = "error.process.cats.3")
+  expect_error(m@var.list$a$cats <- c("1.3 = male", "1 = female"),
+               class = "error.process.cats.4")
+  expect_error(m@var.list$a$cats <- c("a=male", "1=female"),
+               class = "error.process.cats.5")
+  expect_error(m@var.list$a$cats <- c("0=1", "2=female"),
+               class = "error.process.cats.6")
+  expect_error(m@var.list$a$cats <- c("-1 = male", "-2 =male"),
+               class = "error.process.cats.7")
+  expect_error(m@var.list$a$cats <- c("1 = male", "1 = female"),
+               class = "error.process.cats.8")
+  expect_error(m@var.list$a$cats <- c("0 = male", "1 =male"),
+               class = "error.process.cats.9")
+
+  expect_error(m@var.list$a$cats.eng <- c("1=ja", NA), class = "error.process.cats.1")
+  expect_error(m@var.list$a$cats.eng <- NA, class = "error.process.cats.1")
+  expect_error(m@var.list$a$cats.eng <- 3, class = "error.process.cats.2")
+  expect_error(m@var.list$a$cats.eng <- FALSE, class = "error.process.cats.2")
+  expect_error(m@var.list$a$cats.eng <- "", class = "error.process.cats.3")
+  expect_error(m@var.list$a$cats.eng <- c("0==male", "1=female"),
+               class = "error.process.cats.3")
+  expect_error(m@var.list$a$cats.eng <- c(male = "0", female = "1"),
+               class = "error.process.cats.3")
+  expect_error(m@var.list$a$cats.eng <- c("1.3 = male", "1 = female"),
+               class = "error.process.cats.4")
+  expect_error(m@var.list$a$cats.eng <- c("a=male", "1=female"),
+               class = "error.process.cats.5")
+  expect_error(m@var.list$a$cats.eng <- c("0=1", "2=female"),
+               class = "error.process.cats.6")
+  expect_error(m@var.list$a$cats.eng <- c("-1 = male", "-2 =male"),
+               class = "error.process.cats.7")
+  expect_error(m@var.list$a$cats.eng <- c("1 = male", "1 = female"),
+               class = "error.process.cats.8")
+  expect_error(m@var.list$a$cats.eng <- c("0 = male", "1 =male"),
+               class = "error.process.cats.9")
+})
+
 # add tests for id.pattern
 # add tests for all the validations
 # add tests for errors in mate.prop.var.list & meta.prop.var.groups

@@ -13,7 +13,7 @@ metadata.validator <- function(self) {
 
   # option: consent
   if (is.null(self@id.var)) {
-    if (self@consent.final == TRUE) {
+    if (identical(self@consent.final, TRUE)) {
       return("@consent can only be TRUE if @id.var has been specified")
     }
   }
@@ -23,12 +23,10 @@ metadata.validator <- function(self) {
     current_var <- self@var.list[[i]][["var.name"]]
 
     # touch.na
-    check_result <- validator.metadata.default.touch.na(self, current_var)
+    check_result <- validator.metadata.default(self, current_var)
     if (!is.null(check_result)) {
       return(check_result)
     }
-
-    # ADD MORE DEFAULTS HERE
   }
 }
 
@@ -146,9 +144,11 @@ var.groups.validator <- function(value) {
   keys.na.switch <- c("na.switch","switch.na")
   keys.na.keep <- c("na.keep","keep.na")
   keys.na.replace <- c("na.replace","replace.na")
-  keys.dict <- c("dict")
+  keys.dict <- c("dict","dict.eng")
+  keys.dict.rules <- c("dict.rules","rules.dict")
   keys.cats <- c("cats")
   keys.cats.eng <- c("cats.eng","eng.cats")
+  keys.cats.rules <- c("cats.rules","rules.cats")
   keys.to.factor <- c("to.factor")
   keys.from <- c("from")
   keys.from.exclude <- c("from.exclude","from.ex")
@@ -157,13 +157,15 @@ var.groups.validator <- function(value) {
   keys.date.format <- c("date.format","format.date")
   keys.time.format <- c("time.format","format.time")
   keys.datetime.format <- c("datetime.format","format.datetime")
+  keys.limit.rules <- c("limit.rules","limits.rules","rule.limits",
+                        "rules.limits")
   key.list <- c(keys.group.name, keys.group.label, keys.group.label.eng,
     keys.mc.exclusive,
     keys.to.na, keys.touch.na, keys.na.else, keys.na.rules,
-    keys.na.switch, keys.na.keep, keys.na.replace, keys.dict, keys.cats,
-    keys.cats.eng, keys.to.factor, keys.from, keys.from.exclude, keys.to,
-    keys.to.exclude, keys.date.format, keys.time.format,
-    keys.datetime.format)
+    keys.na.switch, keys.na.keep, keys.na.replace, keys.dict, keys.dict.rules,
+    keys.cats, keys.cats.eng, keys.cats.rules, keys.to.factor, keys.from,
+    keys.from.exclude, keys.to, keys.to.exclude, keys.date.format,
+    keys.time.format, keys.datetime.format, keys.limit.rules)
 
   # Loop over all variables
   for (i in seq_along(value)) {
@@ -209,27 +211,17 @@ var.groups.validator <- function(value) {
 #' NULL otherwise.
 #'
 #' @noRd
-validator.metadata.default.touch.na <- function(self, current_var) {
+validator.metadata.default <- function(self, current_var) {
   test.mode(paste0("validate.default.consistency.",current_var))
 
-  # Check consistency of self@touch.na and $touch.na.default.option
-  if (is.null(self@touch.na)) {
-    if (!is.null(self@var.list[[current_var]][["touch.na.default.option"]])) {
-      return(paste0("Do not change @var.list$",current_var,
-            "$touch.na.default.option directly. Change @touch.na instead."))
-    }
-  } else {
-    if (is.null(self@var.list[[current_var]][["touch.na.default.option"]])) {
-      return(paste0("Do not change @var.list$",current_var,
-            "$touch.na.default.option directly. Change @touch.na instead."))
-    }
-    if (self@var.list[[current_var]][["touch.na.default.option"]] != self@touch.na) {
-      return(paste0("Do not change @var.list$",current_var,
-            "$touch.na.default.option directly. Change @touch.na instead."))
-    }
+  # touch.na
+  ## .default.option
+  if (!identical(self@var.list[[current_var]][["touch.na.default.option"]],
+                 self@touch.na)) {
+    return(paste0("Do not change @var.list$",current_var,
+                  "$touch.na.default.option directly. Change @touch.na instead."))
   }
-
-  # Check consistency of var.group$touch.na and $touch.na.default.group
+  ## .default.group
   if (is.null(self@var.list[[current_var]][["group"]])) {
     if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
       return(paste0("Do not change @var.list$",current_var,
@@ -238,22 +230,14 @@ validator.metadata.default.touch.na <- function(self, current_var) {
   } else {
     current_group <- self@var.list[[current_var]][["group"]]
 
-    if (is.null(self@var.groups[[current_group]][["touch.na"]])) {
-      if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
-        return(paste0("Do not change @var.list$",current_var,
-              "$touch.na.default.group directly. Change @var.groups instead."))
-      }
-    } else {
-      if (is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
-        return(paste0("Do not change @var.list$",current_var,
-              "$touch.na.default.group directly. Change @var.groups instead."))
-      }
-      if (self@var.list[[current_var]][["touch.na.default.group"]] != self@var.groups[[current_group]][["touch.na"]]) {
-          return(paste0("Do not change @var.list$",current_var,
-                "$touch.na.default.group directly. Change @var.groups instead."))
-      }
+    if (!identical(self@var.list[[current_var]][["touch.na.default.group"]],
+                   self@var.groups[[current_group]][["touch.na"]])) {
+      return(paste0("Do not change @var.list$",current_var,
+                    "$touch.na.default.group directly. Change @var.groups instead."))
     }
   }
+
+  # ADD MORE DEFAULTS HERE
 }
 
 

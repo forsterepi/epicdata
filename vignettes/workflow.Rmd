@@ -218,6 +218,8 @@ generalize to more than 2 IDs, e.g., mention all three different values maybe ev
 
 ### 12) Missings
 
+Where exactly in the workflow missings are handled, is still tbd.
+
 ### 13) Limits
 
 ### 14) Contradictions

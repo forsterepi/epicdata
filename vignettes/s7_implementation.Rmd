@@ -92,20 +92,28 @@ By R script:
 
 -   **metadata_properties**:
 
-    -   The property function of the "global variable default" needs to be defined. It gets a setter, in which the `.default.option` key in `var.list` are updated. Example for `touch.na`:
+    -   The property function of the "global variable default" needs to be defined. It gets a setter, in which the `.default.option` keys in `var.list` are updated. Example for `touch.na`:
 
         ``` r
         setter = function(self, value) {
-          updated.var.list <- self@var.list
+          # Update touch.na (first, so that validator runs before changing var.list    # or na.touch)
+          self@touch.na <- value
 
+          # Update var.list
+          updated.var.list <- self@var.list
           for (i in seq_along(updated.var.list)) {
             updated.var.list[[i]]$touch.na.default.option <- value
           }
           self@var.list <- updated.var.list
 
-          self@touch.na <- value
-          self
+          # Update na.touch, if different from touch.na
+          if (!identical(self@na.touch, value)) {
+            self@na.touch <- value
           }
+
+          # Return self
+          self
+        }
         ```
 
     -   The setter of property `var.list` needs to be updated. The setter itself outsources the corresponding code to functions `setter.variable.update.default.group()` and `setter.variable.create.final()`.
@@ -114,7 +122,7 @@ By R script:
 
             ``` r
             # Only make adjustments if the value for group actually changed
-            if (change) {
+            if (!identical(self@var.list[[current_var]][["group"]], value[[current_var]][["group"]])) {
               # If group is now NULL, turn all .default.group elements to NULL as well
               if (is.null(value[[i]][["group"]])) {
                 value[[i]][["touch.na.default.group"]] <- NULL
@@ -126,7 +134,7 @@ By R script:
                 if (value[[i]][["group"]] %in% group_names) {
                   # If the new group exists, search for the correct group
                   for (j in seq_along(self@var.groups)) {
-                    if (self@var.groups[[j]][["group.name"]] == value[[i]][["group"]]) {
+                    if (identical(self@var.groups[[j]][["group.name"]], value[[i]][["group"]])) {
                       # Update the .default.group value
                       value[[i]][["touch.na.default.group"]] <- self@var.groups[[j]][["touch.na"]]
 
@@ -186,15 +194,12 @@ By R script:
               current_group <- group_names[i]
               # Loop over all variables
               for (j in seq_along(updated.var.list)) {
-                # Check if group has been specified
-                if (!is.null(updated.var.list[[j]][["group"]])) {
-                  # Check if the specified group is the current group
-                  if (updated.var.list[[j]][["group"]] == current_group) {
-                    # Update .default.group values
-                    updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
+                # Check if the specified group is the current group
+                if (identical(updated.var.list[[j]][["group"]], current_group)) {
+                  # Update .default.group values
+                  updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
 
-                    # ADD MORE DEFAULTS HERE
-                  }
+                  # ADD MORE DEFAULTS HERE
                 }
               }
             }
@@ -202,75 +207,34 @@ By R script:
 
 -   **metadata_validator**:
 
-    -   In the metadata validator, the consistency of the internal keys in `var.list` and the corresponding key in `var.group` as well as the corresponding option need to be checked. This ensures that the internal keys cannot be changed directly by the user. Consistency checks for `.final` keys are not necessary, because whenever a user tries to change a `.final` key, it is re-calculated as part of the updating process and therefore ends up with the correct value again, i.e., the user can change the `.final` key without error or warning but it has no effect. The implementation has two pieces:
-        -   `validator.metadata.default.key()`: A new function has to be created, which does the consistency checks. It is called `validator.metadata.default.key()`, e.g., `validator.metadata.default.touch.na()` for `touch.na`. Example for `touch.na`:
+    -   In the metadata validator, the consistency of the internal keys in `var.list` and the corresponding key in `var.group` as well as the corresponding option need to be checked. This ensures that the internal keys cannot be changed directly by the user. Consistency checks for `.final` keys are not necessary, because whenever a user tries to change a `.final` key, it is re-calculated as part of the updating process and therefore ends up with the correct value again, i.e., the user can change the `.final` key without error or warning but it has no effect. The checks are outsourced to function `validator.metadata.default()`, which needs to be updated. Example for `touch.na`:
 
-            ``` r
-            validator.metadata.default.touch.na <- function(self, current_var) {
-              test.mode(paste0("validate.default.consistency.",current_var))
-
-              # Check consistency of self@touch.na and $touch.na.default.option
-              if (is.null(self@touch.na)) {
-                if (!is.null(self@var.list[[current_var]][["touch.na.default.option"]])) {
-                  return(paste0("Do not change @var.list$",current_var,
-                        "$touch.na.default.option directly. Change @touch.na instead."))
-                }
-              } else {
-                if (is.null(self@var.list[[current_var]][["touch.na.default.option"]])) {
-                  return(paste0("Do not change @var.list$",current_var,
-                        "$touch.na.default.option directly. Change @touch.na instead."))
-                }
-                if (self@var.list[[current_var]][["touch.na.default.option"]] != self@touch.na) {
-                  return(paste0("Do not change @var.list$",current_var,
-                        "$touch.na.default.option directly. Change @touch.na instead."))
-                }
-              }
-
-              # Check consistency of var.group$touch.na and $touch.na.default.group
-              if (is.null(self@var.list[[current_var]][["group"]])) {
-                if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
-                  return(paste0("Do not change @var.list$",current_var,
-                        "$touch.na.default.group directly. Change @var.groups instead."))
-                }
-              } else {
-                current_group <- self@var.list[[current_var]][["group"]]
-
-                if (is.null(self@var.groups[[current_group]][["touch.na"]])) {
-                  if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
-                    return(paste0("Do not change @var.list$",current_var,
-                          "$touch.na.default.group directly. Change @var.groups instead."))
-                  }
-                } else {
-                  if (is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
-                    return(paste0("Do not change @var.list$",current_var,
-                          "$touch.na.default.group directly. Change @var.groups instead."))
-                  }
-                  if (self@var.list[[current_var]][["touch.na.default.group"]] != self@var.groups[[current_group]][["touch.na"]]) {
-                      return(paste0("Do not change @var.list$",current_var,
-                            "$touch.na.default.group directly. Change @var.groups instead."))
-                  }
-                }
-              }
+        ``` r
+        validator.metadata.default <- function(self, current_var) {
+          # touch.na
+          ## .default.option
+          if (!identical(self@var.list[[current_var]][["touch.na.default.option"]], self@touch.na)) {
+            return(paste0("Do not change @var.list$",current_var, "$touch.na.default.option directly. Change @touch.na instead."))
+          }
+          ## .default.group
+          if (is.null(self@var.list[[current_var]][["group"]])) {
+            if (!is.null(self@var.list[[current_var]][["touch.na.default.group"]])) {
+              return(paste0("Do not change @var.list$",current_var, "$touch.na.default.group directly. Change @var.groups instead."))
             }
-            ```
+          } else {
+            current_group <- self@var.list[[current_var]][["group"]]
 
-        -   Metadata validator: The function mentioned above needs to be included in `metadata.validator()`. Example for `touch.na`:
-
-            ``` r
-            # Avoid direct change of automatically generated default-related variables
-            for (i in seq_along(self@var.list)) {
-              current_var <- self@var.list[[i]][["var.name"]]
-
-              # touch.na
-              check_result <- validator.metadata.default.touch.na(self, current_var)
-              if (!is.null(check_result)) {
-                return(check_result)
-              }
-
-              # ADD MORE DEFAULTS HERE
+            if (!identical(self@var.list[[current_var]][["touch.na.default.group"]], self@var.groups[[current_group]][["touch.na"]])) {
+              return(paste0("Do not change @var.list$",current_var, "$touch.na.default.group directly. Change @var.groups instead."))
             }
-            ```
+          }
+
+          # ADD MORE DEFAULTS HERE
+        }
+        ```
+
     -   In the `var.list` validator, the internal keys need to be added to the list of valid keys. In addition, the main key, e.g., `touch.na`, needs to be validated with the corresponding `checkmate` function. No validation is necessary for internal keys, i.e., `.default.option`, `.default.group`, and `.final`.
+
     -   In the `var.groups` validator, the group default key needs to be added to the list of valid keys and validated with a corresponding `checkmate` function.
 
 -   **metadata_constructor**: In the metadata constructor, the corresponding option of type "global variable default" needs to be added to the call of `S7::new_object()`. Include it below `var.list` and `var.groups`. Example for `touch.na`:
@@ -397,7 +361,7 @@ For the main option, i.e., `consent` in the example above, follow the steps in *
 
 ``` r
 if (is.null(self@id.var)) {
-  if (self@consent.final == TRUE) {
+  if (identical(self@consent.final, TRUE)) {
     return("@consent can only be TRUE if @id.var has been specified")
   }
 }
@@ -451,30 +415,23 @@ x
 
 -   **metadata_properties**: Here the property function of the option needs to be updated and the function of the alternative name needs to be created:
 
-    -   Create `meta.prop.[alternative name]()`: The property function of the alternative name gets the same class and validator as the property function of the option, as well as a setter. The setter sets the value of the alternative name and uptdates the value of the option, if it is different from its current value. If there are more than one alternative names, the other ones do not need to be considered here. See the complete property function of `na.touch`, the alternative name of `touch.na`:
+    -   Create `meta.prop.[alternative name]()`: The property function of the alternative name gets the same class and validator as the property function of the option, as well as a setter. The setter sets the value of the alternative name and updates the value of the option, if it is different from its current value. If there are more than one alternative names, the other ones do not need to be considered here. Here is the complete property function of `na.touch`, the alternative name of `touch.na`:
 
         ``` r
         meta.prop.na.touch <- S7::new_property(
           class = NULL | S7::class_logical,
+          validator = function(value) {
+            if (!checkmate::test_logical(value, len = 1, any.missing = FALSE, null.ok = TRUE)) {
+              return("must have length 1 and must not be NA")
+            }
+          },
           setter = function(self, value) {
-            test.mode("option.na.touch.setter")
-
             # Update na.touch
             self@na.touch <- value
 
             # Update touch.na, if different from na.touch
-            if (is.null(value)) {
-              if (!is.null(self@touch.na)) {
-                self@touch.na <- value
-              }
-            } else {
-              if (!is.null(self@touch.na)) {
-                if (self@touch.na != value) {
-                  self@touch.na <- value
-                }
-              } else {
-                self@touch.na <- value
-              }
+            if (!identical(self@touch.na, value)) {
+              self@touch.na <- value
             }
 
             # Return self
@@ -483,22 +440,17 @@ x
         )
         ```
 
-    -   Update the property function of the option: The setter should start with the assignment of the value to the option itself, so that the validator runs in the beginning before invalid values might be given to the alternative names (fails faster). Update the values of all alternative names if they are different. See the complete property function for option `touch.na`:
+    -   Update the property function of the option: The setter should start with the assignment of the value to the option itself, so that the validator runs in the beginning before invalid values might be given to the alternative names (fails faster). Update the values of all alternative names if they are different. Here is the complete property function for option `touch.na`:
 
         ``` r
         meta.prop.touch.na <- S7::new_property(
           class = NULL | S7::class_logical,
           validator = function(value) {
-            test.mode("option.touch.na.validator")
-
-            if (!checkmate::test_logical(value, len = 1, any.missing = FALSE,
-                                        null.ok = TRUE)) {
+            if (!checkmate::test_logical(value, len = 1, any.missing = FALSE, null.ok = TRUE)) {
               return("must have length 1 and must not be NA")
             }
           },
           setter = function(self, value) {
-            test.mode("option.touch.na.setter")
-
             # Update touch.na (first, so that validator runs before changing var.list or na.touch)
             self@touch.na <- value
 
@@ -510,18 +462,8 @@ x
             self@var.list <- updated.var.list
 
             # Update na.touch, if different from touch.na
-            if (is.null(value)) {
-              if (!is.null(self@na.touch)) {
-                self@na.touch <- value
-              }
-            } else {
-              if (!is.null(self@na.touch)) {
-                if (self@na.touch != value) {
-                  self@na.touch <- value
-                }
-              } else {
-                self@na.touch <- value
-              }
+            if (!identical(self@na.touch, value)) {
+              self@na.touch <- value
             }
 
             # Return self

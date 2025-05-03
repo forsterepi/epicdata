@@ -36,6 +36,7 @@ Collate:
     'create_projects.R'
     'data.R'
     'epicdata-package.R'
+    'metadata_process_input.R'
     'metadata_validator.R'
     'metadata_properties.R'
     'metadata_constructor.R'

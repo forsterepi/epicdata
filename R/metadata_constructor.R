@@ -10,6 +10,7 @@ metadata.constructor <- function(file) {
   yaml.str.component(yaml_input)
   #yaml.str.options(yaml_input)
   yaml_input %<>% yaml.add.name() # Finalize and test this function
+  #yaml.str.var.list(yaml_input)
 
   if (is.null(yaml_input$options$touch.na)) {
     touch.na.input <- yaml_input$options$na.touch
@@ -203,6 +204,17 @@ yaml.str.options <- function(x, call = rlang::caller_env()) {
 
 }
 
+
+yaml.str.var.list <- function(x, call = rlang::caller_env()) {
+
+  # Check var.list when reading in YAML
+
+
+  # dict.eng is not valid
+
+}
+
+
 yaml.add.name <- function(x) {
 
   for (i in seq_along(x$var.list)) {
@@ -217,6 +229,10 @@ yaml.add.name <- function(x) {
 
   x
 }
+
+
+
+
 
 
 

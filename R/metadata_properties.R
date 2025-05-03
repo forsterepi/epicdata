@@ -1,4 +1,5 @@
 #' @include metadata_validator.R
+#' @include metadata_process_input.R
 NULL
 
 
@@ -32,7 +33,7 @@ meta.prop.id.var <- S7::new_property(
       return("must have length 1 and must not be empty or NA")
     }
     if (!is.null(value)) {
-      if (make.names(value) != value) {
+      if (!identical(make.names(value), value)) {
         return("must be a syntactically valid name")
       }
     }
@@ -100,18 +101,8 @@ meta.prop.touch.na <- S7::new_property(
     self@var.list <- updated.var.list
 
     # Update na.touch, if different from touch.na
-    if (is.null(value)) {
-      if (!is.null(self@na.touch)) {
-        self@na.touch <- value
-      }
-    } else {
-      if (!is.null(self@na.touch)) {
-        if (self@na.touch != value) {
-          self@na.touch <- value
-        }
-      } else {
-        self@na.touch <- value
-      }
+    if (!identical(self@na.touch, value)) {
+      self@na.touch <- value
     }
 
     # Return self
@@ -136,18 +127,8 @@ meta.prop.na.touch <- S7::new_property(
     self@na.touch <- value
 
     # Update touch.na, if different from na.touch
-    if (is.null(value)) {
-      if (!is.null(self@touch.na)) {
-        self@touch.na <- value
-      }
-    } else {
-      if (!is.null(self@touch.na)) {
-        if (self@touch.na != value) {
-          self@touch.na <- value
-        }
-      } else {
-        self@touch.na <- value
-      }
+    if (!identical(self@touch.na, value)) {
+      self@touch.na <- value
     }
 
     # Return self
@@ -169,7 +150,8 @@ meta.prop.var.list <- S7::new_property(
       if (length(value) > length(self@var.list)) {
         cli::cli_abort(c("Error in creating new variables",
           "i" = "Please create new variables via the YAML file."),
-          call = rlang::caller_env(), class = "error.meta.prop.var.list.1")
+          call = rlang::expr(metadata@var.list <- value),
+          class = "error.meta.prop.var.list.1")
         ## SOLVE CALLER_ENV PROBLEMS
       }
     }
@@ -188,7 +170,8 @@ meta.prop.var.list <- S7::new_property(
       )
     }
 
-    #Pre-validate
+    #Pre-validate (but if we pre-validate, processed inputs like cats, dict
+    # must be validated in the corresponding processing function)
     check_result <- var.list.validator(value)
     if (!is.null(check_result)) {
       cli::cli_abort(paste0("@var.list ",check_result),
@@ -198,6 +181,7 @@ meta.prop.var.list <- S7::new_property(
 
     # Process inputs
     value %<>% setter.variable.process.inputs()
+    ## Update input validation with checkmate in setter.variable.cats()
 
     # Alternative names
     value %<>% setter.variable.update.alternative.names(self)
@@ -235,6 +219,8 @@ meta.prop.var.groups <- S7::new_property(
     if (is.list(value) & length(value) == 0) {
       value <- NULL
     }
+
+    ##WHAT IF INVALID VALUE FOR GROUP.NAME???, e.g. NA
 
     # Update names
     for (i in seq_along(value)) {
@@ -319,244 +305,6 @@ meta.prop.DUP_FREQ <- S7::new_property(
 
 # Setter ------------------------------------------------------------------
 
-#' Process `cats` and `cats.eng`
-#'
-#' Used in function `setter.variable.process.inputs()`
-#'
-#' @param cats A character vector containing the category specification from the
-#' YAML input.
-#' @param name A single character. It contains the name of the variable and
-#' is used in error messages.
-#' @param eng TRUE or FALSE (default). If FALSE, "cats" is used in error
-#' messages. IF TRUE, "cats.eng" is used in error messages.
-#' @param call The caller environment used in error messages to supply the right
-#' call to the user.
-#'
-#' @returns A data.frame, which contains the processed information of the
-#' character input for variable keys `cats` and `cats.eng`.
-#'
-#' @noRd
-setter.variable.cats <- function(cats, name, eng = FALSE,
-                                 call = rlang::caller_env()) {
-  # Check input: eng
-  if (!is.logical(eng) | is.na(eng)) {
-    cli::cli_abort(c("x" = "Error IE006"), call = call, .internal = TRUE,
-                   class = "IE006")
-  }
-
-  # Based on eng, create cats_type, which is used in error messages
-  if (eng) {
-    cats_type <- "cats.eng"
-  } else {
-    cats_type <- "cats"
-  }
-
-  # If cats = NULL, return NULL
-  if (is.null(cats)) {
-    return(NULL)
-  }
-
-  # cats cannot be NA or contain any NA
-  if (is.na(cats) %>% any()) {
-    cli::cli_abort(c("!" = "{.var {cats_type}} must not be NA or contain any
-                     NA.",
-                     "i" = "Applies to variable {.var {name}}."),
-                   call = call, class = "error.setter.variable.cats.1")
-  }
-
-  # cats must be character
-  if (!is.character(cats)) {
-    cli::cli_abort(c("!" = "{.var {cats_type}} must be specified as character
-                     vector.",
-                     "i" = "Applies to variable {.var {name}}.",
-                     "i" = "See the {.vignette epicdata::metadata_long}
-                     vignette."),
-                   call = call, class = "error.setter.variable.cats.2")
-  }
-
-  # Count if there is a single `=` in each element of cats
-  if (cats %>% stringi::stri_count_regex("=") %>% magrittr::equals(1) %>%
-      all() %>% magrittr::not()) {
-    report <- cats[cats %>%
-                     stringi::stri_count_regex("=") %>%
-                     magrittr::equals(1) %>%
-                     magrittr::not()] %>%
-      stringi::stri_flatten(collapse = ", ")
-
-    cli::cli_abort(c("!" = "{.var {cats_type}} has the wrong format.",
-                     "i" = "{.var {cats_type}} must connect an integer with a
-                     text, i.e., non-integer, via a single equal sign, e.g.,
-                     {.var 1 = female}",
-                     "i" = "In variable {.var {name}}, some elements have the
-                     wrong format: {report}"),
-                   call = call, class = "error.setter.variable.cats.3")
-  }
-
-  # Check length of cats
-  if (cats %>% length() %>% magrittr::equals(1)) {
-    cli::cli_abort(c("!" = "{.var {cats_type}} has `length == 1`, but must have
-                     `length > 1`.",
-                     "i" = "You specified only a single category for variable
-                     {.var {name}}."),
-                   call = call, class = "error.setter.variable.cats.10")
-  }
-
-  # Split each element of cats in two elements based on the `=`, also trim
-  splitted <- cats %>%
-    stringi::stri_split_regex(pattern = "=", simplify = TRUE) %>%
-    apply(2, stringi::stri_trim_both) %>%
-    as.data.frame()
-
-  # Make sure that `splitted` has exactly two columns
-  if (splitted %>% ncol() %>% magrittr::equals(2) %>% magrittr::not()) {
-    cli::cli_abort(c("x" = "Error IE001"), call = call, .internal = TRUE,
-                   class = "IE001")
-  }
-
-  # Derive which elements are integers
-  suppressWarnings({
-    inti <- splitted %>%
-      sapply(as.integer) %>%
-      as.data.frame()
-  })
-
-  # Check for doubles
-  inti_num <- inti %>% unlist() %>% as.numeric()
-  suppressWarnings({
-    splitted_num <- splitted %>% unlist() %>% as.numeric()
-  })
-
-  if (inti_num %>%
-      magrittr::equals(splitted_num) %>%
-      magrittr::extract(!is.na(.)) %>%
-      all() %>%
-      magrittr::not()) {
-    report <- splitted_num[inti_num != splitted_num] %>%
-      magrittr::extract(!is.na(.)) %>%
-      as.character() %>%
-      unique() %>%
-      stringi::stri_flatten(collapse = ", ")
-
-    cli::cli_abort(c("!" = "{.var {cats_type}} must not contain doubles.",
-                     "i" = "In variable {.var {name}}, some elements are
-                     double: {report}"),
-                   call = call, class = "error.setter.variable.cats.4")
-  }
-
-  # Error if there is no integer
-  if (inti %>%
-      is.na() %>%
-      rowSums() %>%
-      magrittr::equals(2) %>%
-      any()) {
-    report <- splitted[inti %>%
-                         is.na() %>%
-                         rowSums() %>%
-                         magrittr::equals(2),] %>%
-      apply(1, stringi::stri_flatten, collapse = " = ") %>%
-      stringi::stri_flatten(collapse = ", ")
-
-    cli::cli_abort(c("!" = "{.var {cats_type}} must connect an integer with a
-                     text, i.e., non-integer, via a single equal sign, e.g.,
-                     {.var 1 = female}",
-                     "i" = "In variable {.var {name}}, some elements of
-                     {.var {cats_type}} do not contain an integer: {report}"),
-                   call = call, class = "error.setter.variable.cats.5"
-    )
-  }
-
-  # Error if there are two integers
-  if (inti %>%
-      is.na() %>%
-      rowSums() %>%
-      magrittr::equals(0) %>%
-      any()) {
-    report <- splitted[inti %>%
-                         is.na() %>%
-                         rowSums() %>%
-                         magrittr::equals(0),] %>%
-      apply(1, stringi::stri_flatten, collapse = " = ") %>%
-      stringi::stri_flatten(collapse = ", ")
-
-    cli::cli_abort(c("!" = "{.var {cats_type}} must connect an integer with a
-                     text, i.e., non-integer, via an equal sign, e.g.,
-                     {.var 1 = female}",
-                     "i" = "In variable {.var {name}}, some elements of
-                     {.var {cats_type}} contain two integers: {report}"),
-                   call = call, class = "error.setter.variable.cats.6"
-    )
-  }
-
-  # Process if exactly one is integer
-  if (inti %>%
-      is.na() %>%
-      rowSums() %>%
-      magrittr::equals(1) %>%
-      all()) {
-    out <- data.frame(level = rep(NA,nrow(splitted)),
-                      label = rep(NA,nrow(splitted)))
-    for (i in 1:nrow(out)) {
-      out$label[i] <- splitted[i, inti[i,] %>% is.na() %>% which()]
-      out$level[i] <- splitted[i, inti[i,] %>% is.na() %>% magrittr::not() %>%
-                                 which()]
-    }
-
-    out$level %<>% as.integer()
-
-    # No NAs after tranformation to integer
-    if (out$level %>% is.na() %>% any()) {
-      cli::cli_abort(c("x" = "Error IE003"), call = call, .internal = TRUE,
-                     class = "IE003")
-    }
-
-    # Error if negative integers (0 is allowed)
-    if (out$level %>% magrittr::is_less_than(0) %>% any()) {
-      cli::cli_abort(c("!" = "{.var {cats_type}} must not contain negative
-                       integers.",
-                       "i" = "Variable {.var {name}} contains negative
-                       integers."),
-                     call = call, class = "error.setter.variable.cats.7"
-      )
-    }
-
-    # Error if duplcicated integers
-    if (out$level %>% duplicated() %>% any()) {
-      report <- out$level[out$level %>% duplicated() %>% any()] %>%
-        as.character() %>%
-        unique() %>%
-        stringi::stri_flatten(collapse = ", ")
-
-      cli::cli_abort(c("!" = "{.var {cats_type}} must not contain duplicated
-                       values.",
-                       "i" = "Variable {.var {name}} contains duplicated
-                       integers: {report}"),
-                     call = call, class = "error.setter.variable.cats.8")
-    }
-
-    # Error if duplicated levels
-    if (out$label %>% duplicated() %>% any()) {
-      report <- out$label[out$label %>% duplicated() %>% any()] %>%
-        unique() %>%
-        stringi::stri_flatten(collapse = ", ")
-
-      cli::cli_abort(c("!" = "{.var {cats_type}} must not contain duplicated
-                       values.",
-                       "i" = "Variable {.var {name}} contains duplicated
-                       labels: {report}"),
-                     call = call, class = "error.setter.variable.cats.9")
-    }
-
-    # Order by integer
-    out <- out[out$level %>% order(),] %>% magrittr::set_rownames(1:nrow(out))
-  } else {
-    cli::cli_abort(c("x" = "Error IE002"), call = call, .internal = TRUE,
-                   class = "IE002")
-  }
-
-  # Return
-  out
-}
-
 #' Process inputs in `@var.list` setter function
 #'
 #' Sometimes, the input required in YAML does not correspond to the object
@@ -573,13 +321,13 @@ setter.variable.process.inputs <- function(value) {
   for (i in seq_along(value)) {
     # Process cats input
     if (!is.data.frame(value[[i]]$cats)) {
-      value[[i]]$cats <- setter.variable.cats(cats = value[[i]]$cats,
+      value[[i]]$cats <- process.cats(cats = value[[i]]$cats,
                                               name = value[[i]]$var.name,
                                               eng = FALSE)
     }
     # Process cats.eng input
     if (!is.data.frame(value[[i]]$cats.eng)) {
-      value[[i]]$cats.eng <- setter.variable.cats(cats = value[[i]]$cats.eng,
+      value[[i]]$cats.eng <- process.cats(cats = value[[i]]$cats.eng,
                                                   name = value[[i]]$var.name,
                                                   eng = TRUE)
     }
@@ -602,20 +350,12 @@ setter.variable.update.alternative.names <- function(value, self) {
     current_var <- value[[i]][["var.name"]]
 
     # touch.na / na.touch
-    ## Check if touch.na changed
-    change.touch.na <- setter.variable.did.key.change(self = self,
-                        value = value, current_var = current_var,
-                        key = "touch.na")
-    ## Apply changes to na.touch
-    if (change.touch.na) {
+    if (!identical(self@var.list[[current_var]][["touch.na"]],
+                   value[[current_var]][["touch.na"]])) {
       value[[i]][["na.touch"]] <- value[[i]][["touch.na"]]
     }
-    ## Check if na.touch changed
-    change.na.touch <- setter.variable.did.key.change(self = self,
-                        value = value, current_var = current_var,
-                        key = "na.touch")
-    ## Apply changes to touch.na
-    if (change.na.touch) {
+    if (!identical(self@var.list[[current_var]][["na.touch"]],
+                   value[[current_var]][["na.touch"]])) {
       value[[i]][["touch.na"]] <- value[[i]][["na.touch"]]
     }
 
@@ -638,20 +378,12 @@ setter.group.update.alternative.names <- function(value, self) {
     current_group <- value[[i]][["group.name"]]
 
     # touch.na / na.touch
-    ## Check if touch.na changed
-    change.touch.na <- setter.group.did.key.change(self = self,
-                        value = value, current_group = current_group,
-                        key = "touch.na")
-    ## Apply changes to na.touch
-    if (change.touch.na) {
+    if (!identical(self@var.groups[[current_group]][["touch.na"]],
+                  value[[current_group]][["touch.na"]])) {
       value[[i]][["na.touch"]] <- value[[i]][["touch.na"]]
     }
-    ## Check if na.touch changed
-    change.na.touch <- setter.group.did.key.change(self = self,
-                        value = value, current_group = current_group,
-                        key = "na.touch")
-    ## Apply changes to touch.na
-    if (change.na.touch) {
+    if (!identical(self@var.groups[[current_group]][["na.touch"]],
+                  value[[current_group]][["na.touch"]])) {
       value[[i]][["touch.na"]] <- value[[i]][["na.touch"]]
     }
 
@@ -660,7 +392,6 @@ setter.group.update.alternative.names <- function(value, self) {
   # Return
   value
 }
-
 
 #' Update .default.group keys when changing the group key in `@var.list`
 #'
@@ -681,13 +412,12 @@ setter.variable.update.default.group <- function(value, self) {
 
   # Loop over all variables in the updated var.list, i.e., value
   for (i in seq_along(value)) {
-    # Check if the value for group in variable i actually changed
+    # Get current variable
     current_var <- value[[i]][["var.name"]]
-    change <- setter.variable.did.key.change(self = self, value = value,
-                current_var = current_var, key = "group")
 
     # Only make adjustments if the value for group actually changed
-    if (change) {
+    if (!identical(self@var.list[[current_var]][["group"]],
+                   value[[current_var]][["group"]])) {
       # If group is now NULL, turn all .default.group elements to NULL as well
       if (is.null(value[[i]][["group"]])) {
         value[[i]][["touch.na.default.group"]] <- NULL
@@ -697,7 +427,7 @@ setter.variable.update.default.group <- function(value, self) {
         if (value[[i]][["group"]] %in% group_names) {
           # If the new group exists, search for the correct group
           for (j in seq_along(self@var.groups)) {
-            if (self@var.groups[[j]][["group.name"]] == value[[i]][["group"]]) {
+            if (identical(self@var.groups[[j]][["group.name"]], value[[i]][["group"]])) {
               # Update the .default.group value
               value[[i]][["touch.na.default.group"]] <- self@var.groups[[j]][["touch.na"]]
               # ADD MORE DEFAULTS HERE
@@ -796,14 +526,11 @@ setter.group.update.var.list <- function(self, value) {
     current_group <- group_names[i]
     # Loop over all variables
     for (j in seq_along(updated.var.list)) {
-      # Check if group has been specified
-      if (!is.null(updated.var.list[[j]][["group"]])) {
-        # Check if the specified group is the current group
-        if (updated.var.list[[j]][["group"]] == current_group) {
-          # Update .default.group values
-          updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
-          # ADD MORE DEFAULTS HERE
-        }
+      # Check if the specified group is the current group
+      if (identical(updated.var.list[[j]][["group"]], current_group)) {
+        # Update .default.group values
+        updated.var.list[[j]][["touch.na.default.group"]] <- value[[current_group]][["touch.na"]]
+        # ADD MORE DEFAULTS HERE
       }
     }
   }
@@ -841,77 +568,14 @@ setter.select.default <- function(var = NULL, group = NULL, option = NULL,
   out
 }
 
-#' Check if a key in `@var.list` actually changed
-#'
-#' Check is specific to a certain key in a certain variable
-#'
-#' @param self The previous version of the object
-#' @param value The new version of `@var.list`
-#' @param current_var The variable in `@var.list` to check. Must be a single
-#' string.
-#' @param key The key to check. Must be a single string.
-#'
-#' @returns TRUE or FALSE
-#'
-#' @noRd
-setter.variable.did.key.change <- function(self, value, current_var, key) {
-  # Start with change == FALSE, just for safety
-  change <- FALSE
 
-  # Compare self and value
-  if (is.null(self@var.list[[current_var]][[key]]) & is.null(value[[current_var]][[key]])) {
-    change <- FALSE
-  } else if (is.null(self@var.list[[current_var]][[key]]) & !is.null(value[[current_var]][[key]])) {
-    change <- TRUE
-  } else if (!is.null(self@var.list[[current_var]][[key]]) & is.null(value[[current_var]][[key]])) {
-    change <- TRUE
-  } else if (!is.null(self@var.list[[current_var]][[key]]) & !is.null(value[[current_var]][[key]])) {
-    if (self@var.list[[current_var]][[key]] == value[[current_var]][[key]]) {
-      change <- FALSE
-    } else {
-      change <- TRUE
-    }
-  }
 
-  # Return
-  change
-}
+# viol <- y$var.list$id$dict.viol
+#
+# lobstr::ast(!!rlang::parse_expr(viol[3]))
+# rlang::expr(mutate(df, type := case_when(height > 200 | mass > 200 ~ "large", species == "Droid" ~ "robot", .default = type))) %>% View()
 
-#' Check if a key in `@var.groups` actually changed
-#'
-#' Check is specific to a certain key in a certain group
-#'
-#' @param self The previous version of the object
-#' @param value The new version of `@var.groups`
-#' @param current_group The variable in `@var.groups` to check. Must be a single
-#' string.
-#' @param key The key to check. Must be a single string.
-#'
-#' @returns TRUE or FALSE
-#'
-#' @noRd
-setter.group.did.key.change <- function(self, value, current_group, key) {
-  # Start with change == FALSE, just for safety
-  change <- FALSE
 
-  # Compare self and value
-  if (is.null(self@var.groups[[current_group]][[key]]) & is.null(value[[current_group]][[key]])) {
-    change <- FALSE
-  } else if (is.null(self@var.groups[[current_group]][[key]]) & !is.null(value[[current_group]][[key]])) {
-    change <- TRUE
-  } else if (!is.null(self@var.groups[[current_group]][[key]]) & is.null(value[[current_group]][[key]])) {
-    change <- TRUE
-  } else if (!is.null(self@var.groups[[current_group]][[key]]) & !is.null(value[[current_group]][[key]])) {
-    if (self@var.groups[[current_group]][[key]] == value[[current_group]][[key]]) {
-      change <- FALSE
-    } else {
-      change <- TRUE
-    }
-  }
-
-  # Return
-  change
-}
 
 # variable property remains
 
