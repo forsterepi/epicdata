@@ -59,9 +59,9 @@ yaml.read <- function(x, arg = rlang::caller_arg(x),
                        marks to keys and values with special characters.") %>%
                        magrittr::set_names(c("i","x","i")) %>%
                        magrittr::extract(c(
-                         stringr::str_detect(cnd$message,"line"),
+                         stringi::stri_detect(cnd$message, fixed = "line"),
                          TRUE,
-                         stringr::str_detect(cnd$message,"line"))
+                         stringi::stri_detect(cnd$message, fixed = "line"))
                        )), # add info only if applicable
                    call = call,
                    class = "error.yaml.read.1")})
@@ -97,7 +97,7 @@ yaml.str.input <- function(x, arg = rlang::caller_arg(x),
 
 yaml.forgive.component.name <- function(x) {
 
-  names(x) %<>% stringr::str_to_lower()
+  names(x) %<>% stringi::stri_trans_tolower()
 
   forgive.options <- c("option")
   forgive.var.list <- c("varlist","varslist","vars.list","list.var","list.vars",
@@ -128,8 +128,10 @@ yaml.str.component <- function(x, arg = rlang::caller_arg(x),
   error = function(cnd) {
     cli::cli_abort(c("YAML contains invalid component names!",
                      cnd$message %>%
-                       stringr::str_replace_all("\\{","(") %>%
-                       stringr::str_replace_all("\\}",")"),
+                       stringi::stri_replace_all(replacement = "(",
+                                                 regex = "\\{") %>%
+                       stringi::stri_replace_all(replacement = ")",
+                                                 regex = "\\}"),
                      "Only the above listed components can be on the first
                      YAML layer, i.e., without indentation.") %>%
                      magrittr::set_names(c("!","x","i")),
@@ -193,10 +195,11 @@ yaml.str.options <- function(x, call = rlang::caller_env()) {
   },
   error = function(cnd) {
     cli::cli_abort(c("Some options have not been specified correctly.",
-                     cnd$message %>% stringr::str_split_1("\n") %>%
-                       stringr::str_trim("both") %>%
+                     cnd$message %>% stringi::stri_split_regex("\n") %>%
+                       stringi::stri_trim_both() %>%
                        magrittr::extract(2:length(.)) %>%
-                       stringr::str_replace("^\\* Variable","Option") %>%
+                       stringi::stri_replace_all(replacement = "Option",
+                                            regex = "^\\* Variable") %>%
                        magrittr::set_names(rep("x",length(.))),
                      "i" = "Some info"),
                    call = call,
@@ -250,7 +253,7 @@ yaml.add.name <- function(x) {
 
 # same for variables (here overlap might be possible as well with less control :/)
 
-#x %>% stringr::str_split_1("&") %>% stringr::str_trim("both")
+#x %>% stringi::stri_split("&") %>% stringi::stri_trim_both())
 
 
 

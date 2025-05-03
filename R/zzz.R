@@ -10,6 +10,8 @@ NULL
 # variable
 utils::globalVariables(".")
 utils::globalVariables("test_mode")
+utils::globalVariables("df")
+utils::globalVariables(":=")
 
 # devtools::check() does not realize that package withr is used in examples
 # Strategy suggested in R packages (2e), 11.4.1.1 How to not use a package in

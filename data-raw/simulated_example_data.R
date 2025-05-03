@@ -22,7 +22,7 @@ if (sum(how_many_entries) > n_entry) {
 
 n <- length(how_many_entries)
 
-part_ids <- paste0("ID",c(1:length(how_many_entries)) %>% as.character() %>% stringr::str_pad(width = 3, side = "left", pad = "0"))
+part_ids <- paste0("ID",c(1:length(how_many_entries)) %>% as.character() %>% stringi::stri_pad(width = 3, side = "left", pad = "0"))
 
 # Define a few categorical variables
 male <- sample(c("0","1",NA), size = n, replace = T, prob = c(0.45,0.45,0.1))

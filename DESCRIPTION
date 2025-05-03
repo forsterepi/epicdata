@@ -19,11 +19,11 @@ Config/testthat/edition: 3
 Imports: 
     checkmate,
     cli,
+    dplyr,
     magrittr,
     rlang,
     S7,
     stringi,
-    stringr,
     usethis,
     yaml
 URL: https://github.com/forsterepi/epicdata
