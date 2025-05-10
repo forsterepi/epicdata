@@ -19,8 +19,7 @@ process.cats <- function(cats, name, eng = FALSE,
                                  call = rlang::caller_env()) {
   # Check input: eng
   if (!is.logical(eng) | is.na(eng)) {
-    cli::cli_abort(c("x" = "Error IE004"), call = call, .internal = TRUE,
-                   class = "IE004")
+    cli::cli_abort(c("x" = "Error IE004"), .internal = TRUE, class = "IE004")
   }
 
   # Based on eng, create cats_type, which is used in error messages
@@ -184,8 +183,7 @@ process.cats <- function(cats, name, eng = FALSE,
 
     # No NAs after tranformation to integer
     if (out$level %>% is.na() %>% any()) {
-      cli::cli_abort(c("x" = "Error IE003"), call = call, .internal = TRUE,
-                     class = "IE003")
+      cli::cli_abort(c("x" = "Error IE003"), .internal = TRUE, class = "IE003")
     }
 
     # Error if negative integers (0 is allowed)
@@ -228,8 +226,7 @@ process.cats <- function(cats, name, eng = FALSE,
     # Order by integer
     out <- out[out$level %>% order(),] %>% magrittr::set_rownames(1:nrow(out))
   } else {
-    cli::cli_abort(c("x" = "Error IE002"), call = call, .internal = TRUE,
-                   class = "IE002")
+    cli::cli_abort(c("x" = "Error IE002"), .internal = TRUE, class = "IE002")
   }
 
   # Return
@@ -329,7 +326,7 @@ process.dict <- function(dict, call = rlang::caller_env()) {
 #' @noRd
 process.dict.rules <- function(rule, dict, var, var.names,
                                call = rlang::caller_env()) {
-  # Rutrun NULL if rule is NULL
+  # Ruturn NULL if rule is NULL
   if (is.null(rule)) {
     return(NULL)
   }
@@ -379,6 +376,43 @@ process.dict.rules <- function(rule, dict, var, var.names,
   out
 }
 
+#' Process variable definitions in `new`
+#'
+#' Instructions provided in `new` are processed into the expression that
+#' creates the variable.
+#'
+#' @param new A character vector containing the inputted variable definition.
+#' @param var A single string containing the variable name.
+#' @param var.names A character vector containing all variables in `var.list`.
+#' @param new.order A character vector that gives the order in which the
+#' variables with key `new` are created. Is equal to the order in which they
+#' appear in `var.list`.
+#'
+#' @returns An expression of a call to `dplyr::mutate()` which applies
+#' variable definition of the corresponding variable. The name of the data.frame
+#' on which `mutate()` is applied is assumed to be `df`.
+#'
+#' @noRd
+process.new <- function(new, var, var.names, new.order) {
+  # Return NULL if new is NULL
+  if (is.null(new)) {
+    return(NULL)
+  }
+
+  # Check the format of new and return expression
+  e <- check.new.format(new = new, var = var, var.names = var.names,
+                        new.order = new.order)
+
+  # Get variable
+  v <- rlang::ensym(var)
+
+  # Create final call by unquoting variable name v and definition e
+  out <- rlang::expr(df %<>% dplyr::mutate(!!v := !!e))
+
+  # Return
+  out
+}
+
 
 # Helpers -----------------------------------------------------------------
 
@@ -398,8 +432,7 @@ process.dict.rules <- function(rule, dict, var, var.names,
 check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
   if (!checkmate::test_character(rule, min.len = 1, min.chars = 1,
                                  any.missing = FALSE, null.ok = FALSE)) {
-    cli::cli_abort(c("x" = "Error IE006"), call = call, .internal = TRUE,
-                   class = "IE006")
+    cli::cli_abort(c("x" = "Error IE006"), .internal = TRUE, class = "IE006")
   }
 
   erule <- vector(mode = "list", length = length(rule))
@@ -439,7 +472,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
 
       # Value in front of ~ must be a call
       if (is.call(ex[[2]])) {
-        symbols <- extract.symbols.from.ast(ex)
+        symbols <- extract.symbols.from.ast(ex, call = call)
         if (symbols %>% magrittr::is_in(var.names) %>% all() %>%
             magrittr::not()) {
           re <- symbols[symbols %>% magrittr::is_in(var.names) %>%
@@ -494,8 +527,118 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       call = call, class = "error.check.rules.format.8")
   }
 
+  # Reorder an put entry with "~ value" format at the end
+  if (n_length2 == 1) {
+    erule %<>% magrittr::extract(lapply(., length) %>%
+                                   unlist() %>%
+                                   order(decreasing = TRUE))
+  }
+
   # Return
   erule
+}
+
+
+#' Check format requirements for key `new`
+#'
+#' @param new A character vector containing the inputted variable definition.
+#' @param var A single string containing the variable name.
+#' @param var.names A character vector containing all variables in `var.list`.
+#' @param new.order A character vector that gives the order in which the
+#' variables with key `new` are created. Is equal to the order in which they
+#' appear in `var.list`.
+#'
+#' @returns If no error is thrown due to incorrect formats, returns an
+#' expressions after parsing `new`.
+#'
+#' @noRd
+check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
+                             new.order = NULL) {
+  # Evaluate inputs
+  if (!checkmate::test_character(var, len = 1, min.chars = 1,
+                                 any.missing = FALSE, null.ok = FALSE)) {
+    cli::cli_abort(c("x" = "Error IE007"), .internal = TRUE, class = "IE007")
+  }
+  if (!checkmate::test_character(var.names, min.len = 1, min.chars = 1,
+                                 any.missing = FALSE, null.ok = FALSE)) {
+    cli::cli_abort(c("x" = "Error IE008"), .internal = TRUE, class = "IE008")
+  }
+  if (!checkmate::test_character(new.order, min.len = 1, min.chars = 1,
+                                 any.missing = FALSE, null.ok = FALSE)) {
+    cli::cli_abort(c("x" = "Error IE009"), .internal = TRUE, class = "IE009")
+  }
+
+  # Craft call
+  call <- craft.call.var.list(variable = var, key = "new", value = new)
+
+  # Allow numeric and boolean constants
+  if (checkmate::test_scalar(new, na.ok = FALSE, null.ok = FALSE)) {
+    new %<>% as.character()
+  }
+
+  # Check character input
+  if (!checkmate::test_character(new, len = 1, min.chars = 1,
+                                 any.missing = FALSE, null.ok = FALSE)) {
+    cli::cli_abort(c("For key `new`, the variable definition must be provided
+      as a single character.",
+      "i" = "Please check the required format in the documentation:
+      {.vignette epicdata::metadata_long}"), call = call,
+      class = "error.check.new.format.1")
+  }
+
+  # Evaluate if rule can be parsed to an expression
+  rlang::try_fetch(ex <- rlang::parse_expr(new),
+    error = function(cnd) {
+      cli::cli_abort(c("Unable to process variable definition {.var {new}}",
+        "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"), call = call,
+        class = "error.check.new.format.2")})
+
+  # Error if call is of function `=`
+  if (length(ex) > 1) {
+    if (identical(ex[[1]], rlang::sym("="))) {
+      cli::cli_abort(c("Variable definition {.var {new}} has an incorrect format.",
+        "i" = "Do not assign the variable name with `=`.",
+        "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"), call = call,
+        class = "error.check.new.format.3")
+    }
+  }
+
+  # Error if only NULL
+  if (identical(length(ex), 1L)) {
+    if (is.null(ex)) {
+      cli::cli_abort(c("Variable definition {.var {new}} has an incorrect format.",
+        "i" = "Do not assign `NULL`.",
+        "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"), call = call,
+        class = "error.check.new.format.4")
+    }
+  }
+
+  # Check if all symbols are variables that are vailable
+  symbols <- extract.symbols.from.ast(ex, call = call)
+  not_new <- var.names[var.names %!in% new.order]
+
+  if (identical(which(new.order == var), 1L)) {
+    allowed <- not_new
+  } else {
+    allowed <- c(not_new, new.order[1:(which(new.order == var) - 1)])
+  }
+
+  if (symbols %>% magrittr::is_in(allowed) %>% all() %>%  magrittr::not()) {
+    re <- symbols[symbols %>% magrittr::is_in(allowed) %>%
+                  magrittr::not()] %>% unique() %>%
+                  stringi::stri_c(collapse = ", ")
+    cli::cli_abort(c("Variable definition {.var {new}} has an incorrect format.",
+      "i" = "Some variable names are not available for defining {.var {var}}: {re}",
+      "i" = "Please check the required format in the documentation:
+      {.vignette epicdata::metadata_long}"), call = call,
+      class = "error.check.new.format.4")
+  }
+
+  # Return
+  ex
 }
 
 #' Extract symbols from AST
@@ -523,13 +666,48 @@ extract.symbols.from.ast <- function(x, call = rlang::caller_env()) {
     # unlist() puts the individual elements together. as.character() avoids
     # problems when some elements have names, e.g., function arguments with
     # names.
-    lapply(x[-1], extract.symbols.from.ast) %>% unlist() %>% as.character()
+    lapply(x[-1], extract.symbols.from.ast, call = call) %>%
+      unlist() %>% as.character()
   } else if (is.pairlist(x)) {
     # Same as call
-    lapply(x[-1], extract.symbols.from.ast) %>% unlist() %>% as.character()
+    lapply(x[-1], extract.symbols.from.ast, call = call) %>%
+      unlist() %>% as.character()
   } else {
     # Throw internal error for other types
-    cli::cli_abort(c("x" = "Error IE005"), call = call, .internal = TRUE,
-                   class = "IE005")
+    cli::cli_abort(c("x" = "Error IE14121"), call = call, .internal = TRUE,
+                   class = "IE14121")
   }
+}
+
+#' Craft call for error messages when
+#'
+#' Desc.
+#'
+#' @param x Desc.
+#'
+#' @returns Desc.
+#'
+#' @noRd
+craft.call.var.list <- function(variable, key, value,
+                                call = rlang::caller_env()) {
+  # Check inputs
+
+
+  t <- rlang::trace_back()
+
+  if (identical(t$call[[1]][[1]], rlang::sym("@<-"))) {
+    var <- variable
+    v1 <- rlang::ensym(var)
+    ke <- key
+    k <- rlang::ensym(ke)
+    val <- value
+    v2 <- rlang::enexpr(val)
+    call <- rlang::expr(`$`(`$`(metadata@var.list, !!v1), !!k) <- !!v2)
+  } else if (identical(t$call[[1]][[1]], rlang::sym("metadata"))) {
+    call <- t$call[[1]]
+  } else {
+    call <- rlang::caller_env()
+  }
+
+  call
 }

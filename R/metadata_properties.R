@@ -152,7 +152,6 @@ meta.prop.var.list <- S7::new_property(
           "i" = "Please create new variables via the YAML file."),
           call = rlang::expr(metadata@var.list <- value),
           class = "error.meta.prop.var.list.1")
-        ## SOLVE CALLER_ENV PROBLEMS
       }
     }
 
@@ -164,8 +163,9 @@ meta.prop.var.list <- S7::new_property(
           cli::cli_abort(c("Key {.var var.name} cannot be set to {.var NULL}",
             "i" = "To delete the variable, set @var.list${names(value)[i]}
             to {.var NULL}."),
-          call = rlang::caller_env(), class = "error.meta.prop.var.list.2")
-      ## SOLVE CALLER_ENV PROBLEMS
+          call = craft.call.var.list(variable = names(value)[i],
+                                     key = "var.name", value = NULL),
+          class = "error.meta.prop.var.list.2")
         }
       )
     }
@@ -180,7 +180,7 @@ meta.prop.var.list <- S7::new_property(
     }
 
     # Process inputs
-    value %<>% setter.variable.process.inputs()
+    value %<>% setter.variable.process.inputs(self)
     ## Update input validation with checkmate in setter.variable.cats()
 
     # Alternative names
@@ -205,7 +205,6 @@ meta.prop.var.names <- S7::new_property(
     names(self@var.list)
   }
 )
-
 
 # var.groups --------------------------------------------------------------
 
@@ -317,19 +316,45 @@ meta.prop.DUP_FREQ <- S7::new_property(
 #' @returns An updated version of input `value`.
 #'
 #' @noRd
-setter.variable.process.inputs <- function(value) {
+setter.variable.process.inputs <- function(value, self) {
+  # Get var.names
+  var.names <- names(value)
+
+  # Get new.order
+  new.order <- rep(NA, length(value))
   for (i in seq_along(value)) {
+    if (!is.null(value[[i]]$new)) {
+      new.order[i] <- value[[i]]$var.name
+    }
+  }
+  if (new.order %>% is.na() %>% all()) {
+    new.order <- character(0)
+  } else {
+    new.order <- new.order[!is.na(new.order)]
+  }
+
+# Process
+  for (i in seq_along(value)) {
+    current_var <- names(value)[i]
+
     # Process cats input
-    if (!is.data.frame(value[[i]]$cats)) {
+    if (!identical(value[[current_var]]$cats, self@var.list[[current_var]]$cats)) {
       value[[i]]$cats <- process.cats(cats = value[[i]]$cats,
                                               name = value[[i]]$var.name,
                                               eng = FALSE)
     }
     # Process cats.eng input
-    if (!is.data.frame(value[[i]]$cats.eng)) {
+    if (!identical(value[[current_var]]$cats.eng, self@var.list[[current_var]]$cats.eng)) {
       value[[i]]$cats.eng <- process.cats(cats = value[[i]]$cats.eng,
                                                   name = value[[i]]$var.name,
                                                   eng = TRUE)
+    }
+    # Process new input
+    if (!identical(value[[current_var]]$new, self@var.list[[current_var]]$new)) {
+      value[[i]]$new <- process.new(new = value[[i]]$new,
+                                    var = value[[i]]$var.name,
+                                    var.names = var.names,
+                                    new.order = new.order)
     }
   }
 

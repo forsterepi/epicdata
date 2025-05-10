@@ -93,7 +93,20 @@ test_that("check.rules.format works", {
   rule <- c('ctr == "D" ~ "Deutschland"', '~ "Sonstiges"')
   out <- list(rlang::expr(ctr == "D" ~ "Deutschland"),rlang::expr(~ "Sonstiges"))
   expect_equal(check.rules.format(rule, var.names = "ctr"), out)
+  rule2 <- c('~ "Sonstiges"', 'ctr == "D" ~ "Deutschland"')
+  expect_equal(check.rules.format(rule2, var.names = "ctr"), out)
 })
+
+# test_that("check.new.format works", {
+#   expect_error(check.new.format(c("a","b")), class = "error.check.new.format.1")
+#   expect_error(check.new.format(NA), class = "error.check.new.format.1")
+#   expect_error(check.new.format(NULL), class = "error.check.new.format.1")
+#   expect_error(check.new.format(""), class = "error.check.new.format.1")
+#   expect_error(check.new.format(c(2,3)), class = "error.check.new.format.1")
+#   expect_error(check.new.format(c(T,F)), class = "error.check.new.format.1")
+#   expect_error(check.new.format("var", var = "x", var.names = "var", new.order = "x"), class = "error.check.new.format.1")
+#   check.new.format(new = "3")
+# })
 
 test_that("extract.symbols.from.ast works", {
   expect_equal(extract.symbols.from.ast(NULL), character(0))
@@ -101,7 +114,7 @@ test_that("extract.symbols.from.ast works", {
   expect_equal(extract.symbols.from.ast("x"), character(0))
   expect_equal(extract.symbols.from.ast(3), character(0))
   expect_equal(extract.symbols.from.ast(TRUE), character(0))
-  expect_error(extract.symbols.from.ast(c("1","s")), class = "IE005")
+  expect_error(extract.symbols.from.ast(c("1","s")), class = "IE14121")
   expect_equal(extract.symbols.from.ast(rlang::expr(c("1","s"))), character(0))
   expect_equal(extract.symbols.from.ast(rlang::expr(x + y)), c("x","y"))
   expect_equal(extract.symbols.from.ast(rlang::expr(~ 3)), character(0))

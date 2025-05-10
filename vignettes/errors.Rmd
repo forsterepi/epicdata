@@ -1,0 +1,78 @@
+---
+title: "errors"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{internal_errors}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Error implementation
+
+There are two types of errors:
+
+-   External (i.e., normal) errors: They appear because the **user** made a mistake.
+-   Internal errors: They appear because the **developer** made a mistake.
+
+### Implementation of external errors
+
+Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
+
+-   `call`: All functions unrelated to S7 classes provide `rlang::caller_env()`. For S7-related functions, it is more complcated:
+
+### Implementation of internal errors
+
+## Internal errors
+
+| ID | Level | Error |
+|----|----|----|
+| Script group 1 | **Metadata-related scripts** |  |
+| Script 1.1 | metadata.R |  |
+| Script 1.2 | metadata_constructor.R |  |
+| Function group 1.2.1 | YAML evaluation functions |  |
+| Function 1.2.1.1 | `yaml.read()` |  |
+| Function 1.2.1.2 | `yaml.str.input()` |  |
+| Function 1.2.1.3 | `yaml.forgive.component.name()` |  |
+| Function 1.2.1.4 | `yaml.str.component()` |  |
+| Function 1.2.1.5 | `yaml.str.options()` |  |
+| Function 1.2.1.6 | `yaml.str.var.list()` |  |
+| Function 1.2.1.7 | `yaml.str.var.groups()` |  |
+| Function 1.2.1.8 | `yaml.str.na.codes()` |  |
+| Function 1.2.1.9 | `yaml.str.contras()` |  |
+| Function 1.2.1.10 | `yaml.add.name()` |  |
+| Script 1.3 | metadata_properties.R |  |
+| Script 1.4 | metadata_process_input.R |  |
+| Function group 1.4.1 | Helpers |  |
+| Function 1.4.1.1 | `craft.call.var.list()` |  |
+| Function 1.4.1.2 | `extract.symbols.from.ast()` |  |
+| Error **IE14121** |  | Argument `x` is not of type constant (as checked by `rlang::is_syntactic_literal()`), symbol, call, or pairlist. |
+| Function 1.4.1.3 | `check.rules.format()` |  |
+| Function 1.4.1.4 | `check.new.format()` |  |
+| Function group 1.4.2 | Processing functions |  |
+| Function 1.4.2.1 | `process.cats()` |  |
+| Function 1.4.2.2 | `process.dict()` |  |
+| Function 1.4.2.3 | `process.dict.rules()` |  |
+| Function 1.4.2.4 | `process.new()` |  |
+| Script 1.5 | metadata_validator.R |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |

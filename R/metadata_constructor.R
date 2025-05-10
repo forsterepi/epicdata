@@ -18,6 +18,7 @@ metadata.constructor <- function(file) {
     touch.na.input <- yaml_input$options$touch.na
   }
 
+  # PUT INTO EXTRA FUNCTION
   for (i in seq_along(yaml_input$var.list)) {
     checkmate::assert_logical(yaml_input$var.list[[i]]$touch.na,
                               len = 1, any.missing = FALSE, null.ok = TRUE)
@@ -217,6 +218,32 @@ yaml.str.var.list <- function(x, call = rlang::caller_env()) {
 
 }
 
+yaml.str.var.groups <- function(x, call = rlang::caller_env()) {
+
+  # Check var.groups when reading in YAML
+
+
+  # dict.eng is not valid
+
+}
+
+yaml.str.na.codes <- function(x, call = rlang::caller_env()) {
+
+  # Check var.groups when reading in YAML
+
+
+  # dict.eng is not valid
+
+}
+
+yaml.str.contras <- function(x, call = rlang::caller_env()) {
+
+  # Check var.groups when reading in YAML
+
+
+  # dict.eng is not valid
+
+}
 
 yaml.add.name <- function(x) {
 
