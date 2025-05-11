@@ -26,7 +26,7 @@ The data processing and cleaning workflow is **modular** and its elements can be
 
 During the workflow, some sub-modules or variants need **user input**. There are 2 different types of input:
 
--   **Decision**: `epicdata` processes your data but also identifies potentially problematic values. A decision refers to user input that tells `epicdata` how to procede with an identified potentially problematic value, e.g., changing it to a certain value or leaving it as is. Decisions can be saved. All decisions are logged.
+-   **Decision**: `epicdata` processes your data but also identifies potentially problematic values. A decision refers to user input that tells `epicdata` how to procede with an identified potentially problematic value, e.g., changing it to a certain value or leaving it as is. Decisions are specified in spreadsheet format.
 
 -   **Confirmation**: Throughout the workflow, `epicdata` asks for confirmation of actions and results. These actions and results are concluded from your inputs, i.e., the data, the metadata, and your decisions. Example: `epicdata` notes that variables `var1` and `var2` are not in the data even though they have been specified in the metadata and asks for your confirmation. The workflow will not continue without the confirmation. Otherwise, it will stop and you need to change your inputs, i.e., data or metadata or decisions. If the metadata changes, you usually need to re-create the R project. Confirmations cannot be saved. They have to be given interactively. The intention is not to patronize the user but instead to give her/him control over what happens and to increase transparency. All confirmations are logged.
 
@@ -77,10 +77,10 @@ Desc
 
 #### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.RM)
 
-| Status   | Condition                           |
-|----------|-------------------------------------|
-| active   | option `remove.vars: yes` (default) |
-| inactive | option `remove.vars: no`            |
+| Status   | Condition                          |
+|----------|------------------------------------|
+| active   | option `remove.vars: yes`          |
+| inactive | option `remove.vars: no` (default) |
 
 Desc
 
@@ -90,8 +90,8 @@ Desc
 
 | Status   | Condition |
 |----------|-----------|
-| active   |           |
-| inactive |           |
+| active   | always    |
+| inactive | never     |
 
 : Desc
 
@@ -100,7 +100,7 @@ Desc
 #### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
 
 | Status | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -127,12 +127,12 @@ Desc
 | active: Variant `INVALID` |           |
 | inactive                  |           |
 
-: Desc, no user input because list is provided and intentio nis clear
+: Desc, no user input because list is provided and intention is clear
 
 #### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW_FILTER)
 
 | Status | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
@@ -148,7 +148,7 @@ Desc
 | active   | `consent: yes` (default if `id.var` has been specified)    |
 | inactive | `consent: no` (default if `id.var` has not been specified) |
 
-: Desc, no user input because list is provided and intentio nis clear
+: Desc, no user input because list is provided and intention is clear
 
 ### 4) Cells (Module ID: CELL)
 
@@ -162,6 +162,14 @@ Desc
 : Desc
 
 #### 4.2) NA variants to NA (Sub-Module ID: CELL_TO.NA)
+
+| Status | Condition |
+|----|----|
+| active: VARIANT `EMPTY` | If key `to.na` has not been used at all. |
+| active: VARIANT `NA.VARIANTS` | If key `to.na` has been used at some point in metadata. |
+| inactive | never |
+
+: Desc
 
 ### 5) Duplicates (Module ID: DUP)
 
@@ -198,7 +206,7 @@ database.id?? (limesurveyID)
 
 generalize to more than 2 IDs, e.g., mention all three different values maybe even with frequency
 
-`User input`: *Requires decisions regarding differences between entries of the same ID.*
+`User input`: *Requires **decisions** regarding differences between entries of the same ID.*
 
 ### 6) Variable groups (Module ID: GROUP\_)
 
@@ -212,7 +220,7 @@ generalize to more than 2 IDs, e.g., mention all three different values maybe ev
 
 ### 9) Format
 
-### 10) Change type
+### 10) Change data type
 
 ### 11) Create new variables
 
@@ -221,6 +229,10 @@ generalize to more than 2 IDs, e.g., mention all three different values maybe ev
 Where exactly in the workflow missings are handled, is still tbd.
 
 ### 13) Limits
+
+#### 13.1) By rule
+
+#### 13.2) By case
 
 ### 14) Contradictions
 
@@ -234,4 +246,4 @@ Where exactly in the workflow missings are handled, is still tbd.
 
 ### 17) Finalize
 
-#### Delete temporarily added ID variable, if id.var has not been specified
+Delete temporarily added ID variable, if id.var has not been specified

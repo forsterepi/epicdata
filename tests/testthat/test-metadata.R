@@ -1,8 +1,8 @@
-test_that("property study.name works", {
+test_that("property data.name works", {
   file <- withr::local_tempfile(pattern = "test", fileext = "yml",
     lines = c(
       "options:",
-      "  study.name: test",
+      "  data.name: test",
       "var.list:",
       "  id:",
       "    type: text"
@@ -10,13 +10,13 @@ test_that("property study.name works", {
   )
 
   m <- metadata(file)
-  expect_equal(m@study.name, "test")
+  expect_equal(m@data.name, "test")
 
-  m@study.name <- NULL
-  expect_equal(m@study.name, "my_study")
+  m@data.name <- NULL
+  expect_equal(m@data.name, "my_data")
 
-  m@study.name <- "name"
-  expect_equal(m@study.name, "name")
+  m@data.name <- "name"
+  expect_equal(m@data.name, "name")
 
   file <- withr::local_tempfile(pattern = "test", fileext = "yml",
     lines = c(
@@ -28,14 +28,14 @@ test_that("property study.name works", {
   )
 
   m <- metadata(file)
-  expect_equal(m@study.name, "my_study")
+  expect_equal(m@data.name, "my_data")
 })
 
 test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
   file <- withr::local_tempfile(pattern = "test", fileext = "yml",
     lines = c(
     "options:",
-    "  study.name: test",
+    "  data.name: test",
     "var.list:",
     "  id:",
     "    type: text"
@@ -58,7 +58,7 @@ test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
   file <- withr::local_tempfile(pattern = "test", fileext = "yml",
     lines = c(
     "options:",
-    "  study.name: test",
+    "  data.name: test",
     "  id.var: id",
     "var.list:",
     "  id:",

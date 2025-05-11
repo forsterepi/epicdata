@@ -293,7 +293,7 @@ meta.prop.DUP_FREQ <- S7::new_property(
 
         ``` r
         validator = function(value) {
-          test.mode("option.study.name.validator")
+          test.mode("option.data.name.validator")
 
           if (!checkmate::test_character(value, len = 1, min.chars = 1,
                                         any.missing = FALSE, null.ok = TRUE)) {
@@ -335,7 +335,7 @@ meta.prop.DUP_FREQ <- S7::new_property(
         file <- withr::local_tempfile(pattern = "test", fileext = "yml",
           lines = c(
             "options:",
-            "  study.name: test",
+            "  data.name: test",
             "var.list:",
             "  id:",
             "    type: text"

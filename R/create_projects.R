@@ -259,3 +259,66 @@ create_prc <- function(name, path, db = F) {
 
   cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
 }
+
+
+#' Create new metadata file
+#'
+#' Create a new YAML file for specifying metadata specifications.
+#'
+#' @param name The name of the file without file extension.
+#' @param path The path where the file should be saved, without the name of
+#'   the file. Defaults to the current working directory.
+#'
+#' @returns Creates and opens a template .yml file for creating metadata.
+#'
+#' @export
+#'
+#' @examples
+#' withr::with_tempdir({
+#' create.metadata.file("my_data_set")
+#' })
+create.metadata.file <- function(name, path = getwd()) {
+  # Check inputs
+  if (!checkmate::test_character(name, len = 1, min.chars = 1, null.ok = FALSE,
+                                any.missing = FALSE)) {
+    cli::cli_abort("Wrong input")
+  }
+
+  if (!checkmate::test_character(path, len = 1, min.chars = 1, null.ok = FALSE,
+                                any.missing = FALSE)) {
+    cli::cli_abort("Wrong input")
+  }
+
+  # Add yml file extension
+  if (name %>% stringi::stri_detect(regex = "\\.yml$")) {
+    file_name <- name
+  } else if (name %>% stringi::stri_detect(regex = "\\.yaml$")) {
+    file_name <- name %>% stringi::stri_replace_all(replacement = ".yml",
+                                                    regex = "\\.yaml$")
+  } else if (name %>% stringi::stri_detect(regex = "\\.", negate = TRUE)) {
+    file_name <- stringi::stri_flatten(c(name,"yml"), collapse = ".")
+  } else {
+    cli::cli_abort("Wrong file extension.")
+  }
+
+  # Check if path and file exist
+  if (!dir.exists(path)) {
+    cli::cli_abort("The path does not exist!", class = "xx")
+  }
+  if (dir.exists(file.path(path, file_name))) {
+    cli::cli_abort("The project already exists!", class = "xx")
+  }
+
+  # Create new file
+  new_file <- file.path(path, file_name)
+  file.create(new_file)
+
+  template_code <- readLines(system.file("script_templates", "yaml_template.yml", package = "epicdata"))
+  template_code <- gsub(pattern = "<<add_data_name>>", replacement = name, x = template_code)
+  writeLines(template_code, con = new_file)
+
+  # Open file
+  if (interactive()) {
+    utils::file.edit(new_file)
+  }
+}

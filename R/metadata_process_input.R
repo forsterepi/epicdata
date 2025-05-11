@@ -674,8 +674,8 @@ extract.symbols.from.ast <- function(x, call = rlang::caller_env()) {
       unlist() %>% as.character()
   } else {
     # Throw internal error for other types
-    cli::cli_abort(c("x" = "Error IE14121"), call = call, .internal = TRUE,
-                   class = "IE14121")
+    cli::cli_abort(c("x" = "Error IE14131"), call = call, .internal = TRUE,
+                   class = "IE14131")
   }
 }
 
@@ -710,4 +710,8 @@ craft.call.var.list <- function(variable, key, value,
   }
 
   call
+}
+
+craft.call.var.groups <- function() {
+
 }

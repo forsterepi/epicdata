@@ -1,0 +1,9 @@
+options:
+  data.name: <<add_data_name>>
+var.list:
+  var1:
+    type: text
+    label: first variable
+  var2:
+    type: num
+    label: second variable

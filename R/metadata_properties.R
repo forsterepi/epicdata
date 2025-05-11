@@ -5,10 +5,10 @@ NULL
 
 # Options -----------------------------------------------------------------
 
-meta.prop.study.name <- S7::new_property(
+meta.prop.data.name <- S7::new_property(
   class = S7::class_character | NULL,
   validator = function(value) {
-    test.mode("option.study.name.validator")
+    test.mode("option.data.name.validator")
 
     if (!checkmate::test_character(value, len = 1, min.chars = 1,
                                   any.missing = FALSE, null.ok = TRUE)) {
@@ -16,9 +16,9 @@ meta.prop.study.name <- S7::new_property(
     }
   },
   setter = function(self, value) {
-    test.mode("option.study.name.setter")
+    test.mode("option.data.name.setter")
 
-    self@study.name <- setter.select.default(option = value, pre = "my_study")
+    self@data.name <- setter.select.default(option = value, pre = "my_data")
     self
   }
 )

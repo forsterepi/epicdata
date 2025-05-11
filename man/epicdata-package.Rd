@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-A workflow for processing of epidemiological data, including setup of meta data and handling of raw data.
+A workflow for processing of epidemiological data, turning your raw data into data that can be analyzed. You provide raw data and specify metadata in YAML using a user-friendly format. Decisions regarding invalid values can be collected in spreadsheet files. `epicdata` is thus suitable for non-veteran R users.
 }
 \seealso{
 Useful links:
@@ -19,7 +19,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Felix Forster \email{felix.forster@med.uni-muenchen.de} (\href{https://orcid.org/0000-0002-3670-9244}{ORCID})
+\strong{Maintainer}: Felix Forster \email{felix.forster@med.uni-muenchen.de} (\href{https://orcid.org/0000-0002-3670-9244}{ORCID}) [copyright holder]
 
 }
 \keyword{internal}

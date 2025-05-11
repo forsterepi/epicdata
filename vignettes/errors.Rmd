@@ -32,7 +32,7 @@ Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
 ## Internal errors
 
 | ID | Level | Error |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Script group 1 | **Metadata-related scripts** |  |
 | Script 1.1 | metadata.R |  |
 | Script 1.2 | metadata_constructor.R |  |
@@ -51,10 +51,11 @@ Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
 | Script 1.4 | metadata_process_input.R |  |
 | Function group 1.4.1 | Helpers |  |
 | Function 1.4.1.1 | `craft.call.var.list()` |  |
-| Function 1.4.1.2 | `extract.symbols.from.ast()` |  |
-| Error **IE14121** |  | Argument `x` is not of type constant (as checked by `rlang::is_syntactic_literal()`), symbol, call, or pairlist. |
-| Function 1.4.1.3 | `check.rules.format()` |  |
-| Function 1.4.1.4 | `check.new.format()` |  |
+| Function 1.4.1.2 | `craft.call.var.groups()` |  |
+| Function 1.4.1.3 | `extract.symbols.from.ast()` |  |
+| Error **IE14131** |  | Argument `x` is not of type constant (as checked by `rlang::is_syntactic_literal()`), symbol, call, or pairlist. |
+| Function 1.4.1.4 | `check.rules.format()` |  |
+| Function 1.4.1.5 | `check.new.format()` |  |
 | Function group 1.4.2 | Processing functions |  |
 | Function 1.4.2.1 | `process.cats()` |  |
 | Function 1.4.2.2 | `process.dict()` |  |

@@ -28,7 +28,7 @@ some [text]{style="background-color: blue"}
 -   Automate as much as possible: The user only needs to provide metadata and decide what to do with problematic data values. `epicdata` creates the code, applies your decisions, and creates a data dictionary.
 -   Interactive: Even though `epicdata` automates as much as possible, it is still run interactively, i.e., while the user is on the other side of the keyboard. During the process, the user needs to confirm the results of different workflow steps. If you are looking for a automated data validation process, try packages `pointblank` or `dataquieR`.
 -   Usable for non-veteran R users: Metadata is specified in human readable YAML format. `epicdata` creates R code. User decisions can be inputted in user-friendly ways.
--   Seperate data manager and expert roles: There are often situations in which the data manager is not making decisions on how to proceed with problematic values. `epicdata` therefore provides a mode, in which decision-making can be separated from data cleaning. Decision-makers are not assumed to be R users.
+-   Separate data manager and expert roles: There are often situations in which the data manager is not making decisions on how to proceed with problematic values. `epicdata` therefore provides a mode, in which decision-making can be separated from data cleaning. Decision-makers are not assumed to be R users.
 
 ## Format (YAML)
 
@@ -109,7 +109,7 @@ YAML code is not specified in R files but in special text files with file extens
 
 ``` yaml
 options:
-  study.name: epicdata
+  data.name: epicdata
   id.var:
   load.from: folder
 ```
@@ -118,7 +118,7 @@ is equal to
 
 ``` yaml
 options:
-  study.name: epicdata
+  data.name: epicdata
   load.from: folder
 ```
 
@@ -130,7 +130,7 @@ options:
 
 In `epicdata`, metadata consists of several components:
 
--   `options`: A list of options specifying study information, e.g. `study.name`, selecting workflow modules, e.g. `double.entry`, and defining global variable defaults, e.g. `date.format`.
+-   `options`: A list of options specifying study information, e.g. `data.name`, selecting workflow modules, e.g. `double.entry`, and defining global variable defaults, e.g. `date.format`.
 -   `var.list`: A list of all variables, where variable-specific information is provided.
 -   `var.groups`: A list of variable groups with information that applies to the group instead of individual variables.
 -   `na.codes`: A list of codes that will represent missing values in the processed data set.
@@ -157,7 +157,7 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 **Study information**
 
--   `study.name` (Text): A short name for your study that is used for project and file names. If missing, a generic name will be used instead.
+-   `data.name` (Text): A short name for your dataset that is used for project and file names. If missing, a generic name will be used instead.
 
 -   `id.var` (Name of variable specified in `var.list`): The name of the ID variable, which is used to identify observations. Allowed are the variable names specified in `var.list` as `id`. Duplicate values in the ID variable are allowed only if `double.entry: yes`. If missing, a generic ID variable will be added temporarily. Mandatory when `double.entry: yes` or `id.pattern` has been specified.
 
@@ -171,9 +171,15 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `load.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
 
--   `double.entry` (boolean, i.e., `true`, `yes`, `false`, `no`):
+-   `double.entry` (boolean, i.e., `true`, `yes`, `false`, `no`): Non-digital data has been entered multple times (usually twice) to avoid errors during data entry. This option activates sub-module DUP_COMPARE.
+
+-   `remove.vars` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, variables in the data that are missing from the metadata are removed from the data.
 
 **Global variable defaults**
+
+-   `yesno` (value like `cats`): Specify categories for Yes/No-questions, which can be re-used in `var.list`.
+
+-   `yesno.eng` (value like `cats.eng`): If in `var.list`, `cats` is set to `yesno`, this value is automatically used for `cats.eng`.
 
 -   `date.format` or `format.date` (one of: `ymd`, `ydm`, `mdy`, `myd`, `dmy`, `dym`): Defines the default date format. The value specified here is used for all variables of `type: date` for which no individual `format` is defined in `var.list`. If all date variables have a format defined, `date.format` has no impact. In `epicdata`, `lubridate` functions are used to process dates. The possible values define the order of day (d), month (m) and year (y). See `lubridate::ymd()` for possible date formats that can be processed with these functions. Mandatory when there are variables of `type: date` and not all of them have key `format` defined in `var.list`. Do not use both `date.format` and `format.date`.
 
@@ -189,28 +195,45 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 ``` yaml
 options:
-  study.name: epicdata
+  data.name: epicdata
   id.var: id
   id.pattern: "[:digit:]{5}"
   date.format: dmy
 ```
 
-| Option | Alternative names | Length | Do not specify together with ... | Only specify together with ... |
-|----|----|----|----|----|
-| `study.name` |  | 1 |  |  |
-| `id.var` |  | 1 |  |  |
-| `id.pattern` |  | 1 | `id.list` | `id.var` |
-| `id.list` |  | 1 | `id.pattern` |  |
-| `consent` |  | 1 |  |  |
-| `load.from` |  | 1 |  |  |
-| `double.entry` |  | 1 |  |  |
-|  |  |  |  |  |
-| `date.format` | `format.date` | 1 |  |  |
-| `time.format` | `format.time` | 1 |  |  |
-| `datetime.format` | `format.datetime` | 1 |  |  |
-| `to.na` | `na.to` | \>=1 |  |  |
-| `touch.na` | `na.touch` | 1 |  |  |
-| `to.factor` |  | 1 |  |  |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| Option            | Alternative names | Length      | Do not specify together with ... | Only specify together with ... |
++===================+===================+=============+==================================+================================+
+| `data.name`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.var`          |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.pattern`      |                   | 1           | `id.list`                        | `id.var`                       |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.list`         |                   | 1           | `id.pattern`                     |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `consent`         |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `load.from`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `double.entry`    |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `remove.vars`     | `vars.remove`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+|                   |                   |             |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `date.format`     | `format.date`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `time.format`     | `format.time`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `datetime.format` | `format.datetime` | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `to.na`           | `na.to`           | \>=1        |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `touch.na`        | `na.touch`        | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `to.factor`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
 
 ## Component: var.list
 
@@ -276,6 +299,7 @@ var.groups:
     group.label: What's your favourite sport?
 ```
 
+-   `sub` (): Use `sub`, when the variable is a sub-variable of one other variable, e.g., "Did you x?" - "If yes, y".
 -   `new` (): Create new variables based on existing variables by specifying `new`. If `new` is specified, its name must not be in the data set. Also, `old.id` cannot be used. New variables are created with `dplyr::mutate()`, where the variable definition is specified as a name-value pair using tidy evaluation with data masking. For `new`, specify the value of this name-value pair. As an example, variable `mass_norm` would be created by `data.frame %>% mutate(mass_norm = mass / mean(mass, na.rm = TRUE))`. To recreate the creation of `mass_norm` in `epicdata`, `mass` must be a variable specified in `var.list`, `mass_norm` is the name for your new variable, while `mass / mean(mass, na.rm = TRUE)` is specified for `new`. If your value causes an error, try to wrap it in quotation marks.
 
 ``` yaml
@@ -428,38 +452,71 @@ var.list:
 
 **Summary of variable keys:**
 
-| Key | Alternative names | Length | Do not specify together with ... | Only specify together with ... |
-|----|----|----|----|----|
-| `type` |  | 1 (required) |  |  |
-| `old.id` | `id.old` | 1 | `new` |  |
-| `label` |  | 1 |  |  |
-| `label.eng` | `eng.label` | 1 |  | `label` |
-| `na.else` | `else.na` | 1 |  |  |
-| `na.rules` | `rules.na` | \>=1 |  |  |
-| `na.switch` | `switch.na` | \>=1 |  |  |
-| `na.keep` | `keep.na` | \>=1 |  |  |
-| `na.replace` | `replace.na` | \>=1 |  |  |
-| `to.na` | `na.to` | \>=1 |  |  |
-| `touch.na` | `na.touch` | 1 |  |  |
-| `group` |  | 1 |  |  |
-| `new` |  | 1 | `old.id` |  |
-| `changes` |  | \>=1 |  |  |
-| `ops` |  | 1 |  |  |
-| `dict` |  | \>1 |  |  |
-| `dict.rules` | `rules.dict` | \>=1 |  | `dict` |
-| `cats` |  | \>1 |  |  |
-| `cats.eng` | `eng.cats` | \>1 |  | `cats` |
-| `cats.rules` | `rules.cats` | \>=1 |  | `cats` |
-| `to.factor` |  | 1 |  |  |
-| `factor.name` | `name.factor` | 1 |  |  |
-| `from` |  | 1 | `from.exclude` |  |
-| `from.exclude` | `from.ex` | 1 | `from` |  |
-| `to` |  | 1 | `to.exclude` |  |
-| `to.exclude` | `to.ex` | 1 | `to` |  |
-| `limit.rules` | `rules.limit`, `limits.rules`, `rules.limits` | \>=1 |  | `from` OR `from.exclude` OR `to` OR `to.exclude` |
-| `date.format` | `format.date`, `format` (if `type` is `date`) | 1 |  |  |
-| `time.format` | `format.time`, `format` (if `type` is `time`) | 1 |  |  |
-| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1 |  |  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| Key               | Alternative names                                     | Length                                                                               | Do not specify together with ... | Only specify together with ...                   |
++===================+=======================================================+======================================================================================+==================================+==================================================+
+| `type`            |                                                       | 1 (required)                                                                         |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `old.id`          | `id.old`                                              | 1                                                                                    | `new`                            |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `label`           |                                                       | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `label.eng`       | `eng.label`                                           | 1                                                                                    |                                  | `label`                                          |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `na.else`         | `else.na`                                             | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `na.rules`        | `rules.na`                                            | \>=1                                                                                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `na.switch`       | `switch.na`                                           | \>=1                                                                                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `na.keep`         | `keep.na`                                             | \>=1                                                                                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `na.replace`      | `replace.na`                                          | \>=1                                                                                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `to.na`           | `na.to`                                               | \>=1                                                                                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `touch.na`        | `na.touch`                                            | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `group`           |                                                       | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `sub`             |                                                       | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `new`             |                                                       | 1                                                                                    | `old.id`                         |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `changes`         |                                                       | \>=1                                                                                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `ops`             |                                                       | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `dict`            |                                                       | \>1                                                                                  |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `dict.rules`      | `rules.dict`                                          | \>=1                                                                                 |                                  | `dict`                                           |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `cats`            |                                                       | \>1 (required if type `cat`, but might be specified in `var.groups`)                 |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `cats.eng`        | `eng.cats`                                            | \>1                                                                                  |                                  | `cats`                                           |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `cats.rules`      | `rules.cats`                                          | \>=1                                                                                 |                                  | `cats`                                           |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `to.factor`       |                                                       | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `factor.name`     | `name.factor`                                         | 1                                                                                    |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `from`            |                                                       | 1                                                                                    | `from.exclude`                   |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `from.exclude`    | `from.ex`                                             | 1                                                                                    | `from`                           |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `to`              |                                                       | 1                                                                                    | `to.exclude`                     |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `to.exclude`      | `to.ex`                                               | 1                                                                                    | `to`                             |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `limit.rules`     | `rules.limit`, `limits.rules`, `rules.limits`         | \>=1                                                                                 |                                  | `from` OR `from.exclude` OR `to` OR `to.exclude` |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `date.format`     | `format.date`, `format` (if `type` is `date`)         | 1 (required if type `date`, but might be specified in `var.groups` or `options`)     |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `time.format`     | `format.time`, `format` (if `type` is `time`)         | 1 (required if type `time`, but might be specified in `var.groups` or `options`)     |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
+| `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1 (required if type `datetime`, but might be specified in `var.groups` or `options`) |                                  |                                                  |
++-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
 
 ## Component: na.codes
 
@@ -522,7 +579,7 @@ In the data dictionary, the variables appear in the same order as in the YAML in
 
 In single-choice questions, questionnaire participants select one of the given options. In multiple-choice (mc) questions, they can select multiple options. While single-choice questions can be fit into a single categorical (type `cat`) variable with one category per option, multiple-choice questions need one variable per option. The multiple-choice questions are usually binary, i.e., type `cat` with two categories indicating selection and non-selection. In component `var.list`, you can indicate with key `mc.set` that the corresponding variable belongs to a multiple-choice set, i.e., is one of the multiple variables necessary to describe a multiple-choice question. Specifying the same value in `mc.set` tells `epicdata` that the variables belong to the same multiple-choice question.
 
-In component `mc.sets`, additional information can be provided for the set. Use the following keys:
+In component `var.groups`, additional information can be provided for the set. Use the following keys:
 
 -   `group.label` (Text): Define a `label` for the mc.set. If a `label` is specified, the variables that belong to the set are documented together. We recommend to put the question in `label` in `mc.sets` and specify the option that each variable represents in `label` in `var.list`.
 
@@ -596,7 +653,7 @@ For group-specific keys, i.e., keys that do not appear in `var.list` but only in
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | var.list                                                               | var.groups        | options           | pre-defined                                                                                     |
 +========================================================================+===================+===================+=================================================================================================+
-| \-                                                                     | \-                | `study.name`      | `my_study`                                                                                      |
+| \-                                                                     | \-                | `data.name`       | `my_data`                                                                                       |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | \-                                                                     | \-                | `id.var`          | Adds a variable called `.id.var`, which contains numbers from 1 to N. It is deleted in the end. |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
@@ -609,6 +666,8 @@ For group-specific keys, i.e., keys that do not appear in `var.list` but only in
 | \-                                                                     | \-                | `consent`         | IF `id.var` has been specified: `TRUE`; ELSE: `FALSE`                                           |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | \-                                                                     | \-                | `double.entry`    | `FALSE`                                                                                         |
++------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
+| \-                                                                     | \-                | `remove.vars`     | `FALSE`                                                                                         |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | \-                                                                     | `group.label`     | `NULL`            | `NULL`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
@@ -624,7 +683,7 @@ For group-specific keys, i.e., keys that do not appear in `var.list` but only in
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | `label.eng`                                                            | `NULL`            | `NULL`            | `NULL`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
-| `na.else`                                                              | `na.else`         | `NULL`            | `NULL`                                                                                          |
+| `na.else`                                                              | `na.else`         | `na.else`         | `NULL`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+
 | `na.rules`                                                             | `na.rules`        | `NULL`            | `NULL`                                                                                          |
 +------------------------------------------------------------------------+-------------------+-------------------+-------------------------------------------------------------------------------------------------+

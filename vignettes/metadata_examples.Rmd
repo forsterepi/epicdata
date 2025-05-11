@@ -1,0 +1,358 @@
+---
+title: "metadata_examples"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{metadata_examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## datasets::iris
+
+Please note:
+
+-   Labels are in German with `label.eng` being used to provide English labels. However, `cats.eng` has not been used for variable `Species` since category labels apply to both languages.
+-   Instead of specifying`from.exclude` for each numerical variable separately, they are combined in group `measures`, where `from.exclude` is defined for all of them.
+-   Handling of `NA`s is omitted since there are none.
+
+``` yaml
+options:
+  data.name: iris
+var.list:
+  Sepal.Length:
+    type: num
+    label: Länge des Kelchblatts
+    label.eng: Length of sepal
+    from.exclude: 0
+  Sepal.Width:
+    type: num
+    label: Breite des Kelchblatts
+    label.eng: Width of sepal
+    from.exclude: 0
+  Petal.Length:
+    type: num
+    label: Länge des Blütenblatts
+    label.eng: Length of petal
+    from.exclude: 0
+  Petal.Width:
+    type: num
+    label: Breite des Blütenblatts
+    label.eng: Width of petal
+    from.exclude: 0
+  Species:
+    type: cat
+    label: Art
+    label.eng: Species
+    cats:
+    - 1 = setosa
+    - 2 = versicolor
+    - 3 = virginica
+    to.factor: yes
+```
+
+## ggplot2::mpg
+
+Please note:
+
+-   Sometimes a variable might be both `text` or `cat`, see e.g., `manufacturer`, `model`, and `class`.
+-   `to.factor` has been specified globally for all variables of type `cat`.
+-   Variable `drv` has unsatisfying category labels. Therfore, a new variable `drv2` has been created with more informative category label.
+-   Variable `year` has been defined as `num`, since defining it as `date` would add day and month. It might also make sense to define it as `cat`.
+
+``` yaml
+options:
+  data.name: mpg
+  to.factor: yes
+var.list:
+  manufacturer:
+    type: text
+    label: manufacturer name
+    dict:
+    - audi
+    - chevrolet
+    - dodge
+    - ford
+    - honda
+    - hyundai
+    - jeep
+    - land rover
+    - lincoln
+    - mercury
+    - nissan
+    - pontiac
+    - subaru
+    - toyota
+    - volkswagen
+  model:
+    type: text
+    label: model name
+  displ:
+    type: num
+    label: engine displacement, in litres
+    from.exclude: 0
+  year:
+    type: num
+    label: year of manufacture
+    from: 1990
+    to: 2020
+  cyl:
+    type: num
+    label: number of cylinders
+    from: 1
+    to: 10
+  trans:
+    type: cat
+    label: type of transmission
+    cats:
+    - 1 = auto(av)
+    - 2 = auto(l3)
+    - 3 = auto(l4)
+    - 4 = auto(l5)
+    - 5 = auto(l6)
+    - 6 = auto(s4)
+    - 7 = auto(s5)
+    - 8 = auto(s6)
+    - 9 = manual(m5)
+    - 10 = manual(m6)
+  drv:
+    type: text
+    label: type of drive train (unprocessed)
+  drv2:
+    type: cat
+    label: type of drive train
+    cats:
+    - 1 = front-wheel drive
+    - 2 = rear wheel drive
+    - 3 = 4wd
+    new: dplyr::case_when(drv == "f" ~ 1, drv == "r" ~ 2, drv == "4" ~ 3)
+  cty:
+    type: num
+    label: city miles per gallon
+    from.exclude: 0
+  hwy:
+    type: num
+    label: highway miles per gallon
+    from.exclude: 0
+  fl:
+    type: cat
+    label: fuel type
+    cats:
+    - 1 = c
+    - 2 = d
+    - 3 = e
+    - 4 = p
+    - 5 = r
+  class:
+    type: cat
+    label: type of car
+    cats:
+    - 1 = 2seater
+    - 2 = compact
+    - 3 = midsize
+    - 4 = minivan
+    - 5 = pickup
+    - 6 = subcompact
+    - 7 = suv
+```
+
+## SOLAR 3
+
+The questionnaire of the third follow-up of the **Study on Occupational Allergy Risks** conducted in Germany between 2017-2018. The questionnaire is available as a supplementary file in the correpsonding methods and design publication ([Link to Publication](https://doi.org/10.3389/fpubh.2021.591717)).
+
+``` yaml
+options:
+  data.name: SOLAR3
+  id.var: id
+  data.format: dmy
+  consent: yes
+  double.entry: yes
+  to.factor: yes
+  na.else: 9001
+  yesno: 
+  - 0 = Nein
+  - 1 = Ja
+  yesno.eng:
+  - 0 = No
+  - 1 = Yes
+na.codes:
+  9001: missing
+  8001: not applicable
+var.list:
+  id:
+    type: text
+    label: ID
+  f001:
+    type: date
+    label: Wann wurden Sie geboren?
+    label.eng: When were you born?
+    from: 01.01.1980
+    to: 31.12.1985
+  f002:
+    type: cat
+    label: Sind Sie männlich oder weiblich?
+    label.eng: Are you male or female?
+    cats:
+    - 1 = männlich
+    - 2 = weiblich
+    cats.eng:
+    - 1 = male
+    - 2 = female
+  f003:
+    type: cat
+    label: Welchen Familienstand haben Sie?
+    label.eng: What is your marital status?
+    cats:
+    - 1 = ledig
+    - 2 = verheiratet / eingetragene Lebenspartnerschaft
+    - 3 = geschieden / eingetragene Lebenspartnerschaft aufgehoben
+    - 4 = verwitwet
+    cats.eng:
+    - 1 = single
+    - 2 = married
+    - 3 = divorced
+    - 4 = widowed
+  f004:
+    type: cat
+    label: Haben Sie Kinder? (Adoptiv- und Stiefkinder eingeschlossen)
+    label.eng: Do you have children? (Adopted and stepchildren included)
+    cats: yesno
+  f005:
+    type: num
+    label: Wie viele Kinder haben Sie?
+    label.eng: How many children do you have?
+    from: 0
+    to: 5
+    na.rules: f004 == 0 ~ 8001
+  f006_1:
+    type: num
+    group: f006
+    label: Kind 1
+    label.eng: Child 1
+  f006_2:
+    type: num
+    group: f006
+    label: Kind 2
+    label.eng: Child 2
+  f006_3:
+    type: num
+    group: f006
+    label: Kind 3
+    label.eng: Child 3
+  f007:
+    type: cat
+    label: Haben Sie jemals in den letzten 12 Monaten ein pfeifendes oder brummendes Geräusch in Ihrem Brustkorb gehört?
+    label.eng: Have you had wheezing or whistling in your chest at any time in the last 12 months?
+    cats: yesno
+  f008:
+    type: cat
+    label: Hatten Sie dieses Pfeifen oder Brummen, wenn Sie nicht erkältet waren?
+    label.eng: Have you had this wheezing or whistling when you did not have a cold?
+    cats: yesno
+    na.rules: f007 == 0 ~ 8001
+  f009:
+    type: cat
+    label: Hatten Sie zu irgendeiner Zeit im Verlauf der letzten 12 Monate tagsüber einen Anfall von Kurzatmigkeit, der in Ruhe auftrat?
+    label.eng: Have you had an attack of shortness of breath that came during the day when you were at rest at any time in the last 12 months?
+    cats: yesno
+  f016_1:
+    type: cat
+    label: Asthma
+    group: f016
+  f016_2:
+    type: cat
+    label: Spastische / asthmatische Bronchitis
+    label.eng: Spastic / asthmatic bronchitis
+    group: f016
+  f016_3:
+    type: cat
+    label: Chronische Bronchitis
+    label.eng: Chronic bronchitis
+    group: f016
+  f021:
+    type: cat
+    lable: Nehmen Sie gegenwärtig Medikamente gegen Asthma ein (einschließlich Inhalationen, Dosieraerosolen (Sprays) oder Tabletten)?
+    label.eng: Are you currently taking any medicines, including inhalers, aerosols or tablets, for asthma?
+    cats: yesno
+  f021_text:
+    type: text
+    label: Wenn ja, welche?
+    label.eng: If yes, please specify?
+    sub: f021
+    na.rules: f021_cat == 0 ~ 8001
+  f044_1a:
+    type: cat
+    label: Austausch eines Teppichs gegen einen Holzfußboden oder andere glatte Böden
+    label.eng: Changed floor covering
+    group: f044
+  f044_1b:
+    type: num
+    label: Wann (Jahr)?
+    label.eng: When (year)?
+    sub: f044_1a
+    group: f044
+  f044_2a:
+    type: cat
+    label: Anschaffung eines antiallergischen Matratzenüberzugs (Milbendicht)
+    label.eng: Changed bedding
+    group: f044
+  f044_2b:
+    type: num
+    label: Wann (Jahr)?
+    label.eng: When (year)?
+    sub: f044_2a
+    group: f044
+  f044_3a:
+    type: cat
+    label: Abschaffung eines Haustiers
+    label.eng: Removed pets
+    group: f044
+  f044_3b:
+    type: num
+    label: Wann (Jahr)?
+    label.eng: When (year)?
+    sub: f044_3a
+    group: f044
+  f044_4:
+    type: cat
+    label: Keine dieser Maßnahmen
+    label.eng: None of the above
+    group: f044
+var.groups:
+  f006:
+    group.label: In welchem Jahr sind Ihre Kinder geboren? 
+    group.label.eng: In what year were your children born?
+    from: 2000
+    to: 2020
+    na.rules:
+    - f004 == 0 ~ 8001
+    - f005 == 0 ~ 8001
+  f016:
+    group.label: Wurde bei Ihnen von einem Arzt schon einmal eine der folgenden Erkrankungen festgestellt?
+    group.label.eng: Have you ever been diagnosed by a doctor with any of the following diseases?
+    cats:
+    - 0 = Noch nie
+    - 1 = Einmal
+    - 2 = Mehrmals
+    cats.eng:
+    - 0 = Never
+    - 1 = Once
+    - 2 = More than once
+  f044:
+    group.label: Haben Sie in den letzten 10 Jahren irgendeine der folgenden Maßnahmen durchgeführt, um einer Allergie vorzubeugen oder allergische Beschwerden zu verringern?
+    group.label.eng: Have you made any changes in your home within the last 10 years because you had allergic problems?
+    cats: yesno
+    from: 2000
+    to: 2020
+    mc.exclusive: f044_4
+contras:
+- f044_4 == 1 & f044_1 == 1
+- f044_4 == 1 & f044_2 == 1
+- f044_4 == 1 & f044_3 == 1
+```

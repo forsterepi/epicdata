@@ -33,7 +33,7 @@ metadata.constructor <- function(file) {
     var.groups = yaml_input$var.groups,
     # Global default options need to be listed after var.list and var.groups
     touch.na = touch.na.input,
-    study.name = yaml_input$options$study.name,
+    data.name = yaml_input$options$data.name,
     id.var = yaml_input$options$id.var,
     id.pattern = yaml_input$options$id.pattern,
     consent = yaml_input$options$consent)
@@ -144,7 +144,7 @@ yaml.str.options <- function(x, call = rlang::caller_env()) {
 
   # Create empty list
 
-  options.list <- c("study.name",
+  options.list <- c("data.name",
                     "id.var", "id.pattern",
                     "load.from", "mc.handling", "double.entry",
                     "date.format", "format.date",
@@ -161,10 +161,10 @@ yaml.str.options <- function(x, call = rlang::caller_env()) {
 
   # Define checks for every option
 
-  check.options.template[["study.name"]] <- rlang::expr(
-    checkmate::assert_string(x$options$study.name, min.chars = 1,
+  check.options.template[["data.name"]] <- rlang::expr(
+    checkmate::assert_string(x$options$data.name, min.chars = 1,
                              na.ok = FALSE, null.ok = TRUE, add = coll,
-                             .var.name = "study.name"))
+                             .var.name = "data.name"))
 
   check.options.template[["id.var"]] <- rlang::expr(
     checkmate::assert_string(x$options$id.var, min.chars = 1,

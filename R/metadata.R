@@ -16,7 +16,7 @@ NULL
 metadata <- S7::new_class("metadata",
   properties = list(
     # options
-    study.name = meta.prop.study.name,
+    data.name = meta.prop.data.name,
     id.var = meta.prop.id.var,
     id.pattern = meta.prop.id.pattern,
     consent = meta.prop.consent,

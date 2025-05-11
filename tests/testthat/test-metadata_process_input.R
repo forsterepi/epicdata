@@ -114,7 +114,7 @@ test_that("extract.symbols.from.ast works", {
   expect_equal(extract.symbols.from.ast("x"), character(0))
   expect_equal(extract.symbols.from.ast(3), character(0))
   expect_equal(extract.symbols.from.ast(TRUE), character(0))
-  expect_error(extract.symbols.from.ast(c("1","s")), class = "IE14121")
+  expect_error(extract.symbols.from.ast(c("1","s")), class = "IE14131")
   expect_equal(extract.symbols.from.ast(rlang::expr(c("1","s"))), character(0))
   expect_equal(extract.symbols.from.ast(rlang::expr(x + y)), c("x","y"))
   expect_equal(extract.symbols.from.ast(rlang::expr(~ 3)), character(0))
