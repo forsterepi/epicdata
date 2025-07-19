@@ -24,7 +24,7 @@ test.mode <- function(part) {
   if (exists(x = "test_mode", rlang::global_env())) {
     if (test_mode) {
       print(part)
-      #print(as.numeric(Sys.time()), digits = 15)
+      # print(as.numeric(Sys.time()), digits = 15)
     }
   }
 }

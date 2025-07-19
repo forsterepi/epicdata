@@ -32,7 +32,7 @@ Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
 ## Internal errors
 
 | ID | Level | Error |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | Script group 1 | **Metadata-related scripts** |  |
 | Script 1.1 | metadata.R |  |
 | Script 1.2 | metadata_constructor.R |  |

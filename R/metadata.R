@@ -26,6 +26,7 @@ metadata <- S7::new_class("metadata",
     # variables
     var.list = meta.prop.var.list,
     var.names = meta.prop.var.names,
+    var.str = meta.prop.var.str,
     # groups
     var.groups = meta.prop.var.groups,
     group.names = meta.prop.group.names,

@@ -103,6 +103,15 @@ countries:
 
 YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `xx()` and edited in R Studio. Therefore, the use of R Studio is recommended. See `xx` for more information on how to create your metadata.
 
+YAML files can include comments. Like in R, **comments** start with `#`. If they appear in a line after valid code, there must be a space in front of the `#`. In R Studio, comments are coloured differently.
+
+``` yaml
+countries:
+# a valid comment in a seperate line
+  France: # a valid comment after valid code (note the space in front of #)
+    capital: Paris# not a valid comment since there is no space before the hashtag symbol
+```
+
 ## Metadata design principles
 
 -   Including a key without specifying a value is equal to not including the key at all.

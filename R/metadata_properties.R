@@ -206,6 +206,19 @@ meta.prop.var.names <- S7::new_property(
   }
 )
 
+meta.prop.var.str <- S7::new_property(
+  getter = function(self) {
+    test.mode("var.str.getter")
+
+    groups <- self@group.names
+    vars <- self@var.names
+    varlist <- self@var.list
+
+
+
+  }
+)
+
 # var.groups --------------------------------------------------------------
 
 meta.prop.var.groups <- S7::new_property(
