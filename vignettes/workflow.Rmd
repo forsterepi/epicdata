@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Workflow structure
+# Workflow structure
 
 The data processing and cleaning workflow is **modular** and its elements can be activated and deactivated as needed. Active workflow elements are deduced from the metadata. Some elements are always active. The order of elements is important and should not be altered. The workflow consists of 3 different types of **elements**:
 
@@ -24,11 +24,13 @@ The data processing and cleaning workflow is **modular** and its elements can be
 
 -   **Variants**: Sometimes, different versions of sub-modules are needed, e.g., loading from file or from a database. Variants are these different sub-module versions. For an active sub-module with variants always exactly one variant needs to be selected. Example: When loading a file, you might want to load it from a folder or from a database. If you load from folder, you do not need the code for loading from the database and vice versa. However, since you do need to load the datasets, you need to specify, which variant you want.
 
-During the workflow, some sub-modules or variants need **user input**. There are 2 different types of input:
+During the workflow, some sub-modules or variants need **user input**. There are the following types of input:
+
+-   **ID lists**: Some modules require additional input in the form of ID lists, e.g., a list of IDs with valid informed consent.
 
 -   **Decision**: `epicdata` processes your data but also identifies potentially problematic values. A decision refers to user input that tells `epicdata` how to procede with an identified potentially problematic value, e.g., changing it to a certain value or leaving it as is. Decisions are specified in spreadsheet format.
 
--   **Confirmation**: Throughout the workflow, `epicdata` asks for confirmation of actions and results. These actions and results are concluded from your inputs, i.e., the data, the metadata, and your decisions. Example: `epicdata` notes that variables `var1` and `var2` are not in the data even though they have been specified in the metadata and asks for your confirmation. The workflow will not continue without the confirmation. Otherwise, it will stop and you need to change your inputs, i.e., data or metadata or decisions. If the metadata changes, you usually need to re-create the R project. Confirmations cannot be saved. They have to be given interactively. The intention is not to patronize the user but instead to give her/him control over what happens and to increase transparency. All confirmations are logged.
+-   **Confirmation**: In an interactive mode, `epicdata` asks for confirmation of actions and results throughout the workflow. These actions and results are concluded from your inputs, i.e., the data, the metadata, and your decisions. Example: `epicdata` notes that variables `var1` and `var2` are not in the data even though they have been specified in the metadata and asks for your confirmation. The workflow will not continue without the confirmation. Otherwise, it will stop and you need to change your inputs, i.e., data or metadata or decisions. ((If the metadata changes, you usually need to re-create the R project. Confirmations cannot be saved. They have to be given interactively. The intention is not to patronize the user but instead to give her/him control over what happens and to increase transparency. All confirmations are logged.)) **(to be developed further)**
 
     Reasons for demanding confirmation are:
 
@@ -36,214 +38,558 @@ During the workflow, some sub-modules or variants need **user input**. There are
 
     -   The result or action depends on processed information, which only became available during running the code.
 
-## Workflow elements
+# Modes of using `epicdata`
 
-### 1) Load (Module ID: LOAD)
+-   **Create project with all code**: Based on your metadata, `epicdata` creates a new R Studio project, which, when run from top to bottom, would do the same as calling the processing function. A lot of the processing happens in `epicdata`'s sub-module/variant functions, but users would still have "the code" to the processing workflow, making it possible for them to include some code of there own or make other adjustments. Every sub-module and variant has its own function, which will be exported so that users can use it, and for which input and output, i.e., the state of the data before and after the function are clearly documented. One strength but also difficulty of the modular workflow is that output and input of functions that can realistically be run after each other need to fit together. Maybe we make a specific interface/state of the data documentation to document, which functions fit together with there output and input. The whole workflow can be seen as setting the different variables of the state of the data from "not OK" to "OK" in a specified sequence, although not every characteristic can be seen as OK or not. If some variable is OK already, we can skip the corresponding module.
 
-#### 1.1) Load (Sub-Module ID: LOAD\_)
+-   **Use processing function**: In addition to creating a project, there is also the option of just using a function. This function has the raw data as its first argument and it should be possible to use data.frames, tibbles, and data.tables. The second argument is the metadata, i.e., a metadata S7 object. The remaining arguments are the inputs for the decision spreadsheets. Their default is NULL and the function stops at the first point when it needs decisions which are not available yet. If this is the case, the function returns the spreadsheet with the corresponding decisions that needs to be filled in and included into the function call in the corresponding argument. Maybe a path needs to be provided as an argument in any case, so that `epicdata` can save the spreadsheet directly instead of saying "Well, please re-run but this time, give me a path." The workflow would work like this: in the beginning, only specify data and metadata (and maybe a path); `epicdata` returns a set of decisions you need to make, then run the function again but with the made dicisions as additional argument; now `epicmodel` runs further and provides another set of decisions; continue until all decisions have been made. Note that only case by case decisions have to be made. Another option of making them is by including rules in the metadata on how to handle problematic values. If all case by case decisions are solved by rules, no spreadsheets need to be provided.
+
+    There probably should be a mode for extracting all decisions at once, so that the deciders get all of them at once. The easiest and maybe only good way to do that is by assuming that every decision has been "leave the value as is". There needs to be a way to check if a certain decision is still relevant, i.e. if the value is still problematic, and if the context is still the same (maybe some other value changed based on another decision and this value then influences the second decision).
+
+    Finally, there is an argument that specifies if the process runs interactively or not and additional arguments for user input in the form of ID lists.
+
+    (Is activity and inactivity of modules also concluded from the state of the data? Probably not. The functions just don't do anything if the output state is already present at input, e.g., if the input check for the function of sub-module "All variables to character" realizes that the data is already in the output state, i.e., all variables are already of type character, then it just returns the inputed data, right? This should be much easier, because the activity of workflow modules is already in the metadata S7 object, which is independent of the data. Also it should be much easier to code this way.)
+
+    -   **Interactive function**: While processing the function, `epicdata` asks for confirmations (see "Workflow structure" above) and only continues, if you actually confirm.
+
+    -   **Non-interactive function**: The process will not ask you for confirmations. In this mode, it is especially important to study the log afterwards, to see, if all changes `epicdata` made, actually make sense. Remember, every single change is logged.
+
+# State of the data
+
+Write a standard check function for the state of the data, which is used as input check and output check in sub-module/variant functions. Input checks throw external errors, i.e., informative for the user. Output checks throw internal errors as they are due to bugs in the code. The state of the data is defined by a list of binary characteristics. Each binary value on its own is a data characteristic and the combination of certain values for the characteristic is a data state. The workflow can be seen as repeated steps of altering the state of the data in a specific sequence. The check function has one argument for each characteristic, which probably should be NULL be default, as probably for some workflow steps, certain characteristics can be either TRUE or FALSE as they are not important in the corresponding step.
+
+Maybe the check functions also checks if the object is tibble, data.frame or data.table? No, it's probably easier to transform everything to data.frame in the beginning and transform it back in the end???
+
+**Data characteristics**:
+
+-   All variables are character?
+
+-   Are there duplicated IDs or duplicated rows?
+
+-   Contains contradictions?
+
+-   Contains NAs?
+
+-   Contains NA variants?
+
+-   
+
+# Module naming rules
+
+-   Only use upper case letters to make them easily distinguishable inside the S7 metadata property list
+
+-   Module and sub-module names are separated by `_`, therefore, don't use `_` within names of modules, sub-modules, and variants. Use `.` instead.
+
+# Workflow elements
+
+## 1) Load (Module ID: LOAD)
+
+### 1.1) Load (Sub-Module ID: LOAD\_)
 
 Load the dataset that you want to process into R. This dataset is called "the data" in the remainder of this vignette.
 
-| Status                 | Condition |
-|------------------------|-----------|
-| active: Variant `CSV`  |           |
-| active: Variant `RDS`  |           |
-| active: Variant `SPSS` |           |
-|                        |           |
-| inactive               | never     |
+#### Activity
 
-#### 1.2) Check loaded file (Sub-Module ID: LOAD_CHECK)
+| Activity | Condition |
+|------------------------------------|------------------------------------|
+| active: Variant `CSV` |  |
+| active: Variant `RDS` |  |
+| active: Variant `SPSS` |  |
+|  |  |
+| inactive | epicdata user mode function; or user wants to specify it themselves |
 
-df or tibble; special characters
+#### State of the data
 
-#### 1.3) All values to character (Sub-Module ID: LOAD\_)
+x
 
-include in 1.1, i.e., variants with and without colclasses = "character" or similar???
+#### User input
 
-#### 1.4 Combine multiple datasets (Sub-Module ID: LOAD\_)
+None
 
-### 2) Variables (Module ID: VAR)
+### 1.2) Check loaded file (Sub-Module ID: LOAD_CHECK)
 
-#### 2.1) Notice variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.NOTE)
+df, tibble, and data.table should all work
 
-| Status   | Condition |
+special characters (äöüß, etc.)
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+### 1.3) All variables to character (Sub-Module ID: LOAD\_)
+
+Needs to be separate from the loading procedure, because, when epicdata is used as a function, the data has already been loaded
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+### 1.4 Combine multiple datasets (Sub-Module ID: LOAD\_)
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+x
+
+## 2) Variables (Module ID: VAR)
+
+### 2.1) Notice variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.NOTE)
+
+x
+
+#### Activity
+
+| Activity | Condition |
 |----------|-----------|
 | active   | always    |
 | inactive | never     |
 
-Desc
+#### State of the data
 
-`User input`: *Requires confirmation that variables should be missing.*
+x
 
-#### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.RM)
+#### User input
 
-| Status   | Condition                          |
+Requires [confirmation]{.underline} that variables should be missing
+
+### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.RM)
+
+x
+
+#### Activity
+
+| Activity | Condition                          |
 |----------|------------------------------------|
 | active   | option `remove.vars: yes`          |
 | inactive | option `remove.vars: no` (default) |
 
-Desc
+#### State of the data
 
-`User input`: *Requires confirmation that variables should be removed.*
+x
 
-#### 2.3) Notice variables that are in meta but not in the data (Sub-Module ID: VAR_META!DF.NOTE)
+#### User input
 
-| Status   | Condition |
+Requires [confirmation]{.underline} that variables should be removed
+
+### 2.3) Notice variables that are in meta but not in the data (Sub-Module ID: VAR_META!DF.NOTE)
+
+x
+
+#### Activity
+
+| Activity | Condition |
 |----------|-----------|
 | active   | always    |
 | inactive | never     |
 
-: Desc
+#### State of the data
 
-`User input`: *Requires confirmation that variables should be missing.*
+x
 
-#### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
+#### User input
 
-| Status | Condition |
-|----|----|
+Requires [confirmation]{.underline} that variables should be missing
+
+### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
+
+Desc (include check if all old.id values are available, no confirmation required because intention is clear)
+
+#### Activity
+
+| Activity | Condition |
+|------------------------------------|------------------------------------|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
-: Desc (include check if all old.id values are available, no confirmation required because intention is clear)
+#### State of the data
 
-### 3) Rows (Module ID: ROW)
+x
 
-#### 3.1) Remove rows based on id.pattern (Sub-Module ID: ROW_ID.PATTERN)
+#### User input
 
-| Status   | Condition                           |
+None
+
+## 3) Rows (Module ID: ROW)
+
+### 3.1) Remove rows based on id.pattern (Sub-Module ID: ROW_ID.PATTERN)
+
+x
+
+#### Activity
+
+| Activity | Condition                           |
 |----------|-------------------------------------|
 | active   | `id.pattern` has been specified     |
 | inactive | `id.pattern` has not been specified |
 
-: Desc
+#### State of the data
 
-`User input`: *Requires confirmation that IDs should be removed.*
+x
 
-#### 3.2) Remove based on invalid.ids or valid.ids/id.list (Sub-Module ID: ROW_RM.ID)
+#### User input
 
-| Status                    | Condition |
+Requires [confirmation]{.underline} that IDs should be removed
+
+### 3.2) Remove based on invalid.ids or valid.ids/id.list (Sub-Module ID: ROW_RM.ID)
+
+Desc, no user input because list is provided and intention is clear
+
+#### Activity
+
+| Activity                  | Condition |
 |---------------------------|-----------|
 | active: Variant `VALID`   |           |
 | active: Variant `INVALID` |           |
 | inactive                  |           |
 
-: Desc, no user input because list is provided and intention is clear
+#### State of the data
 
-#### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW_FILTER)
+x
 
-| Status | Condition |
-|----|----|
+#### User input
+
+Requires [ID list]{.underline} of valid or invalid IDs
+
+### 3.3) Remove based on valid.rows/invalid.rows (Sub-Module ID: ROW_FILTER)
+
+Desc, if we use filter, we need to change variable types, no? Or we adjust the filter code based on type, e.g., filter(as.numeric(var) \> 3)
+
+#### Activity
+
+| Activity | Condition |
+|------------------------------------|------------------------------------|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
 
-: Desc, if we use filter, we need to change variable types, no? Or we adjust the filter code based on type
+#### State of the data
 
-`User input`: *Requires confirmation that rows should be removed.*
+x
 
-#### 3.4) Remove based on informed consent (Sub-Module ID: ROW_IC)
+#### User input
 
-| Status   | Condition                                                  |
+Requires [confirmation]{.underline} that rows should be removed
+
+### 3.4) Remove based on informed consent (Sub-Module ID: ROW_IC)
+
+Desc, no user input because list is provided and intention is clear
+
+#### Activity
+
+| Activity | Condition                                                  |
 |----------|------------------------------------------------------------|
 | active   | `consent: yes` (default if `id.var` has been specified)    |
 | inactive | `consent: no` (default if `id.var` has not been specified) |
 
-: Desc, no user input because list is provided and intention is clear
+#### State of the data
 
-### 4) Cells (Module ID: CELL)
+x
 
-#### 4.1) Remove new lines/tabs (Sub-Module ID: CELL_NEW.LINE)
+#### User input
 
-| Status   | Condition |
+Requires an [ID list]{.underline} of all IDs with informed consent
+
+## 4) Cells (Module ID: CELL)
+
+### 4.1) Remove new lines/tabs (Sub-Module ID: CELL_NEW.LINE)
+
+x
+
+#### Activity
+
+| Activity | Condition |
 |----------|-----------|
 | active   |           |
 | inactive |           |
 
-: Desc
+#### State of the data
 
-#### 4.2) NA variants to NA (Sub-Module ID: CELL_TO.NA)
+x
 
-| Status | Condition |
-|----|----|
-| active: VARIANT `EMPTY` | If key `to.na` has not been used at all. |
-| active: VARIANT `NA.VARIANTS` | If key `to.na` has been used at some point in metadata. |
-| inactive | never |
+#### User input
 
-: Desc
+None
 
-### 5) Duplicates (Module ID: DUP)
+### 4.2) NA variants to NA (Sub-Module ID: CELL_EMPTY.TO.NA)
 
-#### 5.1 Check for exact duplicates (Sub-Module ID: DUP_NO.ID)
+Transform NA variants (see NA vignette) to NA. There are a few values that are by default counted as NA variants, namely, empty strings `""` as well as strings that only consist of spaces, defined by some regex (probably use something like "\\\\s\*"; see "Using Predefined Character Sets" in chapter "Regular Expressions" of the stringi documentation; there, it is also recommended to avoid POSIX Classes such as [:punkt:]). However, the term "default" in the previous sentence is misleading, because it is not the default value of key `to.na` as this would mean that you need to include "\\\\s\*" when you add your own NA variants. Therefore, `to.na` has no predefined default and "\\\\s\*" are treated in this separate sub-module, which can be turned off by an option (which should, however, rarely be necessary).
 
-| Status   | Condition                       |
+#### Activity
+
+| Activity | Condition                                 |
+|----------|-------------------------------------------|
+| active   | `exclude.empty.na.variants: no` (default) |
+| inactive | `exclude.empty.na.variants: yes`          |
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+### 4.3) NA variants to NA (Sub-Module ID: CELL_USER.TO.NA)
+
+Transformed user-specified NA variants (see NA vignette) to NA
+
+#### Activity
+
+| Activity | Condition |
+|------------------------------------|------------------------------------|
+| active | If key `to.na` or its alternatives have been used at some point in the metadata |
+| inactive | If key `to.na` and its alternatives have not been used at all |
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+## 5) Duplicates (Module ID: DUP)
+
+### 5.1 Check for exact duplicates (Sub-Module ID: DUP_NO.ID)
+
+Desc, is here the dummy id created (see default of id.var)
+
+#### Activity
+
+| Activity | Condition                       |
 |----------|---------------------------------|
 | active   | `id.var` has not been specified |
 | inactive | `id.var` has been specified     |
 
-Desc, is here the dummy id created (see default of id.var)
+#### State of the data
 
-#### 5.2 Evaluate ID frequency (Sub-Module ID: DUP_FREQ)
+x
 
-| Status   | Condition                       |
+#### User input
+
+x
+
+### 5.2 Evaluate ID frequency (Sub-Module ID: DUP_FREQ)
+
+x
+
+#### Activity
+
+| Activity | Condition                       |
 |----------|---------------------------------|
 | active   | `id.var` has been specified     |
 | inactive | `id.var` has not been specified |
 
-: Desc
+#### State of the data
 
-`User input`: *Requires confirmation that every ID has the expected frequency.*
+x
 
-#### 5.3 Data comparison (Sub-Module ID: DUP_COMPARE)
+#### User input
 
-| Status   | Condition           |
-|----------|---------------------|
-| active   | `double.entry: yes` |
-| inactive | `double.entry: no`  |
+Requires [confirmation]{.underline} that every ID has the expected frequency
 
-: Desc
+### 5.3 Data comparison (Sub-Module ID: DUP_COMPARE)
 
 database.id?? (limesurveyID)
 
 generalize to more than 2 IDs, e.g., mention all three different values maybe even with frequency
 
-`User input`: *Requires **decisions** regarding differences between entries of the same ID.*
+#### Activity
 
-### 6) Variable groups (Module ID: GROUP\_)
+| Activity | Condition           |
+|----------|---------------------|
+| active   | `double.entry: yes` |
+| inactive | `double.entry: no`  |
 
-#### 6.1) All 0s to NA
+#### State of the data
 
-#### 6.2) NAs to 0
+x
 
-### 7) Individual changes
+#### User input
 
-### 8) Other: please specify (Module ID: OPS\_)
+Requires [decisions]{.underline} regarding differences between entries of the same ID
 
-### 9) Format
+## 6) Variable groups (Module ID: GROUP)
 
-### 10) Change data type
+### 6.1) All 0s to NA
 
-### 11) Create new variables
+x
 
-### 12) Missings
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+x
+
+### 6.2) NAs to 0
+
+x
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+x
+
+## 7) Individual changes (Module ID: CHANGE)
+
+## 8) Other: please specify (Module ID: OPS)
+
+## 9) Format (Module ID: FORMAT)
+
+## 10) Change data type (Module ID: TYPE)
+
+## 11) Create new variables (Module ID: NEW)
+
+## 12) Missings (Module ID: NA)
 
 Where exactly in the workflow missings are handled, is still tbd.
 
-### 13) Limits
+## 13) Limits (Module ID: LIMIT)
 
-#### 13.1) By rule
+### 13.1) By rule (Sub-Module ID: LIMIT_RULE)
 
-#### 13.2) By case
+x
 
-### 14) Contradictions
+#### Activity
 
-#### 14.1) By rule
+x
 
-#### 14.2) By case
+#### State of the data
 
-### 15) Cat to factor
+x
 
-### 16) Data Dictionary
+#### User input
 
-### 17) Finalize
+None
+
+### 13.2) By case (Sub-Module ID: LIMIT_CASE)
+
+x
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+Requires [decisions]{.underline} regarding values outside the limits
+
+## 14) Contradictions (Module ID: CON)
+
+### 14.1) By rule (Sub-Module ID: CON_RULE)
+
+x
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+### 14.2) By case (Sub-Module ID: CON_CASE)
+
+x
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+Requires [decisions]{.underline} regarding values that contradict each other
+
+## 15) Cat to factor (Module ID: )
+
+## 16) Documentation (Module ID: DOCU)
+
+### 16.1) Data Dictionnary
+
+Desc: Data Dictionary; I didn't wnat to name the module DICT\_ because the dictionnary key in YAML are already called like that. Two variants dependent on the inclusion of individual changes specfied via the key "changes: " in var.list. If there is personal data of study participants in that changes, they should not appear in the data dictionnary. However, if no data confidentiality problems arise, it would be nice to have all the differences between raw and processed data in the data dictionnary.
+
+#### Activity
+
+| Activity                       | Condition                              |
+|--------------------------------|----------------------------------------|
+| active: Variant `NO.CHANGES`   | option `changes.in.docu: no` (default) |
+| active: Variant `WITH.CHANGES` | option `changes.in.docu: yes`          |
+| inactive                       | never??                                |
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+### 16.2) List of individual changes
+
+Offer separate list with individual changes??
+
+#### Activity
+
+x
+
+#### State of the data
+
+x
+
+#### User input
+
+None
+
+## 17) Finalize (Module ID: FINAL)
 
 Delete temporarily added ID variable, if id.var has not been specified
+
+Transfor Log in specified form?
