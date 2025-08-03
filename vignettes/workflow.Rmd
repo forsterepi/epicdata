@@ -478,8 +478,6 @@ x
 
 ## 12) Missings (Module ID: NA)
 
-Where exactly in the workflow missings are handled, is still tbd.
-
 ## 13) Limits (Module ID: LIMIT)
 
 ### 13.1) By rule (Sub-Module ID: LIMIT_RULE)
@@ -555,6 +553,8 @@ Requires [decisions]{.underline} regarding values that contradict each other
 ### 16.1) Data Dictionnary
 
 Desc: Data Dictionary; I didn't wnat to name the module DICT\_ because the dictionnary key in YAML are already called like that. Two variants dependent on the inclusion of individual changes specfied via the key "changes: " in var.list. If there is personal data of study participants in that changes, they should not appear in the data dictionnary. However, if no data confidentiality problems arise, it would be nice to have all the differences between raw and processed data in the data dictionnary.
+
+Include a plyr::count() table of all changes based on .rules, so that we can easily evaluate if all changes made sense and that we did not forget anything.
 
 #### Activity
 

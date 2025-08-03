@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 
 some [text]{style="background-color: blue"}
 
-## Design principles
+# Design principles
 
 `epicdata` wants to be a user-friendly, yet comprehensive data processing and cleaning tool for all types of epidemiological studies. We therefore adhere to the following design principles:
 
@@ -30,7 +30,7 @@ some [text]{style="background-color: blue"}
 -   Usable for non-veteran R users: Metadata is specified in human readable YAML format. `epicdata` creates R code. User decisions can be inputted in user-friendly ways.
 -   Separate data manager and expert roles: There are often situations in which the data manager is not making decisions on how to proceed with problematic values. `epicdata` therefore provides a mode, in which decision-making can be separated from data cleaning. Decision-makers are not assumed to be R users.
 
-## Format (YAML)
+# Format (YAML)
 
 In `epicdata`, metadata is specified in **YAML** format. YAML has been designed to be readable for both humans and computers. This is accomplished by **indentations**, i.e., the distance a line of text is moved towards the right. The indentation thereby defines a hierarchy of the individual elements. In other formats, such a hierarchy needs additional text elements, which hurts human readability. This means, however, that errors in indentations will lead to misspecification of metadata information. (Usually, the next layer is 2 spaces or a tab towards the right. RStudio provides an "indentation guide" that visually highlights the indentation. To activate it, go to Tools/Global Options/Code/Display. If nothing changes, adjust your theme in Tools/Global Options/Appearance.)
 
@@ -112,7 +112,7 @@ countries:
     capital: Paris# not a valid comment since there is no space before the hashtag symbol
 ```
 
-## Metadata design principles
+# Metadata design principles
 
 -   Including a key without specifying a value is equal to not including the key at all.
 
@@ -135,7 +135,7 @@ options:
 
 -   Whenever useful, different spellings are offered, e.g., `date.format` and `format.date`.
 
-## Components
+# Components
 
 In `epicdata`, metadata consists of several components:
 
@@ -160,7 +160,7 @@ contras:
   tbd
 ```
 
-## Component: options
+# Component: options
 
 Options are key-value pairs below component `options`. List all key-value pairs on the second layer without any dashes. In the list of option keys below, allowed values for the corresponding key are found in the brackets after each key.
 
@@ -210,41 +210,41 @@ options:
   date.format: dmy
 ```
 
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| Option            | Alternative names | Length     | Do not specify together with ... | Only specify together with ... |
-+===================+===================+============+==================================+================================+
-| `data.name`       |                   | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `id.var`          |                   | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `id.pattern`      |                   | 1          | `id.list`                        | `id.var`                       |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `id.list`         |                   | 1          | `id.pattern`                     |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `consent`         |                   | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `load.from`       |                   | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `double.entry`    |                   | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `remove.vars`     | `vars.remove`     | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-|                   |                   |            |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `date.format`     | `format.date`     | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `time.format`     | `format.time`     | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `datetime.format` | `format.datetime` | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `to.na`           | `na.to`           | \>=1       |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `touch.na`        | `na.touch`        | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
-| `to.factor`       |                   | 1          |                                  |                                |
-+-------------------+-------------------+------------+----------------------------------+--------------------------------+
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| Option            | Alternative names | Length      | Do not specify together with ... | Only specify together with ... |
++===================+===================+=============+==================================+================================+
+| `data.name`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.var`          |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.pattern`      |                   | 1           | `id.list`                        | `id.var`                       |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `id.list`         |                   | 1           | `id.pattern`                     |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `consent`         |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `load.from`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `double.entry`    |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `remove.vars`     | `vars.remove`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+|                   |                   |             |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `date.format`     | `format.date`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `time.format`     | `format.time`     | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `datetime.format` | `format.datetime` | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `to.na`           | `na.to`           | \>=1        |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `touch.na`        | `na.touch`        | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
+| `to.factor`       |                   | 1           |                                  |                                |
++-------------------+-------------------+-------------+----------------------------------+--------------------------------+
 
-## Component: var.list
+# Component: var.list
 
 The list of variables `var.list` is the core of the metadata and a mandatory part of it. The second layer contains the variable names. The third layer contains key-value pairs that provide information regarding the corresponding variable. The same keys are re-used for each variable.
 
@@ -260,7 +260,7 @@ var.list:
 
 Note that, in the example above, `var1` and `var2` are the variable names and that there is no value after the colon `:` in their lines. Variable names must be syntactically valid names (see `?make.names` for details). The key-value pairs below `var1` describe the characteristics of `var1`, while the key-value pairs below `var2` describe characteristics of `var2`. Many keys only apply to certain variable types. Do not specify keys that apply to other types of variables. The list below is structured by the type of variable the keys apply to.
 
-**Keys that apply to all variables:**
+## **Keys that apply to all variables**
 
 -   `type` (one of: `text`, `cat`, `num`, `date`, `time`, `datetime`): The variable `type` is the main variable characteristic and the only key that is **always** **required**. There are 6 different types:
 
@@ -322,13 +322,13 @@ var.list:
 
 -   `changes` ():
 
-**Text variables:**
+## **Text variables**
 
 -   `ops` (a variable or group name): add separation of one variable that contains both the checkbox value and the free text, as in modern limesurvey
 -   `dict` ():
 -   `dict.rules` ():
 
-**Categorical (cat) variables:**
+## **Categorical (cat) variables**
 
 -   `cats` ():
 
@@ -373,7 +373,7 @@ var.list:
 
 -   `factor.name` or `name.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
 
-**Numeric (num) variables:**
+## **Numeric (num) variables**
 
 -   `unit` (text): Name the unit of the values
 
@@ -387,7 +387,7 @@ var.list:
 
 -   `limit.rules` ():
 
-**Date variables:**
+## **Date variables**
 
 -   `format` or `date.format` or `format.date` ():
 
@@ -401,7 +401,7 @@ var.list:
 
 -   `limit.rules` ():
 
-**Time variables:**
+## **Time variables**
 
 -   `format` or `time.format` or `format.time` ():
 
@@ -415,7 +415,7 @@ var.list:
 
 -   `limit.rules` ():
 
-**Datetime variables:**
+## **Datetime variables**
 
 -   `format` or `datetime.format` or `format.datetime` ():
 
@@ -429,7 +429,7 @@ var.list:
 
 -   `limit.rules` ():
 
-**Variable names in the data set:**
+## **Variable names in the data set**
 
 The data set must contain a certain set of variables based on the metadata specification:
 
@@ -461,7 +461,19 @@ var.list:
     new: 2 * var1
 ```
 
-**Summary of variable keys:**
+## .rules format
+
+-   Applies to na.rules, dict.rules, cat.rules, limit.rules, contradictions
+
+-   When rules are applied, variables are in their corresponding type already, i.e., after changing them from type character to their actual type, e.g., numeric. Therefore, constants in the rules need to be handled accordingly, e.g., putting strings in quotation marks
+
+-   NA can be written as NA, without quotation marks, just like in R
+
+-   na.rules are applied before all other rules. Therefore, all other rules need to address the post NA processing values, i.e., the missing codes, NA only if na.touch: no, or the values resulting from na.replace; if you can address shortened NA codes for date,time,datetime, e.g. 9001 instead of 9001-01-01, is tbd (ideally yes); na.rules themselves are applied in order of occurrence of the variable in the YAML input. Therefore, if you include variables in your conditions which appear before the current one, use na.codes, etc., and if you address a variable after the current one, use NA even if na.touch: yes
+
+-   Rules follow in general the format of formulas in dplyr::case_when: they are two-sided formulas with a condition on the left hand side and a value on the right hand side.
+
+## **Summary of variable keys**
 
 +-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
 | Key               | Alternative names                                     | Length                                                                               | Do not specify together with ... | Only specify together with ...                   |
@@ -531,7 +543,7 @@ var.list:
 | `datetime.format` | `format.datetime`, `format` (if `type` is `datetime`) | 1 (required if type `datetime`, but might be specified in `var.groups` or `options`) |                                  |                                                  |
 +-------------------+-------------------------------------------------------+--------------------------------------------------------------------------------------+----------------------------------+--------------------------------------------------+
 
-## Component: na.codes
+# Component: na.codes
 
 In the final processed data sets, NAs are usually replaced by missing codes. These codes represent a certain type or reason of missingness. In the component `na.codes`, certain values are declared as missing codes in order to allow `epicdata` to treat them appropriately, e.g., by including them in the data dictionary. In `na.codes`, no reference to certain variables is made yet. Here, only the declaration is done.
 
@@ -548,7 +560,7 @@ na.codes:
 
 The missing codes used in the final data set must be of the same type (text, cat, num, date, datetime, time) as the variable. We therefore recommend to use integers, as they can be used in the same form for variables of type text, cat, and num. When an integer is used for date, datetime, or time, it is automatically transformed by the following rules:
 
-**Single digit, e.g.,** `9`**:**
+## **Single digit, e.g.,** `9`
 
 -   `date`: Add value in years to the date 9000-01-01, e.g., `9009-01-01`
 -   `datetime`: Add value in years to the datetime 9000-01-01 00:00:00, e.g., `9009-01-01 00:00:00`
@@ -556,7 +568,7 @@ The missing codes used in the final data set must be of the same type (text, cat
 -   `time` (format: `hm`): Use the value in every digit, e.g., `99:99`, `99h99m`
 -   `time` (format: `ms`): Use the value in every digit, e.g., `99:99`, `99m99s`
 
-**Two digits, e.g.,** `99`**:**
+## **Two digits, e.g.,** `99`
 
 -   `date`: Add value in years to the date 9000-01-01, e.g., `9099-01-01`
 -   `datetime`: Add value in years to the datetime 9000-01-01 00:00:00, e.g., `9099-01-01 00:00:00`
@@ -564,7 +576,7 @@ The missing codes used in the final data set must be of the same type (text, cat
 -   `time` (format: `hm`): Use the value for hours and minutes, e.g., `99:99`, `99h99m`
 -   `time` (format: `ms`): Use the value for minutes, and seconds, e.g., `99:99`, `99m99s`
 
-**Three digits, e.g.,** `101`**:**
+## **Three digits, e.g.,** `101`
 
 -   `date`: Add value in years to the date 9000-01-01, e.g., `9101-01-01`
 -   `datetime`: Add value in years to the datetime 9000-01-01 00:00:00, e.g., `9101-01-01 00:00:00`
@@ -572,7 +584,7 @@ The missing codes used in the final data set must be of the same type (text, cat
 -   `time` (format: `hm`): Add the first digit in hours and the last two digits in minutes to the time 90:00, e.g., `91:01`, `91h01m`
 -   `time` (format: `ms`): Add the first digit in minutes and the last two digits in seconds to the time 90:00, e.g., `91:01`, `91m01s`
 
-**Four digits, e.g.,** `9001`**:**
+## **Four digits, e.g.,** `9001`
 
 -   `date`: Use the value as the year of the date xxxx-01-01, e.g., `9001-01-01`
 -   `datetime`: Use the value as the year of the datetime xxxx-01-01 00:00:00, e.g., `9001-01-01 00:00:00`
@@ -582,9 +594,11 @@ The missing codes used in the final data set must be of the same type (text, cat
 
 If the automatic transformation does not provide values that make sense for missing codes (values that cannot be confused with real values), you can provide date, datetime, and time values for missing codes as well. The values you choose must be in the same format as the corresponding variable, e.g., `9001-01-01` for format `ymd` and `01.01.9001` for format `dmy`. For time formats, we recommend using the letters `h` (for hours), `m` (for minutes), and `s` (for seconds) after the corresponding number, e.g., `90h01m00s`, `90h01m`, `01m00s`.
 
-## Components: contras
+**It must be checked if after applying the aforementioned conversion processes, there are actually multiple identical na.codes, e.g., imagine there is a missing code 9001 and 9001-01-01, with different meaning, then a transformed 9001 would be the same as 9001-01-01. However, for this we ideally need to check, if 9001 is actually used in any date variable. Maybe: 0) check if duplicated codes have been specified in na.codes; 1) get list of na.codes used by variable with their description provided in component na.codes; 2) for date, datetime, time, transform codes as discussed above; 3) check if all codes of all variables are in the required format for that variable; 4) if there are identical codes with different descriptions =\> error,**
 
-## Components: var.groups
+# Components: contras
+
+# Components: var.groups
 
 Often, variables in the same group are of the same type, e.g., `cat`, but they don't have to be. The specified defaults for type-specific keys of course only apply the variables of the corresponding type.
 
@@ -649,7 +663,7 @@ var.groups:
     group.label: Where do you exercise?
 ```
 
-## Defaults
+# Defaults
 
 In `epicdata`, not specifying a value also holds information. This is accomplished by default values. `epicdata` selects values by going through a following **cascade of defaults**:
 

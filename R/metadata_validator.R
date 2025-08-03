@@ -74,7 +74,7 @@ var.list.validator <- function(value) {
   keys.sub <- c("sub")
   keys.new <- c("new")
   keys.ops <- c("ops")
-  keys.dict <- c("dict", "dict.default.group", "dict.final")
+  keys.dict <- c("dict", "dict.default.group", "dict.final", "dict.rules")
   keys.cats <- c("cats", "cats.default.group", "cats.final")
   keys.cats.eng <- c(
     "cats.eng", "eng.cats", "cats.eng.default.group",

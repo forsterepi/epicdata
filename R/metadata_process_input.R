@@ -16,9 +16,9 @@
 #'
 #' @noRd
 process.cats <- function(cats, name, eng = FALSE,
-                                 call = rlang::caller_env()) {
+                         call = rlang::caller_env()) {
   # Check input: eng
-  if (!is.logical(eng) | is.na(eng)) {
+  if (!is.logical(eng) || is.na(eng)) {
     cli::cli_abort(c("x" = "Error IE004"), .internal = TRUE, class = "IE004")
   }
 
@@ -36,47 +36,66 @@ process.cats <- function(cats, name, eng = FALSE,
 
   # cats cannot be NA or contain any NA
   if (is.na(cats) %>% any()) {
-    cli::cli_abort(c("!" = "{.var {cats_type}} must not be NA or contain any
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} must not be NA or contain any
                      NA.",
-                     "i" = "Applies to variable {.var {name}}."),
-                   call = call, class = "error.process.cats.1")
+        "i" = "Applies to variable {.var {name}}."
+      ),
+      call = call, class = "error.process.cats.1"
+    )
   }
 
   # cats must be character
   if (!is.character(cats)) {
-    cli::cli_abort(c("!" = "{.var {cats_type}} must be specified as character
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} must be specified as character
                      vector.",
-                     "i" = "Applies to variable {.var {name}}.",
-                     "i" = "See the {.vignette epicdata::metadata_long}
-                     vignette."),
-                   call = call, class = "error.process.cats.2")
+        "i" = "Applies to variable {.var {name}}.",
+        "i" = "See the {.vignette epicdata::metadata_long}
+                     vignette."
+      ),
+      call = call, class = "error.process.cats.2"
+    )
   }
 
   # Count if there is a single `=` in each element of cats
-  if (cats %>% stringi::stri_count_regex("=") %>% magrittr::equals(1) %>%
-      all() %>% magrittr::not()) {
+  if (cats %>%
+    stringi::stri_count_regex("=") %>%
+    magrittr::equals(1) %>%
+    all() %>%
+    magrittr::not()) {
     report <- cats[cats %>%
-                     stringi::stri_count_regex("=") %>%
-                     magrittr::equals(1) %>%
-                     magrittr::not()] %>%
+      stringi::stri_count_regex("=") %>%
+      magrittr::equals(1) %>%
+      magrittr::not()] %>%
       stringi::stri_flatten(collapse = ", ")
 
-    cli::cli_abort(c("!" = "{.var {cats_type}} has the wrong format.",
-                     "i" = "{.var {cats_type}} must connect an integer with a
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} has the wrong format.",
+        "i" = "{.var {cats_type}} must connect an integer with a
                      text, i.e., non-integer, via a single equal sign, e.g.,
                      {.var 1 = female}",
-                     "i" = "In variable {.var {name}}, some elements have the
-                     wrong format: {report}"),
-                   call = call, class = "error.process.cats.3")
+        "i" = "In variable {.var {name}}, some elements have the
+                     wrong format: {report}"
+      ),
+      call = call, class = "error.process.cats.3"
+    )
   }
 
   # Check length of cats
   if (cats %>% length() %>% magrittr::equals(1)) {
-    cli::cli_abort(c("!" = "{.var {cats_type}} has `length == 1`, but must have
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} has `length == 1`, but must have
                      `length > 1`.",
-                     "i" = "You specified only a single category for variable
-                     {.var {name}}."),
-                   call = call, class = "error.process.cats.10")
+        "i" = "You specified only a single category for variable
+                     {.var {name}}."
+      ),
+      call = call, class = "error.process.cats.10"
+    )
   }
 
   # Split each element of cats in two elements based on the `=`, also trim
@@ -87,8 +106,10 @@ process.cats <- function(cats, name, eng = FALSE,
 
   # Make sure that `splitted` has exactly two columns
   if (splitted %>% ncol() %>% magrittr::equals(2) %>% magrittr::not()) {
-    cli::cli_abort(c("x" = "Error IE001"), call = call, .internal = TRUE,
-                   class = "IE001")
+    cli::cli_abort(c("x" = "Error IE001"),
+      call = call, .internal = TRUE,
+      class = "IE001"
+    )
   }
 
   # Derive which elements are integers
@@ -99,84 +120,102 @@ process.cats <- function(cats, name, eng = FALSE,
   })
 
   # Check for doubles
-  inti_num <- inti %>% unlist() %>% as.numeric()
+  inti_num <- inti %>%
+    unlist() %>%
+    as.numeric()
   suppressWarnings({
-    splitted_num <- splitted %>% unlist() %>% as.numeric()
+    splitted_num <- splitted %>%
+      unlist() %>%
+      as.numeric()
   })
 
   if (inti_num %>%
-      magrittr::equals(splitted_num) %>%
-      magrittr::extract(!is.na(.)) %>%
-      all() %>%
-      magrittr::not()) {
+    magrittr::equals(splitted_num) %>%
+    magrittr::extract(!is.na(.)) %>%
+    all() %>%
+    magrittr::not()) {
     report <- splitted_num[inti_num != splitted_num] %>%
       magrittr::extract(!is.na(.)) %>%
       as.character() %>%
       unique() %>%
       stringi::stri_flatten(collapse = ", ")
 
-    cli::cli_abort(c("!" = "{.var {cats_type}} must not contain doubles.",
-                     "i" = "In variable {.var {name}}, some elements are
-                     double: {report}"),
-                   call = call, class = "error.process.cats.4")
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} must not contain doubles.",
+        "i" = "In variable {.var {name}}, some elements are
+                     double: {report}"
+      ),
+      call = call, class = "error.process.cats.4"
+    )
   }
 
   # Error if there is no integer
   if (inti %>%
+    is.na() %>%
+    rowSums() %>%
+    magrittr::equals(2) %>%
+    any()) {
+    report <- splitted[inti %>%
       is.na() %>%
       rowSums() %>%
-      magrittr::equals(2) %>%
-      any()) {
-    report <- splitted[inti %>%
-                         is.na() %>%
-                         rowSums() %>%
-                         magrittr::equals(2),] %>%
+      magrittr::equals(2), ] %>%
       apply(1, stringi::stri_flatten, collapse = " = ") %>%
       stringi::stri_flatten(collapse = ", ")
 
-    cli::cli_abort(c("!" = "{.var {cats_type}} must connect an integer with a
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} must connect an integer with a
                      text, i.e., non-integer, via a single equal sign, e.g.,
                      {.var 1 = female}",
-                     "i" = "In variable {.var {name}}, some elements of
-                     {.var {cats_type}} do not contain an integer: {report}"),
-                   call = call, class = "error.process.cats.5"
+        "i" = "In variable {.var {name}}, some elements of
+                     {.var {cats_type}} do not contain an integer: {report}"
+      ),
+      call = call, class = "error.process.cats.5"
     )
   }
 
   # Error if there are two integers
   if (inti %>%
+    is.na() %>%
+    rowSums() %>%
+    magrittr::equals(0) %>%
+    any()) {
+    report <- splitted[inti %>%
       is.na() %>%
       rowSums() %>%
-      magrittr::equals(0) %>%
-      any()) {
-    report <- splitted[inti %>%
-                         is.na() %>%
-                         rowSums() %>%
-                         magrittr::equals(0),] %>%
+      magrittr::equals(0), ] %>%
       apply(1, stringi::stri_flatten, collapse = " = ") %>%
       stringi::stri_flatten(collapse = ", ")
 
-    cli::cli_abort(c("!" = "{.var {cats_type}} must connect an integer with a
+    cli::cli_abort(
+      c(
+        "!" = "{.var {cats_type}} must connect an integer with a
                      text, i.e., non-integer, via an equal sign, e.g.,
                      {.var 1 = female}",
-                     "i" = "In variable {.var {name}}, some elements of
-                     {.var {cats_type}} contain two integers: {report}"),
-                   call = call, class = "error.process.cats.6"
+        "i" = "In variable {.var {name}}, some elements of
+                     {.var {cats_type}} contain two integers: {report}"
+      ),
+      call = call, class = "error.process.cats.6"
     )
   }
 
   # Process if exactly one is integer
   if (inti %>%
-      is.na() %>%
-      rowSums() %>%
-      magrittr::equals(1) %>%
-      all()) {
-    out <- data.frame(level = rep(NA,nrow(splitted)),
-                      label = rep(NA,nrow(splitted)))
-    for (i in 1:nrow(out)) {
-      out$label[i] <- splitted[i, inti[i,] %>% is.na() %>% which()]
-      out$level[i] <- splitted[i, inti[i,] %>% is.na() %>% magrittr::not() %>%
-                                 which()]
+    is.na() %>%
+    rowSums() %>%
+    magrittr::equals(1) %>%
+    all()) {
+    out <- data.frame(
+      level = rep(NA, nrow(splitted)),
+      label = rep(NA, nrow(splitted))
+    )
+    for (i in seq_len(nrow(out))) {
+      out$label[i] <- splitted[i, inti[i, ] %>% is.na() %>% which()]
+      out$level[i] <- splitted[i, inti[i, ] %>%
+        is.na() %>%
+        magrittr::not() %>%
+        which()]
     }
 
     out$level %<>% as.integer()
@@ -188,43 +227,59 @@ process.cats <- function(cats, name, eng = FALSE,
 
     # Error if negative integers (0 is allowed)
     if (out$level %>% magrittr::is_less_than(0) %>% any()) {
-      cli::cli_abort(c("!" = "{.var {cats_type}} must not contain negative
+      cli::cli_abort(
+        c(
+          "!" = "{.var {cats_type}} must not contain negative
                        integers.",
-                       "i" = "Variable {.var {name}} contains negative
-                       integers."),
-                     call = call, class = "error.process.cats.7"
+          "i" = "Variable {.var {name}} contains negative
+                       integers."
+        ),
+        call = call, class = "error.process.cats.7"
       )
     }
 
     # Error if duplcicated integers
     if (out$level %>% duplicated() %>% any()) {
-      report <- out$level[out$level %>% duplicated() %>% any()] %>%
+      report <- out$level[out$level %>%
+        duplicated() %>%
+        any()] %>%
         as.character() %>%
         unique() %>%
         stringi::stri_flatten(collapse = ", ")
 
-      cli::cli_abort(c("!" = "{.var {cats_type}} must not contain duplicated
+      cli::cli_abort(
+        c(
+          "!" = "{.var {cats_type}} must not contain duplicated
                        values.",
-                       "i" = "Variable {.var {name}} contains duplicated
-                       integers: {report}"),
-                     call = call, class = "error.process.cats.8")
+          "i" = "Variable {.var {name}} contains duplicated
+                       integers: {report}"
+        ),
+        call = call, class = "error.process.cats.8"
+      )
     }
 
     # Error if duplicated levels
     if (out$label %>% duplicated() %>% any()) {
-      report <- out$label[out$label %>% duplicated() %>% any()] %>%
+      report <- out$label[out$label %>%
+        duplicated() %>%
+        any()] %>%
         unique() %>%
         stringi::stri_flatten(collapse = ", ")
 
-      cli::cli_abort(c("!" = "{.var {cats_type}} must not contain duplicated
+      cli::cli_abort(
+        c(
+          "!" = "{.var {cats_type}} must not contain duplicated
                        values.",
-                       "i" = "Variable {.var {name}} contains duplicated
-                       labels: {report}"),
-                     call = call, class = "error.process.cats.9")
+          "i" = "Variable {.var {name}} contains duplicated
+                       labels: {report}"
+        ),
+        call = call, class = "error.process.cats.9"
+      )
     }
 
     # Order by integer
-    out <- out[out$level %>% order(),] %>% magrittr::set_rownames(1:nrow(out))
+    out <- out[out$level %>% order(), ] %>%
+      magrittr::set_rownames(seq_len(nrow(out)))
   } else {
     cli::cli_abort(c("x" = "Error IE002"), .internal = TRUE, class = "IE002")
   }
@@ -251,10 +306,13 @@ process.dict <- function(dict, call = rlang::caller_env()) {
   }
 
   # Check input
-  if (!checkmate::test_character(dict, min.len = 1, min.chars = 1,
-                                 any.missing = FALSE, null.ok = FALSE)) {
+  if (!checkmate::test_character(dict,
+    min.len = 1, min.chars = 1,
+    any.missing = FALSE, null.ok = FALSE
+  )) {
     cli::cli_abort("Key {.var dict} must be a character vector.",
-                   call = call, class = "error.process.dict.1")
+      call = call, class = "error.process.dict.1"
+    )
   }
 
   # Parse
@@ -264,10 +322,15 @@ process.dict <- function(dict, call = rlang::caller_env()) {
   for (i in seq_along(dict)) {
     rlang::try_fetch(ex <- rlang::parse_expr(dict[i]),
       error = function(cnd) {
-        cli::cli_abort(c("Unable to process `dict` element {.var {dict[i]}}",
-          "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"),
-          call = call, class = "error.process.dict.2")})
+        cli::cli_abort(
+          c("Unable to process `dict` element {.var {dict[i]}}",
+            "i" = "Please check the required format in the documentation:
+          {.vignette epicdata::metadata_long}"
+          ),
+          call = call, class = "error.process.dict.2"
+        )
+      }
+    )
 
     if (identical(length(ex), 1L)) {
       if (is.symbol(ex)) {
@@ -275,30 +338,39 @@ process.dict <- function(dict, call = rlang::caller_env()) {
         out.dict.eng[i] <- "-"
         names(out.dict.eng)[i] <- rlang::expr_text(ex)
       } else {
-        cli::cli_abort(c("`dict` element {.var {dict[i]}} has an incorrect format.",
-          "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"),
-          call = call, class = "error.process.dict.3")
+        cli::cli_abort(
+          c("`dict` element {.var {dict[i]}} has an incorrect format.",
+            "i" = "Please check the required format in the documentation:
+          {.vignette epicdata::metadata_long}"
+          ),
+          call = call, class = "error.process.dict.3"
+        )
       }
     } else if (identical(length(ex), 3L)) {
-      if (identical(ex[[1]], rlang::sym("=")) &
-          is.symbol(ex[[2]]) &
-          (is.symbol(ex[[3]]) | rlang::is_syntactic_literal(ex[[3]]))) {
+      if (identical(ex[[1]], rlang::sym("=")) &&
+        is.symbol(ex[[2]]) &&
+        (is.symbol(ex[[3]]) || rlang::is_syntactic_literal(ex[[3]]))) {
         out.dict[i] <- rlang::expr_text(ex[[2]])
         out.dict.eng[i] <- rlang::expr_text(ex[[3]]) %>%
           stringi::stri_replace_all(replacement = "", fixed = '\"')
         names(out.dict.eng)[i] <- rlang::expr_text(ex[[2]])
       } else {
-        cli::cli_abort(c("`dict` element {.var {dict[i]}} has an incorrect format.",
-          "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"),
-          call = call, class = "error.process.dict.4")
+        cli::cli_abort(
+          c("`dict` element {.var {dict[i]}} has an incorrect format.",
+            "i" = "Please check the required format in the documentation:
+          {.vignette epicdata::metadata_long}"
+          ),
+          call = call, class = "error.process.dict.4"
+        )
       }
     } else {
-      cli::cli_abort(c("`dict` element {.var {dict[i]}} has an incorrect format.",
+      cli::cli_abort(
+        c("`dict` element {.var {dict[i]}} has an incorrect format.",
           "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"),
-          call = call, class = "error.process.dict.5")
+          {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.process.dict.5"
+      )
     }
   }
 
@@ -317,6 +389,8 @@ process.dict <- function(dict, call = rlang::caller_env()) {
 #' @param var A single string containing the variable name.
 #' @param var.names A character vector containing all variables in `var.list`,
 #' which are the ones that are allowed in the rule conditions.
+#' @param na.codes A character vector containing all na.codes, i.e., missingness
+#' codes of variable `var`.
 #'
 #' @returns An expression of a call to `dplyr::mutate()` with
 #' `dplyr::case_when()` which applies the rules to the corresponding variable
@@ -324,7 +398,7 @@ process.dict <- function(dict, call = rlang::caller_env()) {
 #' assumed to be `df`.
 #'
 #' @noRd
-process.dict.rules <- function(rule, dict, var, var.names,
+process.dict.rules <- function(rule, dict, var, var.names, na.codes,
                                call = rlang::caller_env()) {
   # Ruturn NULL if rule is NULL
   if (is.null(rule)) {
@@ -336,26 +410,31 @@ process.dict.rules <- function(rule, dict, var, var.names,
     return(NULL)
   }
 
-  # Check the dict.rules are in rules format and return expressions
+  # Check that dict.rules are in rules format and return expressions
   e <- check.rules.format(rule = rule, var.names = var.names)
 
-  # Check assigned constants (must be in dect or NA)
+  # Check assigned constants (must be in dict or NA)
   for (i in seq_along(e)) {
-    if (e[[i]][[length(e[[i]])]] %!in% c(dict,NA)) {
-      cli::cli_abort(c("Rule {.var {rlang::expr_text(e[[i]])}} has an incorrect
+    if (e[[i]][[length(e[[i]])]] %!in% c(dict, NA)) {
+      cli::cli_abort(
+        c("Rule {.var {rlang::expr_text(e[[i]])}} has an incorrect
         format.",
-        "i" = "Value after `~` must be in `dect` or NA.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"),
-      call = call, class = "error.process.dict.rules.1")
+          "i" = "Value after `~` must be in `dict` or NA.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.process.dict.rules.1"
+      )
     }
   }
 
   # Get variable
-  v <- rlang::ensym(var)
+  va <- var # Re-assign to make rlang::ensym() work
+  v <- rlang::ensym(va)
 
   # Add condition that value is not in dict
-  dict_cond <- rlang::expr(!!v %!in% !!dict)
+  dict2 <- c(dict, NA, na.codes)
+  dict_cond <- rlang::expr(!!v %!in% !!dict2)
   ## Empty container
   e_dict <- vector(mode = "list", length = length(e))
   ## Add based on availability of other conditions
@@ -370,7 +449,8 @@ process.dict.rules <- function(rule, dict, var, var.names,
 
   # Create final call by unquoting variable name v and rules e_dict
   out <- rlang::expr(df %<>% dplyr::mutate(!!v := dplyr::case_when(!!!e_dict,
-            .default = !!v)))
+    .default = !!v
+  )))
 
   # Return
   out
@@ -400,8 +480,10 @@ process.new <- function(new, var, var.names, new.order) {
   }
 
   # Check the format of new and return expression
-  e <- check.new.format(new = new, var = var, var.names = var.names,
-                        new.order = new.order)
+  e <- check.new.format(
+    new = new, var = var, var.names = var.names,
+    new.order = new.order
+  )
 
   # Get variable
   v <- rlang::ensym(var)
@@ -430,8 +512,10 @@ process.new <- function(new, var, var.names, new.order) {
 #'
 #' @noRd
 check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
-  if (!checkmate::test_character(rule, min.len = 1, min.chars = 1,
-                                 any.missing = FALSE, null.ok = FALSE)) {
+  if (!checkmate::test_character(rule,
+    min.len = 1, min.chars = 1,
+    any.missing = FALSE, null.ok = FALSE
+  )) {
     cli::cli_abort(c("x" = "Error IE006"), .internal = TRUE, class = "IE006")
   }
 
@@ -442,27 +526,38 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
     # Evaluate if rule can be parsed to an expression
     rlang::try_fetch(ex <- rlang::parse_expr(rule[i]),
       error = function(cnd) {
-        cli::cli_abort(c("Unable to process rule {.var {rule[i]}}",
-          "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"),
-          call = call, class = "error.check.rules.format.1")})
+        cli::cli_abort(
+          c("Unable to process rule {.var {rule[i]}}",
+            "i" = "Please check the required format in the documentation:
+          {.vignette epicdata::metadata_long}"
+          ),
+          call = call, class = "error.check.rules.format.1"
+        )
+      }
+    )
 
     # Error if evaluation is only a constant or symbol
     if (!is.call(ex)) {
-      cli::cli_abort(c("Rule {.var {rule[i]}} has an incorrect format.",
-        "i" = "Use of `~` required.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"),
-        call = call, class = "error.check.rules.format.2")
+      cli::cli_abort(
+        c("Rule {.var {rule[i]}} has an incorrect format.",
+          "i" = "Use of `~` required.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.check.rules.format.2"
+      )
     }
 
     # Error if call is not of function `~`
     if (!identical(ex[[1]], rlang::sym("~"))) {
-      cli::cli_abort(c("Rule {.var {rule[i]}} has an incorrect format.",
-        "i" = "Use of `~` required.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"),
-        call = call, class = "error.check.rules.format.3")
+      cli::cli_abort(
+        c("Rule {.var {rule[i]}} has an incorrect format.",
+          "i" = "Use of `~` required.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.check.rules.format.3"
+      )
     }
 
     # Check elements of the call to `~`
@@ -473,16 +568,23 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       # Value in front of ~ must be a call
       if (is.call(ex[[2]])) {
         symbols <- extract.symbols.from.ast(ex, call = call)
-        if (symbols %>% magrittr::is_in(var.names) %>% all() %>%
-            magrittr::not()) {
-          re <- symbols[symbols %>% magrittr::is_in(var.names) %>%
-                          magrittr::not()] %>% unique() %>%
+        if (symbols %>%
+          magrittr::is_in(var.names) %>%
+          all() %>%
+          magrittr::not()) {
+          re <- symbols[symbols %>%
+            magrittr::is_in(var.names) %>%
+            magrittr::not()] %>%
+            unique() %>%
             stringi::stri_c(collapse = ", ")
-          cli::cli_abort(c("Rule {.var {rule[i]}} has an incorrect format.",
-            "i" = "Some variable names have not been specified in `var.list`: {re}",
-            "i" = "Please check the required format in the documentation:
-            {.vignette epicdata::metadata_long}"),
-            call = call, class = "error.check.rules.format.4")
+          cli::cli_abort(
+            c("Rule {.var {rule[i]}} has an incorrect format.",
+              "i" = "Some variable names have not been specified in `var.list`: {re}",
+              "i" = "Please check the required format in the documentation:
+            {.vignette epicdata::metadata_long}"
+            ),
+            call = call, class = "error.check.rules.format.4"
+          )
         }
       }
     } else if (identical(length(ex), 2L)) {
@@ -490,28 +592,37 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       constant_at <- 2
       n_length2 <- n_length2 + 1
     } else {
-      cli::cli_abort(c("Rule {.var {rule[i]}} has an incorrect format.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"),
-        call = call, class = "error.check.rules.format.5")
+      cli::cli_abort(
+        c("Rule {.var {rule[i]}} has an incorrect format.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.check.rules.format.5"
+      )
     }
 
     # Check constant
     ## Value after ~ must be a constant
     if (!rlang::is_syntactic_literal(ex[[constant_at]])) {
-      cli::cli_abort(c("Rules have an incorrect format.",
-        "i" = "Value after ~ must be a constant, i.e., atomic vector or `NA`.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"),
-        call = call, class = "error.check.rules.format.6")
+      cli::cli_abort(
+        c("Rules have an incorrect format.",
+          "i" = "Value after ~ must be a constant, i.e., atomic vector or `NA`.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.check.rules.format.6"
+      )
     }
     ## Value after ~ must not be NULL
     if (is.null(ex[[constant_at]])) {
-      cli::cli_abort(c("Rule {.var {rule[i]}} has an incorrect format.",
-        "i" = "Value after ~ must not be `NULL`.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"),
-        call = call, class = "error.check.rules.format.7")
+      cli::cli_abort(
+        c("Rule {.var {rule[i]}} has an incorrect format.",
+          "i" = "Value after ~ must not be `NULL`.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call, class = "error.check.rules.format.7"
+      )
     }
 
 
@@ -520,18 +631,21 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
 
   # Only one rule can have format "~ value"
   if (n_length2 > 1) {
-    cli::cli_abort(c("Defaults, i.e., rules without value in front of `~`, can
+    cli::cli_abort(
+      c("Defaults, i.e., rules without value in front of `~`, can
       only be assigned once.",
-      "i" = "Please check the required format in the documentation:
-      {.vignette epicdata::metadata_long}"),
-      call = call, class = "error.check.rules.format.8")
+        "i" = "Please check the required format in the documentation:
+      {.vignette epicdata::metadata_long}"
+      ),
+      call = call, class = "error.check.rules.format.8"
+    )
   }
 
-  # Reorder an put entry with "~ value" format at the end
+  # Reorder and put entry with "~ value" format at the end
   if (n_length2 == 1) {
     erule %<>% magrittr::extract(lapply(., length) %>%
-                                   unlist() %>%
-                                   order(decreasing = TRUE))
+      unlist() %>%
+      order(decreasing = TRUE))
   }
 
   # Return
@@ -555,16 +669,22 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
 check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
                              new.order = NULL) {
   # Evaluate inputs
-  if (!checkmate::test_character(var, len = 1, min.chars = 1,
-                                 any.missing = FALSE, null.ok = FALSE)) {
+  if (!checkmate::test_character(var,
+    len = 1, min.chars = 1,
+    any.missing = FALSE, null.ok = FALSE
+  )) {
     cli::cli_abort(c("x" = "Error IE007"), .internal = TRUE, class = "IE007")
   }
-  if (!checkmate::test_character(var.names, min.len = 1, min.chars = 1,
-                                 any.missing = FALSE, null.ok = FALSE)) {
+  if (!checkmate::test_character(var.names,
+    min.len = 1, min.chars = 1,
+    any.missing = FALSE, null.ok = FALSE
+  )) {
     cli::cli_abort(c("x" = "Error IE008"), .internal = TRUE, class = "IE008")
   }
-  if (!checkmate::test_character(new.order, min.len = 1, min.chars = 1,
-                                 any.missing = FALSE, null.ok = FALSE)) {
+  if (!checkmate::test_character(new.order,
+    min.len = 1, min.chars = 1,
+    any.missing = FALSE, null.ok = FALSE
+  )) {
     cli::cli_abort(c("x" = "Error IE009"), .internal = TRUE, class = "IE009")
   }
 
@@ -577,42 +697,62 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
   }
 
   # Check character input
-  if (!checkmate::test_character(new, len = 1, min.chars = 1,
-                                 any.missing = FALSE, null.ok = FALSE)) {
-    cli::cli_abort(c("For key `new`, the variable definition must be provided
+  if (!checkmate::test_character(new,
+    len = 1, min.chars = 1,
+    any.missing = FALSE, null.ok = FALSE
+  )) {
+    cli::cli_abort(
+      c("For key `new`, the variable definition must be provided
       as a single character.",
-      "i" = "Please check the required format in the documentation:
-      {.vignette epicdata::metadata_long}"), call = call,
-      class = "error.check.new.format.1")
+        "i" = "Please check the required format in the documentation:
+      {.vignette epicdata::metadata_long}"
+      ),
+      call = call,
+      class = "error.check.new.format.1"
+    )
   }
 
   # Evaluate if rule can be parsed to an expression
   rlang::try_fetch(ex <- rlang::parse_expr(new),
     error = function(cnd) {
-      cli::cli_abort(c("Unable to process variable definition {.var {new}}",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"), call = call,
-        class = "error.check.new.format.2")})
+      cli::cli_abort(
+        c("Unable to process variable definition {.var {new}}",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call,
+        class = "error.check.new.format.2"
+      )
+    }
+  )
 
   # Error if call is of function `=`
   if (length(ex) > 1) {
     if (identical(ex[[1]], rlang::sym("="))) {
-      cli::cli_abort(c("Variable definition {.var {new}} has an incorrect format.",
-        "i" = "Do not assign the variable name with `=`.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"), call = call,
-        class = "error.check.new.format.3")
+      cli::cli_abort(
+        c("Variable definition {.var {new}} has an incorrect format.",
+          "i" = "Do not assign the variable name with `=`.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call,
+        class = "error.check.new.format.3"
+      )
     }
   }
 
   # Error if only NULL
   if (identical(length(ex), 1L)) {
     if (is.null(ex)) {
-      cli::cli_abort(c("Variable definition {.var {new}} has an incorrect format.",
-        "i" = "Do not assign `NULL`.",
-        "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"), call = call,
-        class = "error.check.new.format.4")
+      cli::cli_abort(
+        c("Variable definition {.var {new}} has an incorrect format.",
+          "i" = "Do not assign `NULL`.",
+          "i" = "Please check the required format in the documentation:
+        {.vignette epicdata::metadata_long}"
+        ),
+        call = call,
+        class = "error.check.new.format.4"
+      )
     }
   }
 
@@ -626,15 +766,21 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
     allowed <- c(not_new, new.order[1:(which(new.order == var) - 1)])
   }
 
-  if (symbols %>% magrittr::is_in(allowed) %>% all() %>%  magrittr::not()) {
-    re <- symbols[symbols %>% magrittr::is_in(allowed) %>%
-                  magrittr::not()] %>% unique() %>%
-                  stringi::stri_c(collapse = ", ")
-    cli::cli_abort(c("Variable definition {.var {new}} has an incorrect format.",
-      "i" = "Some variable names are not available for defining {.var {var}}: {re}",
-      "i" = "Please check the required format in the documentation:
-      {.vignette epicdata::metadata_long}"), call = call,
-      class = "error.check.new.format.4")
+  if (symbols %>% magrittr::is_in(allowed) %>% all() %>% magrittr::not()) {
+    re <- symbols[symbols %>%
+      magrittr::is_in(allowed) %>%
+      magrittr::not()] %>%
+      unique() %>%
+      stringi::stri_c(collapse = ", ")
+    cli::cli_abort(
+      c("Variable definition {.var {new}} has an incorrect format.",
+        "i" = "Some variable names are not available for defining {.var {var}}: {re}",
+        "i" = "Please check the required format in the documentation:
+      {.vignette epicdata::metadata_long}"
+      ),
+      call = call,
+      class = "error.check.new.format.4"
+    )
   }
 
   # Return
@@ -667,15 +813,19 @@ extract.symbols.from.ast <- function(x, call = rlang::caller_env()) {
     # problems when some elements have names, e.g., function arguments with
     # names.
     lapply(x[-1], extract.symbols.from.ast, call = call) %>%
-      unlist() %>% as.character()
+      unlist() %>%
+      as.character()
   } else if (is.pairlist(x)) {
     # Same as call
     lapply(x[-1], extract.symbols.from.ast, call = call) %>%
-      unlist() %>% as.character()
+      unlist() %>%
+      as.character()
   } else {
     # Throw internal error for other types
-    cli::cli_abort(c("x" = "Error IE14131"), call = call, .internal = TRUE,
-                   class = "IE14131")
+    cli::cli_abort(c("x" = "Error IE14131"),
+      call = call, .internal = TRUE,
+      class = "IE14131"
+    )
   }
 }
 

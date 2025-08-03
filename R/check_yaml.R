@@ -134,6 +134,8 @@ cy.comments <- function(lines, type = "warning") {
   out
 }
 
+
+## This function is not completed and tested adequately, especially the j <- j - 1 shananigans
 cy.hierarchie <- function(lines, type = "error") {
   message <- "[Error in hierarchie] The indentation does not lead to a valid YAML file."
 
