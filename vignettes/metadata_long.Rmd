@@ -44,22 +44,24 @@ First.layer
   Second.layer
 ```
 
-Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. **Always include a space after the colon.** Usually no quotation marks `""` are necessary when specifying values. Some exceptions are listed below. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g. a number, or come from a list of allowed values. The values `yes` and `no` (similarly to `true` and `false`) will be transformed to `TRUE` and `FALSE` in R.
+Colons `:` are used to specify **key-value pairs**, i.e., an element of a certain name (key) as well as its corresponding value. Per line, only one key-value pair is specified. The basic syntax is `key: value`. **Always include a space after the colon.** Usually no quotation marks `""` are necessary when specifying values. Some exceptions are listed below. Almost all keys are pre-defined by `epicdata` to structure your metadata. The values usually must have a specific format, e.g., a number, or come from a list of allowed values. The values `true` and `false` will be transformed to `TRUE` and `FALSE` in R.
 
 When to use quotation marks `""`:
 
--   By default, you don't need to wrap strings in quotation marks
--   Use them, however, if you start a value with a special symbol (non-letter and non-number) apart from dot `.` and underscore `_`
--   Use them, however, if the string is only a dot `"."`
+-   Quatation marks are used for specifying strings, i.e., character values, i.e., text. By default, you don't need to wrap strings in quotation marks.
+-   Use them, however, if you start a value with one of the following symbols: `-`, `?`, `!`, `:`, `,`, `#`, `&`, `%`, `*`, `` ` ``, `>`, `|`, `@`, because they have a special function in YAML and will throw an error or lead to unexpected results. If the symbol appears not at the start but later in the string, e.g., `Hey!`, you do not need quotation marks. Starting a string with the following symbols works without quotation marks as well: `.`, `_`, `<`. If, e.g., you work with a dataset that uses `.` and `-` for missing values, you need to specify `"-"` (in `to.na`), i.e., with quotation marks, but `.`, i.e., without quotation marks, works. Of course, wrapping `.` in quotation marks, i.e., `"."`, works as well.
+-   Use them, when a string contains (not only starting with) `[]` or `{}`, e.g., when specifing regular expressions. `()` do not need quatation marks.
+-   Use them, when the string contains `:`, i.e., a colon and a space, or `#`, i.e., a space and a hashtag. `:` will lead to an error because it is reserved for key-value pairs. `#` will treat everything afterwards as a comment (without throwing an error) and only part of your string is used in the metadata.
 -   Use them as well, if you want to force a value to be a string. The `calling.code` in the example below would be read as the positive number `33` without quotation marks.
+-   Use them, when strings start with extra spaces, because otherwise, they will be removed.
 -   The same rules apply to keys and values, i.e., the part in front and after the colon `"key": "value"`
--   If reading your metadata leads to a `Loading YAML metadata failed!` error with the line number of the problem's location, try wrapping it in quotation marks as your first debugging activity.
+-   If reading your metadata leads to a `Loading YAML metadata failed!` error or a `YAML parse error` with the line number of the problem's location, try wrapping it in quotation marks as your first debugging activity. Sometimes, the line above the line mentioned in the error message needs the quotation marks.
 
 ``` yaml
 name: France
 capital: Paris
 population.million: 68
-eu.member: yes
+eu.member: true
 calling.code: "+33"
 ```
 
@@ -70,12 +72,12 @@ countries:
   France:
     capital: Paris
     population.million: 68
-    eu.member: yes
+    eu.member: true
     calling.code: "+33"
   Germany:
     capital: Berlin
     population.million: 84
-    eu.member: yes
+    eu.member: true
     calling.code: "+49"
 ```
 
@@ -86,13 +88,13 @@ countries:
   France:
     capital: Paris
     population.million: 68
-    eu.member: yes
+    eu.member: true
     calling.code: "+33"
     million.cities: Paris
   Germany:
     capital: Berlin
     population.million: 84
-    eu.member: yes
+    eu.member: true
     calling.code: "+49"
     million.cities:
     - Berlin
@@ -101,7 +103,15 @@ countries:
     - Cologne
 ```
 
-YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `xx()` and edited in R Studio. Therefore, the use of R Studio is recommended. See `xx` for more information on how to create your metadata.
+If strings are too long to keep them in a single line, e.g., for long questionnaire items, use the `>-` syntax to use multiple lines. As described in the code block below, for splitting a string across multiple lines, write `>-` after the key, and switch to a new line. The lines that contain the string need an indentation! In the final result, your lines will be separated by spaces, i.e., `"``This label is much too long to keep it in a single line, because that makes it hard to read.``"`.
+
+``` yaml
+label: This label is much too long to keep it in a single line, because that makes it 
+label2: >-
+  This label is much too long to keep it
+  in a single line, because that makes it 
+  hard to read.
+```
 
 YAML files can include comments. Like in R, **comments** start with `#`. If they appear in a line after valid code, there must be a space in front of the `#`. In R Studio, comments are coloured differently.
 
@@ -111,6 +121,8 @@ countries:
   France: # a valid comment after valid code (note the space in front of #)
     capital: Paris# not a valid comment since there is no space before the hashtag symbol
 ```
+
+YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `xx()` and edited in R Studio. Therefore, the use of R Studio is recommended. See `xx` for more information on how to create your metadata.
 
 # Metadata design principles
 
@@ -168,21 +180,21 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `data.name` (Text): A short name for your dataset that is used for project and file names. If missing, a generic name will be used instead.
 
--   `id.var` (Name of variable specified in `var.list`): The name of the ID variable, which is used to identify observations. Allowed are the variable names specified in `var.list` as `id`. Duplicate values in the ID variable are allowed only if `double.entry: yes`. If missing, a generic ID variable will be added temporarily. Mandatory when `double.entry: yes` or `id.pattern` has been specified.
+-   `id.var` (Name of variable specified in `var.list`): The name of the ID variable, which is used to identify observations. Allowed are the variable names specified in `var.list` as `id`. Duplicate values in the ID variable are allowed only if `double.entry: true`. If missing, a generic ID variable will be added temporarily. Mandatory when `double.entry: true` or `id.pattern` has been specified.
 
 -   `id.pattern` (Regular expression): A regex pattern that must be fulfilled for all values of the variable specified in `id.var`. Rows with non-matching IDs are excluded. **Wrap the value in quotation marks**, e.g., `"[:digit:]{5}"`!
 
 **Workflow module selection**
 
--   `id.list` (boolean, i.e., `true`, `yes`, `false`, `no`): Indicate if a list with valid IDs is provided. An `id.list` makes sense if users are unsure how to specify an `id.pattern` with regular expressions, if the `id.pattern` is not sufficient to differentiate between valid and invalid IDs, i.e., some IDs with the specified pattern are valid and some are not, or if a list of all used IDs is easily available. Should not (Cannot??) be combined with `id.pattern`.
+-   `id.list` (boolean, i.e., `true`, `false`): Indicate if a list with valid IDs is provided. An `id.list` makes sense if users are unsure how to specify an `id.pattern` with regular expressions, if the `id.pattern` is not sufficient to differentiate between valid and invalid IDs, i.e., some IDs with the specified pattern are valid and some are not, or if a list of all used IDs is easily available. Should not (Cannot??) be combined with `id.pattern`.
 
--   `consent` (boolean, i.e., `true`, `yes`, `false`, `no`): Indicate if informed consent will be checked. Can only be `true`, if an `id.var` has been specified.
+-   `consent` (boolean, i.e., `true`, `false`): Indicate if informed consent will be checked. Can only be `true`, if an `id.var` has been specified.
 
 -   `load.from` (one of: `folder`, `db`): Defines which code module for reading raw data is used. If `folder`, data is read from the `Input` folder in the project. If `db`, data is read from a database. If missing, defaults to `folder`.
 
--   `double.entry` (boolean, i.e., `true`, `yes`, `false`, `no`): Non-digital data has been entered multple times (usually twice) to avoid errors during data entry. This option activates sub-module DUP_COMPARE.
+-   `double.entry` (boolean, i.e., `true`, `false`): Non-digital data has been entered multple times (usually twice) to avoid errors during data entry. This option activates sub-module DUP_COMPARE.
 
--   `remove.vars` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, variables in the data that are missing from the metadata are removed from the data.
+-   `remove.vars` (boolean, i.e., `true`, `false`): If `yes`, variables in the data that are missing from the metadata are removed from the data.
 
 **Global variable defaults**
 
@@ -198,9 +210,9 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 -   `to.na` (Text):
 
--   `touch.na` (boolean, i.e., `true`, `yes`, `false`, `no`):
+-   `touch.na` (boolean, i.e., `true`, `false`):
 
--   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`):
+-   `to.factor` (boolean, i.e., `true`, `false`):
 
 ``` yaml
 options:
@@ -279,9 +291,9 @@ Note that, in the example above, `var1` and `var2` are the variable names and th
 
 -   `to.na` or `na.to` (text):
 
--   `touch.na` or `na.touch` (boolean, i.e., `true`, `yes`, `false`, `no`): If `no`, all `NA`s, after applying `to.na`, will remain as `NA`. If `yes`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `yes`.
+-   `touch.na` or `na.touch` (boolean, i.e., `true`, `false`): If `false`, all `NA`s, after applying `to.na`, will remain as `NA`. If `true`, `NA`s are processed as usual. Defaults to the global option `touch.na`, or, if the global options has not been specified, to `true`.
 
--   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specified always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `no`.
+-   `na.else` (a missing code): The missing code (as defined in component `na.codes`) specified here is used to replace `NA`s if no rule in `na.rules` applies. Must be specified always, apart from situations when the variable has no `NA`s or when `touch.na` is set to `false`. **Will become global option and its function for individual variables is included into na.rules.**
 
 -   `na.rules` ():
 
@@ -369,9 +381,9 @@ var.list:
 
 -   `cats.rules` ():
 
--   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): If `yes`, transforms the variable to factor.
+-   `to.factor` (boolean, i.e., `true`, `false`): If `true`, transforms the variable to factor.
 
--   `factor.name` or `name.factor` (): If `to.factor` is `yes` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
+-   `factor.name` or `name.factor` (): If `to.factor` is `true` or not specified, a new variable is created and turned to factor while this variable stays integer. Provide the name of the new factor variable.
 
 ## **Numeric (num) variables**
 
@@ -469,7 +481,7 @@ var.list:
 
 -   NA can be written as NA, without quotation marks, just like in R
 
--   na.rules are applied before all other rules. Therefore, all other rules need to address the post NA processing values, i.e., the missing codes, NA only if na.touch: no, or the values resulting from na.replace; if you can address shortened NA codes for date,time,datetime, e.g. 9001 instead of 9001-01-01, is tbd (ideally yes); na.rules themselves are applied in order of occurrence of the variable in the YAML input. Therefore, if you include variables in your conditions which appear before the current one, use na.codes, etc., and if you address a variable after the current one, use NA even if na.touch: yes
+-   na.rules are applied before all other rules. Therefore, all other rules need to address the post NA processing values, i.e., the missing codes, NA only if na.touch: false, or the values resulting from na.replace; if you can address shortened NA codes for date,time,datetime, e.g. 9001 instead of 9001-01-01, is tbd (ideally yes); na.rules themselves are applied in order of occurrence of the variable in the YAML input. Therefore, if you include variables in your conditions which appear before the current one, use na.codes, etc., and if you address a variable after the current one, use NA even if na.touch: true
 
 -   Rules follow in general the format of formulas in dplyr::case_when: they are two-sided formulas with a condition on the left hand side and a value on the right hand side.
 
@@ -596,6 +608,8 @@ If the automatic transformation does not provide values that make sense for miss
 
 **It must be checked if after applying the aforementioned conversion processes, there are actually multiple identical na.codes, e.g., imagine there is a missing code 9001 and 9001-01-01, with different meaning, then a transformed 9001 would be the same as 9001-01-01. However, for this we ideally need to check, if 9001 is actually used in any date variable. Maybe: 0) check if duplicated codes have been specified in na.codes; 1) get list of na.codes used by variable with their description provided in component na.codes; 2) for date, datetime, time, transform codes as discussed above; 3) check if all codes of all variables are in the required format for that variable; 4) if there are identical codes with different descriptions =\> error,**
 
+**Also, we should allow negative numbers for codes. Unquoted numbers as keys (9001: missing) will end up in the "yaml_keys" attribute and the name in the list is an empty string ("")**
+
 # Components: contras
 
 # Components: var.groups
@@ -612,13 +626,13 @@ In component `var.groups`, additional information can be provided for the set. U
 
 -   `group.label.eng` (Text): Similar to `var.list`, specify here the English translation of the value in `label`, if it is not in English already. The English version can be used to create an English data dictionary.
 
--   `mc.exclusive` (boolean, i.e., `true`, `yes`, `false`, `no`): If the variable is part of a multiple choice (mc) set, it can be defined as an exclusive answer. A common example is a multiple choice set with option "none of the other options". It is implausible that "none of the other options" and another option are both selected. Setting `mc.exclusive` to `yes` automatically includes the corresponding contradictions. Contradictions are only included if the mc variables have only categories `0` and `1` while `1` is assumed to indicate selection of the corresponding option. If the exclusive variable is called `var_exclusive` and another variable in the same mc set is called `var_mc1`, then the following contradiction is added: `var_exclusive == 1 & var_mc1 == 1`. This type of contradiction is added for all other mc variables in the set. Only specify `mc.exclusive`, if you also specified `mc.set`.
+-   `mc.exclusive` (boolean, i.e., `true`, `false`): If the variable is part of a multiple choice (mc) set, it can be defined as an exclusive answer. A common example is a multiple choice set with option "none of the other options". It is implausible that "none of the other options" and another option are both selected. Setting `mc.exclusive` to `true` automatically includes the corresponding contradictions. Contradictions are only included if the mc variables have only categories `0` and `1` while `1` is assumed to indicate selection of the corresponding option. If the exclusive variable is called `var_exclusive` and another variable in the same mc set is called `var_mc1`, then the following contradiction is added: `var_exclusive == 1 & var_mc1 == 1`. This type of contradiction is added for all other mc variables in the set. Only specify `mc.exclusive`, if you also specified `mc.set`.
 
 -   `cats` (): To shorten the specification of the multiple-choice variables in `var.list`, their categories can be specified in `mc.sets` and are applied to all variables in the set.
 
 -   `cats.eng` (): Similar to `var.list`, specify the English translations of the categories here to create an English version of the data dictionary, if the questionnaire is not in English already.
 
--   `to.factor` (boolean, i.e., `true`, `yes`, `false`, `no`): Sets the default for all variables in the set to the specified value. Therefore, if `yes` is specified, `to.factor` of all variables in the mc.set is set to `yes` as well. You can overwrite the value for individual variables by setting their value in `var.list` back to `no`.
+-   `to.factor` (boolean, i.e., `true`, `false`): Sets the default for all variables in the set to the specified value. Therefore, if `true` is specified, `to.factor` of all variables in the mc.set is set to `true` as well. You can overwrite the value for individual variables by setting their value in `var.list` back to `false`.
 
 ``` yaml
 var.list:

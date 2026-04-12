@@ -91,7 +91,7 @@ Load the dataset that you want to process into R. This dataset is called "the da
 #### Activity
 
 | Activity | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active: Variant `CSV` |  |
 | active: Variant `RDS` |  |
 | active: Variant `SPSS` |  |
@@ -220,7 +220,7 @@ Desc (include check if all old.id values are available, no confirmation required
 #### Activity
 
 | Activity | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -280,7 +280,7 @@ Desc, if we use filter, we need to change variable types, no? Or we adjust the f
 #### Activity
 
 | Activity | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
@@ -359,7 +359,7 @@ Transformed user-specified NA variants (see NA vignette) to NA
 #### Activity
 
 | Activity | Condition |
-|------------------------------------|------------------------------------|
+|----|----|
 | active | If key `to.na` or its alternatives have been used at some point in the metadata |
 | inactive | If key `to.na` and its alternatives have not been used at all |
 

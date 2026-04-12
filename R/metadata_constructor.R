@@ -54,7 +54,7 @@ yaml.read <- function(x, arg = rlang::caller_arg(x),
   # Read
   rlang::try_fetch(
     {
-      yaml_input <- yaml::read_yaml(x)
+      yaml_input <- yaml12::read_yaml(x)
     },
     error = function(cnd) {
       cli::cli_abort(
@@ -62,7 +62,7 @@ yaml.read <- function(x, arg = rlang::caller_arg(x),
           "Loading YAML metadata failed!",
           c(
             "Loading failed due to an error in the YAML grammar. The
-                      {.code yaml::read_yaml()} error message below reports its
+                      {.code yaml12::read_yaml()} error message below reports its
                       location. (Check lines before and after as well.)",
             cnd$message,
             "Check if you forgot any colons `:` or spaces after

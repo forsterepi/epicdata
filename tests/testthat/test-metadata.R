@@ -1,5 +1,6 @@
 test_that("property data.name works", {
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
       "options:",
       "  data.name: test",
@@ -18,12 +19,13 @@ test_that("property data.name works", {
   m@data.name <- "name"
   expect_equal(m@data.name, "name")
 
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "var.list:",
-    "  id:",
-    "    type: text"
+      "options:",
+      "var.list:",
+      "  id:",
+      "    type: text"
     )
   )
 
@@ -32,13 +34,14 @@ test_that("property data.name works", {
 })
 
 test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "  data.name: test",
-    "var.list:",
-    "  id:",
-    "    type: text"
+      "options:",
+      "  data.name: test",
+      "var.list:",
+      "  id:",
+      "    type: text"
     )
   )
 
@@ -52,17 +55,18 @@ test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
   expect_false(m@DUP_NO.ID)
   expect_true(m@DUP_FREQ)
 
-  expect_snapshot(error = TRUE, m@id.var <- c("a","b"))
+  expect_snapshot(error = TRUE, m@id.var <- c("a", "b"))
   expect_snapshot(error = TRUE, m@id.var <- "a")
 
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "  data.name: test",
-    "  id.var: id",
-    "var.list:",
-    "  id:",
-    "    type: text"
+      "options:",
+      "  data.name: test",
+      "  id.var: id",
+      "var.list:",
+      "  id:",
+      "    type: text"
     )
   )
 
@@ -81,14 +85,15 @@ test_that("properties id.var, DUP_NO.ID, and DUP_FREQ works", {
 })
 
 test_that("property consent works", {
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "  id.var:",
-    "  consent:",
-    "var.list:",
-    "  id:",
-    "    type: text"
+      "options:",
+      "  id.var:",
+      "  consent:",
+      "var.list:",
+      "  id:",
+      "    type: text"
     )
   )
 
@@ -110,14 +115,15 @@ test_that("property consent works", {
   expect_null(m@consent)
   expect_false(m@consent.final)
 
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "  id.var: id",
-    "  consent: no",
-    "var.list:",
-    "  id:",
-    "    type: text"
+      "options:",
+      "  id.var: id",
+      "  consent: false",
+      "var.list:",
+      "  id:",
+      "    type: text"
     )
   )
 
@@ -145,20 +151,20 @@ test_that("property consent works", {
 })
 
 test_that("touch.na works", {
-
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "  touch.na:",
-    "var.list:",
-    "  b:",
-    "    type: text",
-    "  a:",
-    "    type: text",
-    "    group: g",
-    "var.groups:",
-    "  g:",
-    "    touch.na:"
+      "options:",
+      "  touch.na:",
+      "var.list:",
+      "  b:",
+      "    type: text",
+      "  a:",
+      "    type: text",
+      "    group: g",
+      "var.groups:",
+      "  g:",
+      "    touch.na:"
     )
   )
 
@@ -548,23 +554,24 @@ test_that("touch.na works", {
 
   # Load file with full specification and check if all works correctly
 
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
     lines = c(
-    "options:",
-    "  touch.na: no",
-    "var.list:",
-    "  a:",
-    "    type: text",
-    "    group: g",
-    "    touch.na: yes",
-    "  b:",
-    "    type: text",
-    "    group: h",
-    "var.groups:",
-    "  g:",
-    "    touch.na: no",
-    "  h:",
-    "    touch.na: yes"
+      "options:",
+      "  touch.na: false",
+      "var.list:",
+      "  a:",
+      "    type: text",
+      "    group: g",
+      "    touch.na: true",
+      "  b:",
+      "    type: text",
+      "    group: h",
+      "var.groups:",
+      "  g:",
+      "    touch.na: false",
+      "  h:",
+      "    touch.na: true"
     )
   )
 
@@ -677,20 +684,21 @@ test_that("touch.na works", {
 
   # Try alternative values
 
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
-                                lines = c(
-                                  "options:",
-                                  "  na.touch:",
-                                  "var.list:",
-                                  "  b:",
-                                  "    type: text",
-                                  "  a:",
-                                  "    type: text",
-                                  "    group: g",
-                                  "var.groups:",
-                                  "  g:",
-                                  "    na.touch:"
-                                )
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  na.touch:",
+      "var.list:",
+      "  b:",
+      "    type: text",
+      "  a:",
+      "    type: text",
+      "    group: g",
+      "var.groups:",
+      "  g:",
+      "    na.touch:"
+    )
   )
 
   m <- metadata(file)
@@ -939,24 +947,25 @@ test_that("touch.na works", {
 
   # Load file with full specification and check if all works correctly
 
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
-                                lines = c(
-                                  "options:",
-                                  "  na.touch: no",
-                                  "var.list:",
-                                  "  a:",
-                                  "    type: text",
-                                  "    group: g",
-                                  "    na.touch: yes",
-                                  "  b:",
-                                  "    type: text",
-                                  "    group: h",
-                                  "var.groups:",
-                                  "  g:",
-                                  "    na.touch: no",
-                                  "  h:",
-                                  "    na.touch: yes"
-                                )
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  na.touch: false",
+      "var.list:",
+      "  a:",
+      "    type: text",
+      "    group: g",
+      "    na.touch: true",
+      "  b:",
+      "    type: text",
+      "    group: h",
+      "var.groups:",
+      "  g:",
+      "    na.touch: false",
+      "  h:",
+      "    na.touch: true"
+    )
   )
 
   m <- metadata(file)
@@ -978,13 +987,14 @@ test_that("touch.na works", {
   expect_equal(m@var.list$b[["touch.na.final"]], TRUE)
 })
 
-test_that("cats and cats.eng work",{
-  file <- withr::local_tempfile(pattern = "test", fileext = "yml",
-                                lines = c(
-                                  "var.list:",
-                                  "  a:",
-                                  "    type: text"
-                                )
+test_that("cats and cats.eng work", {
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
   )
 
   m <- metadata(file)
@@ -997,7 +1007,7 @@ test_that("cats and cats.eng work",{
   # expect_snapshot(error = TRUE, m@var.list$a$cats.eng <- c("0=no","1=yes"))
 
   m@var.list$a$type <- "cat"
-  m@var.list$a$cats <- c("0=nein","1=ja")
+  m@var.list$a$cats <- c("0=nein", "1=ja")
   out <- data.frame(level = c(0L, 1L), label = c("nein", "ja"))
   expect_equal(m@var.list$a$cats, out)
 
@@ -1007,7 +1017,7 @@ test_that("cats and cats.eng work",{
   # expect_snapshot(error = TRUE, m@var.list$a$cats.eng <- c("0=no","2=maybe"))
 
   out.eng2 <- data.frame(level = c(0L, 1L), label = c("no", "yes"))
-  m@var.list$a$cats.eng <- c("1=yes","0=no")
+  m@var.list$a$cats.eng <- c("1=yes", "0=no")
   expect_equal(m@var.list$a$cats.eng, out.eng2)
 
   # Maybe add that cats can only be used for type "cat
@@ -1017,10 +1027,10 @@ test_that("cats and cats.eng work",{
   # expect_snapshot(error = TRUE, m@var.list$a$cats <- c("0=nein","ja=1","2=vielleicht"))
   m@var.list$a$cats.eng <- NULL
   expect_equal(m@var.list$a$cats.eng, NULL)
-  m@var.list$a$cats <- c("0=nein","ja=1","2=vielleicht")
+  m@var.list$a$cats <- c("0=nein", "ja=1", "2=vielleicht")
   out2 <- data.frame(level = c(0L, 1L, 2L), label = c("nein", "ja", "vielleicht"))
   expect_equal(m@var.list$a$cats, out2)
-  m@var.list$a$cats.eng <- c("0=no","1=yes","2=maybe")
+  m@var.list$a$cats.eng <- c("0=no", "1=yes", "2=maybe")
   expect_equal(m@var.list$a$cats.eng, out.eng)
 
   m <- metadata(file)
@@ -1031,21 +1041,29 @@ test_that("cats and cats.eng work",{
   expect_error(m@var.list$a$cats <- FALSE, class = "error.process.cats.2")
   expect_error(m@var.list$a$cats <- "", class = "error.process.cats.3")
   expect_error(m@var.list$a$cats <- c("0==male", "1=female"),
-               class = "error.process.cats.3")
+    class = "error.process.cats.3"
+  )
   expect_error(m@var.list$a$cats <- c(male = "0", female = "1"),
-               class = "error.process.cats.3")
+    class = "error.process.cats.3"
+  )
   expect_error(m@var.list$a$cats <- c("1.3 = male", "1 = female"),
-               class = "error.process.cats.4")
+    class = "error.process.cats.4"
+  )
   expect_error(m@var.list$a$cats <- c("a=male", "1=female"),
-               class = "error.process.cats.5")
+    class = "error.process.cats.5"
+  )
   expect_error(m@var.list$a$cats <- c("0=1", "2=female"),
-               class = "error.process.cats.6")
+    class = "error.process.cats.6"
+  )
   expect_error(m@var.list$a$cats <- c("-1 = male", "-2 =male"),
-               class = "error.process.cats.7")
+    class = "error.process.cats.7"
+  )
   expect_error(m@var.list$a$cats <- c("1 = male", "1 = female"),
-               class = "error.process.cats.8")
+    class = "error.process.cats.8"
+  )
   expect_error(m@var.list$a$cats <- c("0 = male", "1 =male"),
-               class = "error.process.cats.9")
+    class = "error.process.cats.9"
+  )
 
   expect_error(m@var.list$a$cats.eng <- c("1=ja", NA), class = "error.process.cats.1")
   expect_error(m@var.list$a$cats.eng <- NA, class = "error.process.cats.1")
@@ -1053,21 +1071,29 @@ test_that("cats and cats.eng work",{
   expect_error(m@var.list$a$cats.eng <- FALSE, class = "error.process.cats.2")
   expect_error(m@var.list$a$cats.eng <- "", class = "error.process.cats.3")
   expect_error(m@var.list$a$cats.eng <- c("0==male", "1=female"),
-               class = "error.process.cats.3")
+    class = "error.process.cats.3"
+  )
   expect_error(m@var.list$a$cats.eng <- c(male = "0", female = "1"),
-               class = "error.process.cats.3")
+    class = "error.process.cats.3"
+  )
   expect_error(m@var.list$a$cats.eng <- c("1.3 = male", "1 = female"),
-               class = "error.process.cats.4")
+    class = "error.process.cats.4"
+  )
   expect_error(m@var.list$a$cats.eng <- c("a=male", "1=female"),
-               class = "error.process.cats.5")
+    class = "error.process.cats.5"
+  )
   expect_error(m@var.list$a$cats.eng <- c("0=1", "2=female"),
-               class = "error.process.cats.6")
+    class = "error.process.cats.6"
+  )
   expect_error(m@var.list$a$cats.eng <- c("-1 = male", "-2 =male"),
-               class = "error.process.cats.7")
+    class = "error.process.cats.7"
+  )
   expect_error(m@var.list$a$cats.eng <- c("1 = male", "1 = female"),
-               class = "error.process.cats.8")
+    class = "error.process.cats.8"
+  )
   expect_error(m@var.list$a$cats.eng <- c("0 = male", "1 =male"),
-               class = "error.process.cats.9")
+    class = "error.process.cats.9"
+  )
 })
 
 # add tests for id.pattern
