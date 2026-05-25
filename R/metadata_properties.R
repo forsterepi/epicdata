@@ -86,14 +86,71 @@ meta.prop.consent.final <- S7::new_property(
   }
 )
 
+meta.prop.remove.vars <- S7::new_property(
+  class = NULL | S7::class_logical,
+  validator = function(value) {
+    if (!checkmate::test_logical(value,
+      len = 1, any.missing = FALSE, null.ok = TRUE
+    )) {
+      return("must have length 1 and must not be NA")
+    }
+  },
+  setter = function(self, value) {
+    # Get value with which to update the property
+    update_value <- setter.select.default(
+      option = value,
+      pre = FALSE
+    )
+
+    # Update remove.vars first
+    self@remove.vars <- update_value
+
+    # Update vars.remove, if different from remove.vars
+    if (!identical(self@vars.remove, update_value)) {
+      self@vars.remove <- update_value
+    }
+
+    # Return self
+    self
+  }
+)
+
+meta.prop.vars.remove <- S7::new_property(
+  class = NULL | S7::class_logical,
+  validator = function(value) {
+    if (!checkmate::test_logical(value,
+      len = 1, any.missing = FALSE, null.ok = TRUE
+    )) {
+      return("must have length 1 and must not be NA")
+    }
+  },
+  setter = function(self, value) {
+    # Get value with which to update the property
+    update_value <- setter.select.default(
+      option = value,
+      pre = FALSE
+    )
+
+    # Update vars.remove
+    self@vars.remove <- update_value
+
+    # Update remove.vars, if different from vars.remove
+    if (!identical(self@remove.vars, update_value)) {
+      self@remove.vars <- update_value
+    }
+
+    # Return self
+    self
+  }
+)
+
 meta.prop.touch.na <- S7::new_property(
   class = NULL | S7::class_logical,
   validator = function(value) {
     test.mode("option.touch.na.validator")
 
     if (!checkmate::test_logical(value,
-      len = 1, any.missing = FALSE,
-      null.ok = TRUE
+      len = 1, any.missing = FALSE, null.ok = TRUE
     )) {
       return("must have length 1 and must not be NA")
     }
@@ -319,7 +376,27 @@ meta.prop.group.names <- S7::new_property(
 )
 
 
-# Modules -----------------------------------------------------------------
+# Workflow ----------------------------------------------------------------
+
+meta.prop.VAR_DF.NOT.META_NOTE <- S7::new_property(
+  getter = function(self) {
+    if (self@remove.vars) {
+      FALSE
+    } else {
+      TRUE
+    }
+  }
+)
+
+meta.prop.VAR_DF.NOT.META_RM <- S7::new_property(
+  getter = function(self) {
+    if (self@remove.vars) {
+      TRUE
+    } else {
+      FALSE
+    }
+  }
+)
 
 meta.prop.DUP_NO.ID <- S7::new_property(
   getter = function(self) {
@@ -666,12 +743,10 @@ setter.select.default <- function(var = NULL, group = NULL, option = NULL,
 }
 
 
-
 # viol <- y$var.list$id$dict.viol
 #
 # lobstr::ast(!!rlang::parse_expr(viol[3]))
 # rlang::expr(mutate(df, type := case_when(height > 200 | mass > 200 ~ "large", species == "Droid" ~ "robot", .default = type))) %>% View()
-
 
 
 # variable property remains

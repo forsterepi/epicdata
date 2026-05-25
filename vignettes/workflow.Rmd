@@ -18,41 +18,41 @@ knitr::opts_chunk$set(
 
 The data processing and cleaning workflow is **modular** and its elements can be activated and deactivated as needed. Active workflow elements are deduced from the metadata. Some elements are always active. The order of elements is important and should not be altered. The workflow consists of 3 different types of **elements**:
 
--   **Modules**: They combine tasks that address the same structure, problem, etc., e.g., rows or contradictions. They consist of sub-modules, which hold the actual code. Deactivating a module means deactivating all of its sub-modules.
+- **Modules**: They combine tasks that address the same structure, problem, etc., e.g., rows or contradictions. They consist of sub-modules, which hold the actual code. Deactivating a module means deactivating all of its sub-modules.
 
--   **Sub-Modules**: They describe the actual tasks and combine code, for which it only makes sense to be run completely (active) or not at all (inactive). Every sub-module is part of exactly one module. Within a module, some sub-modules can be active and some can be inactive.
+- **Sub-Modules**: They describe the actual tasks and combine code, for which it only makes sense to be run completely (active) or not at all (inactive). Every sub-module is part of exactly one module. Within a module, some sub-modules can be active and some can be inactive.
 
--   **Variants**: Sometimes, different versions of sub-modules are needed, e.g., loading from file or from a database. Variants are these different sub-module versions. For an active sub-module with variants always exactly one variant needs to be selected. Example: When loading a file, you might want to load it from a folder or from a database. If you load from folder, you do not need the code for loading from the database and vice versa. However, since you do need to load the datasets, you need to specify, which variant you want.
+- **Variants**: Sometimes, different versions of sub-modules are needed, e.g., loading from file or from a database. Variants are these different sub-module versions. For an active sub-module with variants always exactly one variant needs to be selected. Example: When loading a file, you might want to load it from a folder or from a database. If you load from folder, you do not need the code for loading from the database and vice versa. However, since you do need to load the datasets, you need to specify, which variant you want.
 
 During the workflow, some sub-modules or variants need **user input**. There are the following types of input:
 
--   **ID lists**: Some modules require additional input in the form of ID lists, e.g., a list of IDs with valid informed consent.
+- **ID lists**: Some modules require additional input in the form of ID lists, e.g., a list of IDs with valid informed consent.
 
--   **Decision**: `epicdata` processes your data but also identifies potentially problematic values. A decision refers to user input that tells `epicdata` how to procede with an identified potentially problematic value, e.g., changing it to a certain value or leaving it as is. Decisions are specified in spreadsheet format.
+- **Decision**: `epicdata` processes your data but also identifies potentially problematic values. A decision refers to user input that tells `epicdata` how to procede with an identified potentially problematic value, e.g., changing it to a certain value or leaving it as is. Decisions are specified in spreadsheet format.
 
--   **Confirmation**: In an interactive mode, `epicdata` asks for confirmation of actions and results throughout the workflow. These actions and results are concluded from your inputs, i.e., the data, the metadata, and your decisions. Example: `epicdata` notes that variables `var1` and `var2` are not in the data even though they have been specified in the metadata and asks for your confirmation. The workflow will not continue without the confirmation. Otherwise, it will stop and you need to change your inputs, i.e., data or metadata or decisions. ((If the metadata changes, you usually need to re-create the R project. Confirmations cannot be saved. They have to be given interactively. The intention is not to patronize the user but instead to give her/him control over what happens and to increase transparency. All confirmations are logged.)) **(to be developed further)**
+- **Confirmation**: In an interactive mode, `epicdata` asks for confirmation of actions and results throughout the workflow. These actions and results are concluded from your inputs, i.e., the data, the metadata, and your decisions. Example: `epicdata` notes that variables `var1` and `var2` are not in the data even though they have been specified in the metadata and asks for your confirmation. The workflow will not continue without the confirmation. Otherwise, it will stop and you need to change your inputs, i.e., data or metadata or decisions. ((If the metadata changes, you usually need to re-create the R project. Confirmations cannot be saved. They have to be given interactively. The intention is not to patronize the user but instead to give her/him control over what happens and to increase transparency. All confirmations are logged.)) **(to be developed further)**
 
-    Reasons for demanding confirmation are:
+  Reasons for demanding confirmation are:
 
-    -   There is reasonable uncertainty if the result or action is actually intended by the user.
+  - There is reasonable uncertainty if the result or action is actually intended by the user.
 
-    -   The result or action depends on processed information, which only became available during running the code.
+  - The result or action depends on processed information, which only became available during running the code.
 
 # Modes of using `epicdata`
 
--   **Create project with all code**: Based on your metadata, `epicdata` creates a new R Studio project, which, when run from top to bottom, would do the same as calling the processing function. A lot of the processing happens in `epicdata`'s sub-module/variant functions, but users would still have "the code" to the processing workflow, making it possible for them to include some code of there own or make other adjustments. Every sub-module and variant has its own function, which will be exported so that users can use it, and for which input and output, i.e., the state of the data before and after the function are clearly documented. One strength but also difficulty of the modular workflow is that output and input of functions that can realistically be run after each other need to fit together. Maybe we make a specific interface/state of the data documentation to document, which functions fit together with there output and input. The whole workflow can be seen as setting the different variables of the state of the data from "not OK" to "OK" in a specified sequence, although not every characteristic can be seen as OK or not. If some variable is OK already, we can skip the corresponding module.
+- **Create project with all code**: Based on your metadata, `epicdata` creates a new R Studio project, which, when run from top to bottom, would do the same as calling the processing function. A lot of the processing happens in `epicdata`'s sub-module/variant functions, but users would still have "the code" to the processing workflow, making it possible for them to include some code of there own or make other adjustments. Every sub-module and variant has its own function, which will be exported so that users can use it, and for which input and output, i.e., the state of the data before and after the function are clearly documented. One strength but also difficulty of the modular workflow is that output and input of functions that can realistically be run after each other need to fit together. Maybe we make a specific interface/state of the data documentation to document, which functions fit together with there output and input. The whole workflow can be seen as setting the different variables of the state of the data from "not OK" to "OK" in a specified sequence, although not every characteristic can be seen as OK or not. If some variable is OK already, we can skip the corresponding module.
 
--   **Use processing function**: In addition to creating a project, there is also the option of just using a function. This function has the raw data as its first argument and it should be possible to use data.frames, tibbles, and data.tables. The second argument is the metadata, i.e., a metadata S7 object. The remaining arguments are the inputs for the decision spreadsheets. Their default is NULL and the function stops at the first point when it needs decisions which are not available yet. If this is the case, the function returns the spreadsheet with the corresponding decisions that needs to be filled in and included into the function call in the corresponding argument. Maybe a path needs to be provided as an argument in any case, so that `epicdata` can save the spreadsheet directly instead of saying "Well, please re-run but this time, give me a path." The workflow would work like this: in the beginning, only specify data and metadata (and maybe a path); `epicdata` returns a set of decisions you need to make, then run the function again but with the made dicisions as additional argument; now `epicmodel` runs further and provides another set of decisions; continue until all decisions have been made. Note that only case by case decisions have to be made. Another option of making them is by including rules in the metadata on how to handle problematic values. If all case by case decisions are solved by rules, no spreadsheets need to be provided.
+- **Use processing function**: In addition to creating a project, there is also the option of just using a function. This function has the raw data as its first argument and it should be possible to use data.frames, tibbles, and data.tables. The second argument is the metadata, i.e., a metadata S7 object. The remaining arguments are the inputs for the decision spreadsheets. Their default is NULL and the function stops at the first point when it needs decisions which are not available yet. If this is the case, the function returns the spreadsheet with the corresponding decisions that needs to be filled in and included into the function call in the corresponding argument. Maybe a path needs to be provided as an argument in any case, so that `epicdata` can save the spreadsheet directly instead of saying "Well, please re-run but this time, give me a path." The workflow would work like this: in the beginning, only specify data and metadata (and maybe a path); `epicdata` returns a set of decisions you need to make, then run the function again but with the made dicisions as additional argument; now `epicmodel` runs further and provides another set of decisions; continue until all decisions have been made. Note that only case by case decisions have to be made. Another option of making them is by including rules in the metadata on how to handle problematic values. If all case by case decisions are solved by rules, no spreadsheets need to be provided.
 
-    There probably should be a mode for extracting all decisions at once, so that the deciders get all of them at once. The easiest and maybe only good way to do that is by assuming that every decision has been "leave the value as is". There needs to be a way to check if a certain decision is still relevant, i.e. if the value is still problematic, and if the context is still the same (maybe some other value changed based on another decision and this value then influences the second decision).
+  There probably should be a mode for extracting all decisions at once, so that the deciders get all of them at once. The easiest and maybe only good way to do that is by assuming that every decision has been "leave the value as is". There needs to be a way to check if a certain decision is still relevant, i.e. if the value is still problematic, and if the context is still the same (maybe some other value changed based on another decision and this value then influences the second decision).
 
-    Finally, there is an argument that specifies if the process runs interactively or not and additional arguments for user input in the form of ID lists.
+  Finally, there is an argument that specifies if the process runs interactively or not and additional arguments for user input in the form of ID lists.
 
-    (Is activity and inactivity of modules also concluded from the state of the data? Probably not. The functions just don't do anything if the output state is already present at input, e.g., if the input check for the function of sub-module "All variables to character" realizes that the data is already in the output state, i.e., all variables are already of type character, then it just returns the inputed data, right? This should be much easier, because the activity of workflow modules is already in the metadata S7 object, which is independent of the data. Also it should be much easier to code this way.)
+  (Is activity and inactivity of modules also concluded from the state of the data? Probably not. The functions just don't do anything if the output state is already present at input, e.g., if the input check for the function of sub-module "All variables to character" realizes that the data is already in the output state, i.e., all variables are already of type character, then it just returns the inputed data, right? This should be much easier, because the activity of workflow modules is already in the metadata S7 object, which is independent of the data. Also it should be much easier to code this way.)
 
-    -   **Interactive function**: While processing the function, `epicdata` asks for confirmations (see "Workflow structure" above) and only continues, if you actually confirm.
+  - **Interactive function**: While processing the function, `epicdata` asks for confirmations (see "Workflow structure" above) and only continues, if you actually confirm.
 
-    -   **Non-interactive function**: The process will not ask you for confirmations. In this mode, it is especially important to study the log afterwards, to see, if all changes `epicdata` made, actually make sense. Remember, every single change is logged.
+  - **Non-interactive function**: The process will not ask you for confirmations. In this mode, it is especially important to study the log afterwards, to see, if all changes `epicdata` made, actually make sense. Remember, every single change is logged.
 
 # State of the data
 
@@ -62,23 +62,23 @@ Maybe the check functions also checks if the object is tibble, data.frame or dat
 
 **Data characteristics**:
 
--   All variables are character?
+- All variables are character?
 
--   Are there duplicated IDs or duplicated rows?
+- Are there duplicated IDs or duplicated rows?
 
--   Contains contradictions?
+- Contains contradictions?
 
--   Contains NAs?
+- Contains NAs?
 
--   Contains NA variants?
+- Contains NA variants?
 
--   
+- 
 
 # Module naming rules
 
--   Only use upper case letters to make them easily distinguishable inside the S7 metadata property list
+- Only use upper case letters to make them easily distinguishable inside the S7 metadata property list
 
--   Module and sub-module names are separated by `_`, therefore, don't use `_` within names of modules, sub-modules, and variants. Use `.` instead.
+- Module and sub-module names are separated by `_`, therefore, don't use `_` within names of modules, sub-modules, and variants. Use `.` instead.
 
 # Workflow elements
 
@@ -91,7 +91,7 @@ Load the dataset that you want to process into R. This dataset is called "the da
 #### Activity
 
 | Activity | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active: Variant `CSV` |  |
 | active: Variant `RDS` |  |
 | active: Variant `SPSS` |  |
@@ -128,6 +128,8 @@ None
 
 Needs to be separate from the loading procedure, because, when epicdata is used as a function, the data has already been loaded
 
+use `vctrs::vec_cast()`
+
 #### Activity
 
 x
@@ -156,7 +158,31 @@ x
 
 ## 2) Variables (Module ID: VAR)
 
-### 2.1) Notice variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.NOTE)
+### 2.1) Variables that are in the data but not in the metadata (Sub-Module ID: VAR_DF.NOT.META)
+
+x
+
+#### Activity
+
+| Activity               | Condition                          |
+|------------------------|------------------------------------|
+| active: Variant `NOTE` | option `remove.vars: no` (default) |
+| active: Variant `RM`   | option `remove.vars: yes`          |
+| inactive               | never                              |
+
+#### State of the data
+
+| Data characteristic | Before | After |
+|---------------------|--------|-------|
+| all.vars.character  | TRUE   | TRUE  |
+|                     |        |       |
+|                     |        |       |
+
+#### User input
+
+Requires [confirmation]{.underline} that variables should be missing, removed
+
+### 2.2) Notice variables that are in meta but not in the data (Sub-Module ID: VAR_META.NOT.DF.NOTE)
 
 x
 
@@ -175,52 +201,14 @@ x
 
 Requires [confirmation]{.underline} that variables should be missing
 
-### 2.2) Remove variables that are in the data but not in meta (Sub-Module ID: VAR_DF!META.RM)
-
-x
-
-#### Activity
-
-| Activity | Condition                          |
-|----------|------------------------------------|
-| active   | option `remove.vars: yes`          |
-| inactive | option `remove.vars: no` (default) |
-
-#### State of the data
-
-x
-
-#### User input
-
-Requires [confirmation]{.underline} that variables should be removed
-
-### 2.3) Notice variables that are in meta but not in the data (Sub-Module ID: VAR_META!DF.NOTE)
-
-x
-
-#### Activity
-
-| Activity | Condition |
-|----------|-----------|
-| active   | always    |
-| inactive | never     |
-
-#### State of the data
-
-x
-
-#### User input
-
-Requires [confirmation]{.underline} that variables should be missing
-
-### 2.4) Apply old.id (Sub-Module ID: VAR_OLD.ID)
+### 2.3) Apply old.id (Sub-Module ID: VAR_OLD.ID)
 
 Desc (include check if all old.id values are available, no confirmation required because intention is clear)
 
 #### Activity
 
 | Activity | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active | `old.id` has been specified for at least one variable in `var.list` |
 | inactive | `old.id` has not been used |
 
@@ -280,7 +268,7 @@ Desc, if we use filter, we need to change variable types, no? Or we adjust the f
 #### Activity
 
 | Activity | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active: Variant `VALID` | `valid.rows` or `rows.valid` have been specified |
 | active: Variant `INVALID` | `invalid.rows` or `rows.invalid` have been specified |
 | inactive | Neither `valid.rows` or `rows.valid` nor `invalid.rows` or `rows.invalid` have been specified |
@@ -359,7 +347,7 @@ Transformed user-specified NA variants (see NA vignette) to NA
 #### Activity
 
 | Activity | Condition |
-|----|----|
+|------------------------------------|------------------------------------|
 | active | If key `to.na` or its alternatives have been used at some point in the metadata |
 | inactive | If key `to.na` and its alternatives have not been used at all |
 
@@ -472,7 +460,17 @@ x
 
 ## 9) Format (Module ID: FORMAT)
 
+Use `attr(,"problems")` for the result of `readr::parse_double()` to get the rows that would result in NA when parsing
+
 ## 10) Change data type (Module ID: TYPE)
+
+Use `date::parse_date_time()` for dates and datetime (add timezone argument, how to handle locale necessary?)
+
+Use lubri`date::hms()`, `lubridate::ms()`, `lubridate::hm()` (or functions from `hms` package directly?)
+
+Use `readr::parse_double()` for numbers (add decimal.mark and grouping.mark as metadata fields)
+
+Well, probably use `vctrs::vec_cast()` for all of them?
 
 ## 11) Create new variables (Module ID: NEW)
 

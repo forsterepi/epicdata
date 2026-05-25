@@ -1,12 +1,25 @@
 #' Static analysis of YAML metadata specification
 #'
-#' @param file
+#' @param file x
 #'
 #' @returns
 #' @export
 #'
 #' @examples
 check.yaml <- function(file = NULL) {
+
+
+  ##### Check structure with JSON schema!!!!!!!!!!!!
+  ##### Check logic via validator of the S7 object
+
+
+
+
+
+
+
+
+
   # Read file or active file
   if (is.null(file)) {
     rlang::check_installed(c("rstudioapi"))

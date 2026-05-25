@@ -7,7 +7,7 @@
 check.yaml(file = NULL)
 }
 \arguments{
-\item{file}{}
+\item{file}{x}
 }
 \description{
 Static analysis of YAML metadata specification

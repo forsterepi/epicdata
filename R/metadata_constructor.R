@@ -15,10 +15,17 @@ metadata.constructor <- function(file) {
   yaml_input %<>% yaml.add.name() # Finalize and test this function
   # yaml.str.var.list(yaml_input)
 
+  # Aliases
   if (is.null(yaml_input$options$touch.na)) {
     touch.na.input <- yaml_input$options$na.touch
   } else {
     touch.na.input <- yaml_input$options$touch.na
+  }
+
+  if (is.null(yaml_input$options$remove.vars)) {
+    remove.vars.input <- yaml_input$options$vars.remove
+  } else {
+    remove.vars.input <- yaml_input$options$remove.vars
   }
 
   # PUT INTO EXTRA FUNCTION
@@ -41,7 +48,8 @@ metadata.constructor <- function(file) {
     data.name = yaml_input$options$data.name,
     id.var = yaml_input$options$id.var,
     id.pattern = yaml_input$options$id.pattern,
-    consent = yaml_input$options$consent
+    consent = yaml_input$options$consent,
+    remove.vars = remove.vars.input
   )
 }
 

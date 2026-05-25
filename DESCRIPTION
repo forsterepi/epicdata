@@ -2,7 +2,7 @@ Package: epicdata
 Title: Clean Data for Epidemiology
 Version: 0.0.0.9000
 Authors@R: 
-    person("Felix", "Forster", , "felix.forster@med.uni-muenchen.de", role = c("aut", "cre","cph"),
+    person("Felix", "Forster", , "forsterepi@gmail.com", role = c("aut","cre","cph"),
            comment = c(ORCID = "0000-0002-3670-9244"))
 Description: A workflow for processing of epidemiological data, turning your 
     raw data into data that can be analyzed. You provide raw data and specify
@@ -13,24 +13,31 @@ License: GPL (>= 3)
 URL: https://github.com/forsterepi/epicdata
 BugReports: https://github.com/forsterepi/epicdata/issues
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
+Config/roxygen2/markdown: TRUE
+Config/roxygen2/version: 8.0.0
 Imports: 
     checkmate,
     cli,
     dplyr,
+    lubridate,
     magrittr,
+    purrr,
+    readr,
     rlang,
     S7,
     stringi,
     usethis,
+    vctrs,
     yaml12
 Suggests: 
+    data.table,
+    haven,
     knitr,
     learnr,
     rmarkdown,
     rstudioapi,
     testthat (>= 3.0.0),
+    tibble,
     withr
 Depends: 
     R (>= 2.10)
@@ -40,12 +47,16 @@ VignetteBuilder: knitr
 Collate: 
     'check_yaml.R'
     'create_projects.R'
+    'custom_expectations.R'
     'data.R'
-    'epicdata-package.R'
     'metadata_process_input.R'
     'metadata_validator.R'
     'metadata_properties.R'
     'metadata_constructor.R'
     'metadata.R'
+    'dataset.R'
+    'epicdata-package.R'
+    'module_VAR.R'
+    'state_of_data.R'
     'utils-pipe.R'
     'zzz.R'

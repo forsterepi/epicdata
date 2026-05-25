@@ -18,21 +18,21 @@ knitr::opts_chunk$set(
 
 There are two types of errors:
 
--   External (i.e., normal) errors: They appear because the **user** made a mistake.
--   Internal errors: They appear because the **developer** made a mistake.
+- External (i.e., normal) errors: They appear because the **user** made a mistake.
+- Internal errors: They appear because the **developer** made a mistake.
 
 ### Implementation of external errors
 
 Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
 
--   `call`: All functions unrelated to S7 classes provide `rlang::caller_env()`. For S7-related functions, it is more complcated:
+- `call`: All functions unrelated to S7 classes provide `rlang::caller_env()`. For S7-related functions, it is more complicated:
 
 ### Implementation of internal errors
 
 ## Internal errors
 
 | ID | Level | Error |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Script group 1 | **Metadata-related scripts** |  |
 | Script 1.1 | metadata.R |  |
 | Script 1.2 | metadata_constructor.R |  |
@@ -62,11 +62,11 @@ Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
 | Function 1.4.2.3 | `process.dict.rules()` |  |
 | Function 1.4.2.4 | `process.new()` |  |
 | Script 1.5 | metadata_validator.R |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Script group 2 | **Workflow functions** |  |
+| Script 2.1 | state_of_data.R |  |
+| Function group 2.1.1 | state_of_the_data() |  |
+| Function 2.1.1.1 | state_of_the_data() |  |
+| Error **IE21111** |  | After a workflow function, the state of the data is incorrect, as not all variables are character, even though they have to be. |
 |  |  |  |
 |  |  |  |
 |  |  |  |

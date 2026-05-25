@@ -10,8 +10,16 @@ metadata(file)
 \item{file}{Path to yaml file}
 }
 \value{
-An S7 \code{epicdata::metadata} object
+A S7 \code{epicdata::metadata} object
 }
 \description{
-S7 class \code{epicmodel::metadata}
+S7 class \code{epicdata::metadata}
 }
+\section{Additional properties}{
+
+\describe{
+\item{\code{@data.name}}{The name of the data.frame. A single string.}
+
+\item{\code{@id.var}}{The name of the ID variable. A variable name used in \code{var.list}.}
+}}
+

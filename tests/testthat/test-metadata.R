@@ -1,3 +1,5 @@
+# S7 class ----------------------------------------------------------------
+
 test_that("property data.name works", {
   file <- withr::local_tempfile(
     pattern = "test", fileext = "yml",
@@ -1096,6 +1098,164 @@ test_that("cats and cats.eng work", {
   )
 })
 
+test_that("remove.vars works", {
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+
+  expect_false(m@remove.vars)
+  expect_false(m@vars.remove)
+
+  m@remove.vars <- TRUE
+
+  expect_true(m@remove.vars)
+  expect_true(m@vars.remove)
+
+  m@vars.remove <- NULL
+
+  expect_false(m@remove.vars)
+  expect_false(m@vars.remove)
+
+  m@vars.remove <- TRUE
+
+  expect_true(m@remove.vars)
+  expect_true(m@vars.remove)
+
+  m@vars.remove <- FALSE
+
+  expect_false(m@remove.vars)
+  expect_false(m@vars.remove)
+
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  remove.vars: true",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+
+  expect_true(m@remove.vars)
+  expect_true(m@vars.remove)
+
+  m@remove.vars <- NULL
+
+  expect_false(m@remove.vars)
+  expect_false(m@vars.remove)
+
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  vars.remove: true",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+
+  expect_true(m@remove.vars)
+  expect_true(m@vars.remove)
+
+  m@remove.vars <- FALSE
+
+  expect_false(m@remove.vars)
+  expect_false(m@vars.remove)
+
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  remove.vars: yes",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+
+  expect_error(m <- metadata(file))
+})
+
+
+
 # add tests for id.pattern
 # add tests for all the validations
 # add tests for errors in mate.prop.var.list & meta.prop.var.groups
+
+
+# Workflow ----------------------------------------------------------------
+
+test_that("VAR_DF.NOT.META_NOTE works", {
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+  expect_true(m@VAR_DF.NOT.META_NOTE)
+  expect_false(m@VAR_DF.NOT.META_RM)
+  expect_error(m@VAR_DF.NOT.META_NOTE <- FALSE)
+  expect_error(m@VAR_DF.NOT.META_RM <- TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  remove.vars: true",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+
+  m <- metadata(file)
+  expect_false(m@VAR_DF.NOT.META_NOTE)
+  expect_true(m@VAR_DF.NOT.META_RM)
+
+  m@vars.remove <- NULL
+  expect_true(m@VAR_DF.NOT.META_NOTE)
+  expect_false(m@VAR_DF.NOT.META_RM)
+})
+
+
+
+# Extractors --------------------------------------------------------------
+
+test_that("all.vars.of.type works", {
+  file <- withr::local_tempfile(
+    pattern = "test", fileext = "yml",
+    lines = c(
+      "options:",
+      "  data.name: test",
+      "var.list:",
+      "  a:",
+      "    type: text",
+      "  b:",
+      "    type: num",
+      "  c:",
+      "    type: num"
+    )
+  )
+
+  m <- metadata(file)
+  expect_equal(metadata.all.vars.of.type(m, "text"), "a")
+  expect_equal(metadata.all.vars.of.type(m, "num"), c("b", "c"))
+  expect_equal(metadata.all.vars.of.type(m, "cat"), character(0))
+})

@@ -14,3 +14,16 @@ knitr::opts_chunk$set(
 )
 ```
 
+Must work for:
+- data.frame
+- tibble
+- data.table
+- everything that is imported from haven
+- For datasets that are already in R format, e.g., .rds or the other one, and might not fulfil the
+  requirements for state of the data, e.g., all vars are character, encoding??, ...
+- csv, txt via readr
+- Excel, especially when data is not tidy yet, e.g., if there are additional non-data lines in the top
+  or even empty lines
+- Search for downloadable data and look at the formats (and think about how important epicdata is for this
+  data. I mean, epicdata should be able to finish the processing job, if not done well. In this situation
+  the data should pass through some stages of the workflow without problems and then only the necessary      ones should take somw work. ==> epicdata needs to work for all data formats, also the one downloaded from   the web ==> the user need to be able to work with all of them. ==> Transforming all vars to character needs to be in the workflow right at the start.)
