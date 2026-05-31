@@ -1,19 +1,128 @@
 metadata.constructor <- function(file) {
   test.mode("metadata.constructor")
 
-  # Static code check
-  # TODO: Only continue if no errors are reported in the static check (check.yaml) (warnings and infos are fine)
+  # Check file exists
+  rlang::try_fetch(
+    {
+      checkmate::assert_file_exists(file,
+        access = "r", extension = c("yml", "yaml")
+      )
+    },
+    error = function(cnd) {
+      cli::cli_abort(cnd$message,
+        call = rlang::caller_env(), class = "error.metadata.constructor.1"
+      )
+    }
+  )
 
-  # Read in YAML file
-  yaml_input <- yaml.read(file)
+  # Read yaml
+  rlang::try_fetch(
+    {
+      yaml_input <- yaml12::read_yaml(file)
+    },
+    error = function(cnd) {
+      cli::cli_abort(
+        c(
+          "Loading YAML metadata failed!",
+          c(
+            "Loading failed due to an error in the YAML grammar. The {.code yaml12::read_yaml()} error message below reports its location. (Check lines before and after as well.)",
+            cnd$message,
+            "Check if you forgot any colons `:` or spaces after colons `key: value`. Otherwise, try adding quotation marks to keys and values with special characters."
+          ) %>%
+            magrittr::set_names(c("i", "x", "i")) %>%
+            magrittr::extract(c(
+              stringi::stri_detect(cnd$message, fixed = "line"),
+              TRUE,
+              stringi::stri_detect(cnd$message, fixed = "line")
+            ))
+        ), # add info only if applicable
+        call = rlang::caller_env(), class = "error.metadata.constructor.2"
+      )
+    }
+  )
 
-  # Check structure after reading-in the file
-  yaml.str.input(yaml_input)
-  yaml_input %<>% yaml.forgive.component.name()
-  yaml.str.component(yaml_input)
-  # yaml.str.options(yaml_input)
-  yaml_input %<>% yaml.add.name() # Finalize and test this function
-  # yaml.str.var.list(yaml_input)
+  # Check structure with JSON schema
+  ## Load schema
+  schema_path <- system.file("epicdata-schema.json", package = "epicdata")
+
+  ## Create validator
+  v <- jsonvalidate::json_schema$new(schema_path, engine = "ajv")
+
+  ## Validate
+  res <- yaml_input %>%
+    jsonlite::toJSON(auto_unbox = TRUE, null = "null") %>%
+    v$validate(verbose = TRUE) %>%
+    attributes() %>%
+    magrittr::use_series("error")
+
+  ## Report results
+  if (!is.null(res)) {
+    ## Merge good error messages
+    res %<>% dplyr::left_join(
+      better.json.validate.error.messages,
+      by = "schemaPath"
+    ) %>%
+      dplyr::select(my_error, my_hint)
+
+    ## Prepare messages for cli_abort()
+    res$error_number <- 1:nrow(res)
+    res_error <- res %>%
+      dplyr::select(error_number, message = my_error) %>%
+      dplyr::mutate(
+        type = "x"
+      )
+    res_hint <- res %>%
+      dplyr::select(error_number, message = my_hint) %>%
+      dplyr::mutate(
+        type = "i"
+      ) %>%
+      dplyr::filter(message != "")
+    res <- rbind(
+      data.frame(
+        error_number = 0L,
+        message = "The YAML input has an incorrect structure.",
+        type = "x"
+      ), res_error, res_hint
+    ) %>%
+      dplyr::arrange(error_number, dplyr::desc(type))
+
+    number_of_errors <- max(res$error_number)
+    ### Only report up to 5 errors
+    if (number_of_errors > 5) {
+      res %<>%
+        filter(error_number <= 5)
+    }
+
+    errors <- res$message %>%
+      magrittr::set_names(res$type)
+
+    if (number_of_errors == 6) {
+      errors <- c(errors, "... and 1 more problem")
+    }
+    if (number_of_errors > 6) {
+      errors <- c(
+        errors,
+        paste0("... and ", number_of_errors - 5, " more problems")
+      )
+    }
+
+
+    cli::cli_abort(errors,
+      call = rlang::caller_env(), class = "error.metadata.constructor.2"
+    )
+  }
+
+  # Add the variable name as var.list to the list of elements for this variable
+  for (i in seq_along(yaml_input$var.list)) {
+    yaml_input$var.list[[i]]$var.name <- names(yaml_input$var.list)[i]
+  }
+
+  # Add the group name as group.name to the list of elements for this group
+  if (!is.null(yaml_input$var.groups)) {
+    for (i in seq_along(yaml_input$var.groups)) {
+      yaml_input$var.groups[[i]]$group.name <- names(yaml_input$var.groups)[i]
+    }
+  }
 
   # Aliases
   if (is.null(yaml_input$options$touch.na)) {
@@ -28,22 +137,13 @@ metadata.constructor <- function(file) {
     remove.vars.input <- yaml_input$options$remove.vars
   }
 
-  # PUT INTO EXTRA FUNCTION
-  for (i in seq_along(yaml_input$var.list)) {
-    checkmate::assert_logical(yaml_input$var.list[[i]]$touch.na,
-      len = 1, any.missing = FALSE, null.ok = TRUE
-    )
-    checkmate::assert_logical(yaml_input$var.list[[i]]$na.touch.,
-      len = 1, any.missing = FALSE, null.ok = TRUE
-    )
-  }
-
+  # Create S7 object
   S7::new_object(S7::S7_object(),
-    # Run the setter of var.list first
+    ## Run the setter of var.list first
     var.list = yaml_input$var.list,
-    # Run var.groups always after var.list
+    ## Run var.groups always after var.list
     var.groups = yaml_input$var.groups,
-    # Global default options need to be listed after var.list and var.groups
+    ## Global default options need to be listed after var.list and var.groups
     touch.na = touch.na.input,
     data.name = yaml_input$options$data.name,
     id.var = yaml_input$options$id.var,
@@ -53,250 +153,55 @@ metadata.constructor <- function(file) {
   )
 }
 
+# Data.frame translating error messages from JSON schema validation ----
+better.json.validate.error.messages <- matrix(
+  c(
+    "#/type",
+    "The metadata specification must at least contain a variable list.",
+    "Check {.vignette epicdata::metadata_long} for more information.",
 
-# !!Add test!!
+    "#/required",
+    "The metadata specification must at least contain a variable list.",
+    "Check {.vignette epicdata::metadata_long} for more information.",
 
+    ###
+    # options
+    ###
 
-yaml.read <- function(x, arg = rlang::caller_arg(x),
-                      call = rlang::caller_env()) {
-  # Read
-  rlang::try_fetch(
-    {
-      yaml_input <- yaml12::read_yaml(x)
-    },
-    error = function(cnd) {
-      cli::cli_abort(
-        c(
-          "Loading YAML metadata failed!",
-          c(
-            "Loading failed due to an error in the YAML grammar. The
-                      {.code yaml12::read_yaml()} error message below reports its
-                      location. (Check lines before and after as well.)",
-            cnd$message,
-            "Check if you forgot any colons `:` or spaces after
-                       colons `key: value`. Otherwise, try adding quotation
-                       marks to keys and values with special characters."
-          ) %>%
-            magrittr::set_names(c("i", "x", "i")) %>%
-            magrittr::extract(c(
-              stringi::stri_detect(cnd$message, fixed = "line"),
-              TRUE,
-              stringi::stri_detect(cnd$message, fixed = "line")
-            ))
-        ), # add info only if applicable
-        call = call,
-        class = "error.yaml.read.1"
-      )
-    }
-  )
+    "#/properties/options/properties/id.var/pattern",
+    "Option `id.var` must contain a valid variable name.",
+    "Look at `?make.names` for details.",
 
-  # Evaluate if spaces behind colons are missing
+    "#/properties/options/properties/id.var/type",
+    "Option `id.var` must contain a valid variable name.",
+    "Look at `?make.names` for details.",
 
+    "#/properties/options/properties/consent/type",
+    "Option `consent` must be `true` or `false`.",
+    "Please don't use `yes`, `no`, `on`, `off`, `y`, or `n`.",
 
-  yaml_input
-}
+    ###
+    # var.list
+    ###
 
-yaml.str.input <- function(x, arg = rlang::caller_arg(x),
-                           call = rlang::caller_env()) {
-  # logger::log_info("Checking basic metadata input structure",
-  #                  namespace = "epicdata")
+    "#/properties/var.list/type",
+    "`var.list` must have at least one variable specified.",
+    "Check {.vignette epicdata::metadata_long} for more information.",
 
-  rlang::try_fetch(
-    {
-      # START: actual check
-      checkmate::assert_list(x,
-        min.len = 1, names = "unique", null.ok = FALSE,
-        .var.name = arg
-      )
-      # END: actual check
-    },
-    error = function(cnd) {
-      # logger::log_error("Checking basic metadata input structure failed",
-      #                   namespace = "epicdata")
-      # logger::log_debug(cnd$message, namespace = "epicdata")
-      cli::cli_abort(
-        c("YAML must describe a single list!",
-          "x" = cnd$message,
-          "i" = "Do not use dashes ({.var -}) in front of the
-                            main metadata components: options, var.list, etc."
-        ),
-        call = call,
-        class = "error.yaml.str.input.1"
-      )
-    }
-  )
-}
-
-yaml.forgive.component.name <- function(x) {
-  names(x) %<>% stringi::stri_trans_tolower()
-
-  forgive.options <- c("option")
-  forgive.var.list <- c(
-    "varlist", "varslist", "vars.list", "list.var", "list.vars",
-    "variable.list", "variables.list"
-  )
-  forgive.var.groups <- c("groups")
-  forgive.na.codes <- c("codes.na")
-  forgive.contras <- c("contra", "contradiction", "contradictions")
-
-  names(x)[names(x) %in% forgive.options] <- "options"
-  names(x)[names(x) %in% forgive.var.list] <- "var.list"
-  names(x)[names(x) %in% forgive.var.groups] <- "var.groups"
-  names(x)[names(x) %in% forgive.na.codes] <- "na.codes"
-  names(x)[names(x) %in% forgive.contras] <- "contras"
-
-  x
-}
-
-yaml.str.component <- function(x, arg = rlang::caller_arg(x),
-                               call = rlang::caller_env()) {
-  components.list <- c("options", "var.list", "var.groups", "na.codes", "contras")
-
-  rlang::try_fetch(
-    {
-      # START: actual check
-      checkmate::assert_subset(names(x), components.list, .var.name = arg)
-      # END: actual check
-    },
-    error = function(cnd) {
-      cli::cli_abort(
-        c(
-          "YAML contains invalid component names!",
-          cnd$message %>%
-            stringi::stri_replace_all(
-              replacement = "(",
-              regex = "\\{"
-            ) %>%
-            stringi::stri_replace_all(
-              replacement = ")",
-              regex = "\\}"
-            ),
-          "Only the above listed components can be on the first
-                     YAML layer, i.e., without indentation."
-        ) %>%
-          magrittr::set_names(c("!", "x", "i")),
-        call = call,
-        class = "error.yaml.str.component.1"
-      )
-    }
-  )
-}
-
-yaml.str.options <- function(x, call = rlang::caller_env()) {
-  # Create empty list
-
-  options.list <- c(
-    "data.name",
-    "id.var", "id.pattern",
-    "load.from", "mc.handling", "double.entry",
-    "date.format", "format.date",
-    "time.format", "format.time",
-    "datetime.format", "format.datetime",
-    "to.na", "touch.na",
-    "to.factor",
-    "translate"
-  )
-
-  check.options.template <- vector(
-    mode = "list",
-    length = length(options.list)
-  ) %>%
-    magrittr::set_names(options.list)
+    "#/properties/var.list/additionalProperties",
+    "All variable names must be syntactically valid.",
+    "Look at `?make.names` for details."
+  ),
+  ncol = 3,
+  byrow = TRUE
+) %>%
+  as.data.frame() %>%
+  magrittr::set_colnames(c("schemaPath", "my_error", "my_hint"))
 
 
-  # Define checks for every option
-
-  check.options.template[["data.name"]] <- rlang::expr(
-    checkmate::assert_string(x$options$data.name,
-      min.chars = 1,
-      na.ok = FALSE, null.ok = TRUE, add = coll,
-      .var.name = "data.name"
-    )
-  )
-
-  check.options.template[["id.var"]] <- rlang::expr(
-    checkmate::assert_string(x$options$id.var,
-      min.chars = 1,
-      na.ok = FALSE, null.ok = TRUE, add = coll,
-      .var.name = "id.var"
-    )
-  )
-
-  check.options.template[["id.pattern"]] <- rlang::expr(
-    checkmate::assert_string(x$options$id.pattern,
-      min.chars = 1,
-      na.ok = FALSE, null.ok = TRUE, add = coll,
-      .var.name = "id.pattern"
-    )
-  )
 
 
-  # Select
 
-  options.used <- names(x$options)
-  check.options <- check.options.template[options.used]
-
-
-  # Eval
-
-  rlang::try_fetch(
-    {
-      # START: actual check
-      coll <- checkmate::makeAssertCollection()
-      for (i in seq_along(check.options)) {
-        eval(check.options[[i]])
-      }
-      checkmate::reportAssertions(coll)
-      # END: actual check
-    },
-    error = function(cnd) {
-      cli::cli_abort(
-        c("Some options have not been specified correctly.",
-          cnd$message %>% stringi::stri_split_regex("\n") %>%
-            stringi::stri_trim_both() %>%
-            magrittr::extract(2:length(.)) %>%
-            stringi::stri_replace_all(
-              replacement = "Option",
-              regex = "^\\* Variable"
-            ) %>%
-            magrittr::set_names(rep("x", length(.))),
-          "i" = "Some info"
-        ),
-        call = call,
-        class = "error.yaml.str.options.1"
-      )
-    }
-  )
-}
-
-
-yaml.str.var.list <- function(x, call = rlang::caller_env()) {
-  # Check var.list when reading in YAML
-
-
-  # dict.eng is not valid
-}
-
-yaml.str.var.groups <- function(x, call = rlang::caller_env()) {
-  # Check var.groups when reading in YAML
-
-
-  # dict.eng is not valid
-}
-
-yaml.str.na.codes <- function(x, call = rlang::caller_env()) {
-  # Check var.groups when reading in YAML
-
-
-  # dict.eng is not valid
-}
-
-yaml.str.contras <- function(x, call = rlang::caller_env()) {
-  # Check var.groups when reading in YAML
-
-
-  # dict.eng is not valid
-}
 
 yaml.add.name <- function(x) {
   for (i in seq_along(x$var.list)) {
@@ -311,11 +216,6 @@ yaml.add.name <- function(x) {
 
   x
 }
-
-
-
-
-
 
 
 ### START Extraction test
@@ -333,7 +233,6 @@ yaml.add.name <- function(x) {
 # same for variables (here overlap might be possible as well with less control :/)
 
 # x %>% stringi::stri_split("&") %>% stringi::stri_trim_both())
-
 
 
 ### END Extraction test

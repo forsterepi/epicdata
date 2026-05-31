@@ -56,7 +56,7 @@ state.of.the.data <- function(d, metadata, when,
     if (check.all.vars.character != all.vars.character) {
       if (when == "before") {
         cli::cli_abort(
-          "State of the data incorrect: All variables must be character!",
+          "State of the data incorrect: All variables must be character.",
           class = "error.state.of.the.data.1"
         )
       }

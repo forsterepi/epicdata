@@ -1,3 +1,39 @@
+validate.metadata <- function(file) {
+  # Check file exists
+  rlang::try_fetch(
+    {
+      checkmate::assert_file_exists(file,
+        access = "r",
+        extension = c("yml", "yaml")
+      )
+    },
+    error = function(cnd) {
+      cli::cli_abort(cnd$message,
+        call = rlang::caller_env(),
+        class = "error.validate.metadata.1"
+      )
+    }
+  )
+
+  # Load schema
+  schema_path <- system.file("epicdata-schemaAI.json", package = "epicdata")
+
+  # Create validator
+  v <- jsonvalidate::json_schema$new(schema_path, engine = "ajv")
+
+  # Validate
+  out <- yaml12::read_yaml(file) %>%
+    v$serialise(.) %>%
+    v$validate(., verbose = TRUE) %>%
+    attributes() %>%
+    magrittr::use_series("error")
+
+  yaml12::read_yaml(file) %>%
+    v$serialise(.) %>%
+    v$validate(., error = TRUE)
+}
+
+
 #' Static analysis of YAML metadata specification
 #'
 #' @param file x
@@ -7,17 +43,8 @@
 #'
 #' @examples
 check.yaml <- function(file = NULL) {
-
-
   ##### Check structure with JSON schema!!!!!!!!!!!!
   ##### Check logic via validator of the S7 object
-
-
-
-
-
-
-
 
 
   # Read file or active file
@@ -30,7 +57,7 @@ check.yaml <- function(file = NULL) {
       lines <- activefile[["contents"]]
     } else {
       cli::cli_abort(
-        "Please provide a .yml or .yaml file!",
+        "Please provide a .yml or .yaml file.",
         call = rlang::caller_env(),
         class = "error.check.yaml.1"
       )
@@ -161,7 +188,9 @@ cy.hierarchie <- function(lines, type = "error") {
   ind[lines == ""] <- NA
 
   # Ranks
-  lvl <- ind %>% unique() %>% sort()
+  lvl <- ind %>%
+    unique() %>%
+    sort()
   layer <- ind
   for (i in seq_along(layer)) {
     if (!is.na(layer[i])) {
@@ -183,7 +212,6 @@ cy.hierarchie <- function(lines, type = "error") {
   }
 
   for (i in 2:length(layer)) {
-
     if (layer[i] >= layer[i - 1]) {
       check_hierarchie[i] <- FALSE
     } else {
@@ -210,17 +238,21 @@ cy.hierarchie <- function(lines, type = "error") {
   # Put NAs back in
   if (length(pos_na) > 0) {
     for (i in 1:(length(pos_na) - 1)) {
-      check_hierarchie <- c(check_hierarchie[1:(pos_na[i] - 1)],
-                            NA,
-                            check_hierarchie[pos_na[i]:length(check_hierarchie)])
+      check_hierarchie <- c(
+        check_hierarchie[1:(pos_na[i] - 1)],
+        NA,
+        check_hierarchie[pos_na[i]:length(check_hierarchie)]
+      )
     }
 
     if (length(check_hierarchie) == (pos_na[length(pos_na)] - 1)) {
       check_hierarchie <- c(check_hierarchie, NA)
     } else {
-      check_hierarchie <- c(check_hierarchie[1:(pos_na[length(pos_na)] - 1)],
-                            NA,
-                            check_hierarchie[pos_na[length(pos_na)]:length(check_hierarchie)])
+      check_hierarchie <- c(
+        check_hierarchie[1:(pos_na[length(pos_na)] - 1)],
+        NA,
+        check_hierarchie[pos_na[length(pos_na)]:length(check_hierarchie)]
+      )
     }
   }
 

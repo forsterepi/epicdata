@@ -19,6 +19,8 @@ Imports:
     checkmate,
     cli,
     dplyr,
+    jsonlite,
+    jsonvalidate,
     lubridate,
     magrittr,
     purrr,

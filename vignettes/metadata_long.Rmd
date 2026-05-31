@@ -194,7 +194,7 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 - `double.entry` (boolean, i.e., `true`, `false`): Non-digital data has been entered multple times (usually twice) to avoid errors during data entry. This option activates sub-module DUP_COMPARE.
 
-- `remove.vars` (boolean, i.e., `true`, `false`): If `yes`, variables in the data that are missing from the metadata are removed from the data.
+- `remove.vars` (boolean, i.e., `true`, `false`): Indicate if variables in the data that are missing from the metadata should be removed
 
 **Global variable defaults**
 
@@ -216,7 +216,7 @@ Options are key-value pairs below component `options`. List all key-value pairs 
 
 - `to.na` (Text):
 
-- `touch.na` (boolean, i.e., `true`, `false`):
+- `touch.na` (boolean, i.e., `true`, `false`): Indicate if NAs should be changed to missing codes
 
 - `to.factor` (boolean, i.e., `true`, `false`):
 

@@ -38,8 +38,7 @@ process.cats <- function(cats, name, eng = FALSE,
   if (is.na(cats) %>% any()) {
     cli::cli_abort(
       c(
-        "!" = "{.var {cats_type}} must not be NA or contain any
-                     NA.",
+        "!" = "{.var {cats_type}} must not be NA or contain any NA.",
         "i" = "Applies to variable {.var {name}}."
       ),
       call = call, class = "error.process.cats.1"
@@ -50,11 +49,9 @@ process.cats <- function(cats, name, eng = FALSE,
   if (!is.character(cats)) {
     cli::cli_abort(
       c(
-        "!" = "{.var {cats_type}} must be specified as character
-                     vector.",
+        "!" = "{.var {cats_type}} must be specified as character vector.",
         "i" = "Applies to variable {.var {name}}.",
-        "i" = "See the {.vignette epicdata::metadata_long}
-                     vignette."
+        "i" = "See the {.vignette epicdata::metadata_long} vignette."
       ),
       call = call, class = "error.process.cats.2"
     )
@@ -75,11 +72,8 @@ process.cats <- function(cats, name, eng = FALSE,
     cli::cli_abort(
       c(
         "!" = "{.var {cats_type}} has the wrong format.",
-        "i" = "{.var {cats_type}} must connect an integer with a
-                     text, i.e., non-integer, via a single equal sign, e.g.,
-                     {.var 1 = female}",
-        "i" = "In variable {.var {name}}, some elements have the
-                     wrong format: {report}"
+        "i" = "{.var {cats_type}} must connect an integer with a text, i.e., non-integer, via a single equal sign, e.g., {.var 1 = female}",
+        "i" = "In variable {.var {name}}, some elements have the wrong format: {report}"
       ),
       call = call, class = "error.process.cats.3"
     )
@@ -89,10 +83,8 @@ process.cats <- function(cats, name, eng = FALSE,
   if (cats %>% length() %>% magrittr::equals(1)) {
     cli::cli_abort(
       c(
-        "!" = "{.var {cats_type}} has `length == 1`, but must have
-                     `length > 1`.",
-        "i" = "You specified only a single category for variable
-                     {.var {name}}."
+        "!" = "{.var {cats_type}} has `length == 1`, but must have `length > 1`.",
+        "i" = "You specified only a single category for variable {.var {name}}."
       ),
       call = call, class = "error.process.cats.10"
     )
@@ -143,8 +135,7 @@ process.cats <- function(cats, name, eng = FALSE,
     cli::cli_abort(
       c(
         "!" = "{.var {cats_type}} must not contain doubles.",
-        "i" = "In variable {.var {name}}, some elements are
-                     double: {report}"
+        "i" = "In variable {.var {name}}, some elements are double: {report}"
       ),
       call = call, class = "error.process.cats.4"
     )
@@ -165,11 +156,8 @@ process.cats <- function(cats, name, eng = FALSE,
 
     cli::cli_abort(
       c(
-        "!" = "{.var {cats_type}} must connect an integer with a
-                     text, i.e., non-integer, via a single equal sign, e.g.,
-                     {.var 1 = female}",
-        "i" = "In variable {.var {name}}, some elements of
-                     {.var {cats_type}} do not contain an integer: {report}"
+        "!" = "{.var {cats_type}} must connect an integer with a text, i.e., non-integer, via a single equal sign, e.g., {.var 1 = female}",
+        "i" = "In variable {.var {name}}, some elements of {.var {cats_type}} do not contain an integer: {report}"
       ),
       call = call, class = "error.process.cats.5"
     )
@@ -190,11 +178,8 @@ process.cats <- function(cats, name, eng = FALSE,
 
     cli::cli_abort(
       c(
-        "!" = "{.var {cats_type}} must connect an integer with a
-                     text, i.e., non-integer, via an equal sign, e.g.,
-                     {.var 1 = female}",
-        "i" = "In variable {.var {name}}, some elements of
-                     {.var {cats_type}} contain two integers: {report}"
+        "!" = "{.var {cats_type}} must connect an integer with a text, i.e., non-integer, via an equal sign, e.g., {.var 1 = female}",
+        "i" = "In variable {.var {name}}, some elements of {.var {cats_type}} contain two integers: {report}"
       ),
       call = call, class = "error.process.cats.6"
     )
@@ -229,10 +214,8 @@ process.cats <- function(cats, name, eng = FALSE,
     if (out$level %>% magrittr::is_less_than(0) %>% any()) {
       cli::cli_abort(
         c(
-          "!" = "{.var {cats_type}} must not contain negative
-                       integers.",
-          "i" = "Variable {.var {name}} contains negative
-                       integers."
+          "!" = "{.var {cats_type}} must not contain negative integers.",
+          "i" = "Variable {.var {name}} contains negative integers."
         ),
         call = call, class = "error.process.cats.7"
       )
@@ -249,10 +232,8 @@ process.cats <- function(cats, name, eng = FALSE,
 
       cli::cli_abort(
         c(
-          "!" = "{.var {cats_type}} must not contain duplicated
-                       values.",
-          "i" = "Variable {.var {name}} contains duplicated
-                       integers: {report}"
+          "!" = "{.var {cats_type}} must not contain duplicated values.",
+          "i" = "Variable {.var {name}} contains duplicated integers: {report}"
         ),
         call = call, class = "error.process.cats.8"
       )
@@ -268,10 +249,8 @@ process.cats <- function(cats, name, eng = FALSE,
 
       cli::cli_abort(
         c(
-          "!" = "{.var {cats_type}} must not contain duplicated
-                       values.",
-          "i" = "Variable {.var {name}} contains duplicated
-                       labels: {report}"
+          "!" = "{.var {cats_type}} must not contain duplicated values.",
+          "i" = "Variable {.var {name}} contains duplicated labels: {report}"
         ),
         call = call, class = "error.process.cats.9"
       )
@@ -324,8 +303,7 @@ process.dict <- function(dict, call = rlang::caller_env()) {
       error = function(cnd) {
         cli::cli_abort(
           c("Unable to process `dict` element {.var {dict[i]}}",
-            "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"
+            "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
           ),
           call = call, class = "error.process.dict.2"
         )
@@ -340,8 +318,7 @@ process.dict <- function(dict, call = rlang::caller_env()) {
       } else {
         cli::cli_abort(
           c("`dict` element {.var {dict[i]}} has an incorrect format.",
-            "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"
+            "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
           ),
           call = call, class = "error.process.dict.3"
         )
@@ -357,8 +334,7 @@ process.dict <- function(dict, call = rlang::caller_env()) {
       } else {
         cli::cli_abort(
           c("`dict` element {.var {dict[i]}} has an incorrect format.",
-            "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"
+            "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
           ),
           call = call, class = "error.process.dict.4"
         )
@@ -366,8 +342,7 @@ process.dict <- function(dict, call = rlang::caller_env()) {
     } else {
       cli::cli_abort(
         c("`dict` element {.var {dict[i]}} has an incorrect format.",
-          "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.process.dict.5"
       )
@@ -420,8 +395,7 @@ process.dict.rules <- function(rule, dict, var, var.names, na.codes,
         c("Rule {.var {rlang::expr_text(e[[i]])}} has an incorrect
         format.",
           "i" = "Value after `~` must be in `dict` or NA.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.process.dict.rules.1"
       )
@@ -528,8 +502,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       error = function(cnd) {
         cli::cli_abort(
           c("Unable to process rule {.var {rule[i]}}",
-            "i" = "Please check the required format in the documentation:
-          {.vignette epicdata::metadata_long}"
+            "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
           ),
           call = call, class = "error.check.rules.format.1"
         )
@@ -541,8 +514,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       cli::cli_abort(
         c("Rule {.var {rule[i]}} has an incorrect format.",
           "i" = "Use of `~` required.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.check.rules.format.2"
       )
@@ -553,8 +525,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       cli::cli_abort(
         c("Rule {.var {rule[i]}} has an incorrect format.",
           "i" = "Use of `~` required.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.check.rules.format.3"
       )
@@ -580,8 +551,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
           cli::cli_abort(
             c("Rule {.var {rule[i]}} has an incorrect format.",
               "i" = "Some variable names have not been specified in `var.list`: {re}",
-              "i" = "Please check the required format in the documentation:
-            {.vignette epicdata::metadata_long}"
+              "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
             ),
             call = call, class = "error.check.rules.format.4"
           )
@@ -594,8 +564,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
     } else {
       cli::cli_abort(
         c("Rule {.var {rule[i]}} has an incorrect format.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.check.rules.format.5"
       )
@@ -607,8 +576,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       cli::cli_abort(
         c("Rules have an incorrect format.",
           "i" = "Value after ~ must be a constant, i.e., atomic vector or `NA`.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.check.rules.format.6"
       )
@@ -618,8 +586,7 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
       cli::cli_abort(
         c("Rule {.var {rule[i]}} has an incorrect format.",
           "i" = "Value after ~ must not be `NULL`.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call, class = "error.check.rules.format.7"
       )
@@ -632,10 +599,8 @@ check.rules.format <- function(rule, var.names, call = rlang::caller_env()) {
   # Only one rule can have format "~ value"
   if (n_length2 > 1) {
     cli::cli_abort(
-      c("Defaults, i.e., rules without value in front of `~`, can
-      only be assigned once.",
-        "i" = "Please check the required format in the documentation:
-      {.vignette epicdata::metadata_long}"
+      c("Defaults, i.e., rules without value in front of `~`, can only be assigned once.",
+        "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
       ),
       call = call, class = "error.check.rules.format.8"
     )
@@ -702,10 +667,8 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
     any.missing = FALSE, null.ok = FALSE
   )) {
     cli::cli_abort(
-      c("For key `new`, the variable definition must be provided
-      as a single character.",
-        "i" = "Please check the required format in the documentation:
-      {.vignette epicdata::metadata_long}"
+      c("For key `new`, the variable definition must be provided as a single character.",
+        "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
       ),
       call = call,
       class = "error.check.new.format.1"
@@ -717,8 +680,7 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
     error = function(cnd) {
       cli::cli_abort(
         c("Unable to process variable definition {.var {new}}",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call,
         class = "error.check.new.format.2"
@@ -732,8 +694,7 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
       cli::cli_abort(
         c("Variable definition {.var {new}} has an incorrect format.",
           "i" = "Do not assign the variable name with `=`.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call,
         class = "error.check.new.format.3"
@@ -747,8 +708,7 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
       cli::cli_abort(
         c("Variable definition {.var {new}} has an incorrect format.",
           "i" = "Do not assign `NULL`.",
-          "i" = "Please check the required format in the documentation:
-        {.vignette epicdata::metadata_long}"
+          "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
         ),
         call = call,
         class = "error.check.new.format.4"
@@ -775,8 +735,7 @@ check.new.format <- function(new = NULL, var = NULL, var.names = NULL,
     cli::cli_abort(
       c("Variable definition {.var {new}} has an incorrect format.",
         "i" = "Some variable names are not available for defining {.var {var}}: {re}",
-        "i" = "Please check the required format in the documentation:
-      {.vignette epicdata::metadata_long}"
+        "i" = "Please check the required format in the documentation: {.vignette epicdata::metadata_long}"
       ),
       call = call,
       class = "error.check.new.format.4"
@@ -862,6 +821,4 @@ craft.call.var.list <- function(variable, key, value,
   call
 }
 
-craft.call.var.groups <- function() {
-
-}
+craft.call.var.groups <- function() {}

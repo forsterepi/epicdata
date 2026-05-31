@@ -63,34 +63,42 @@ create_new_file <- function(path, project_name, folder, script_name, template) {
 #'
 #' @examples
 #' withr::with_tempdir({
-#' path <- getwd()
-#' create_meta("meta_test", path, db = TRUE)
+#'   path <- getwd()
+#'   create_meta("meta_test", path, db = TRUE)
 #' })
 create_meta <- function(name, path, db = F) {
-
   # Check
   rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var path} must be a single element of type character!",
-                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_path", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var path} must be a single element of type character.",
+          "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
+        ),
+        class = "inpur_error_path", parent = cnd
+      )
+    }
   )
 
   rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var name} must be a single element of type character!",
-                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_name", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var name} must be a single element of type character.",
+          "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
+        ),
+        class = "inpur_error_name", parent = cnd
+      )
+    }
   )
 
   rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var db} must be TRUE or FALSE!",
-                                      "i" = "{.var NA} and {.var NULL} are not allowed."),
-                                    class = "inpur_error_db", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var db} must be TRUE or FALSE.",
+          "i" = "{.var NA} and {.var NULL} are not allowed."
+        ),
+        class = "inpur_error_db", parent = cnd
+      )
+    }
   )
 
   dir_exists <- dir.exists(path)
@@ -100,7 +108,7 @@ create_meta <- function(name, path, db = F) {
 
   proj_exists <- dir.exists(file.path(path, name))
   if (proj_exists) {
-    cli::cli_abort("The project already exists!", class = "proj_exists")
+    cli::cli_abort("The project already exists.", class = "proj_exists")
   }
 
   # Do
@@ -109,9 +117,7 @@ create_meta <- function(name, path, db = F) {
   create_new_file(path, name, "", "test_workflow.R", "test_template.R")
   create_new_file(path, name, "R", "test_script.R", "test_template.R")
 
-  if (db) {
-
-  }
+  if (db) {}
 
   cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
 }
@@ -135,44 +141,52 @@ create_meta <- function(name, path, db = F) {
 #'
 #' @examples
 #' withr::with_tempdir({
-#' path <- getwd()
-#' create_raw("raw_test", path, db = TRUE)
+#'   path <- getwd()
+#'   create_raw("raw_test", path, db = TRUE)
 #' })
 create_raw <- function(name, path, db = F) {
-
   # Check
   rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var path} must be a single element of type character!",
-                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_path", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var path} must be a single element of type character.",
+          "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
+        ),
+        class = "inpur_error_path", parent = cnd
+      )
+    }
   )
 
   rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var name} must be a single element of type character!",
-                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_name", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var name} must be a single element of type character.",
+          "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
+        ),
+        class = "inpur_error_name", parent = cnd
+      )
+    }
   )
 
   rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var db} must be TRUE or FALSE!",
-                                      "i" = "{.var NA} and {.var NULL} are not allowed."),
-                                    class = "inpur_error_db", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var db} must be TRUE or FALSE.",
+          "i" = "{.var NA} and {.var NULL} are not allowed."
+        ),
+        class = "inpur_error_db", parent = cnd
+      )
+    }
   )
 
   dir_exists <- dir.exists(path)
   if (!dir_exists) {
-    cli::cli_abort("The path does not exist!", class = "dir_exists")
+    cli::cli_abort("The path does not exist.", class = "dir_exists")
   }
 
   proj_exists <- dir.exists(file.path(path, name))
   if (proj_exists) {
-    cli::cli_abort("The project already exists!", class = "proj_exists")
+    cli::cli_abort("The project already exists.", class = "proj_exists")
   }
 
   # Do
@@ -181,9 +195,7 @@ create_raw <- function(name, path, db = F) {
   create_new_file(path, name, "", "test_workflow.R", "test_template.R")
   create_new_file(path, name, "R", "test_script.R", "test_template.R")
 
-  if (db) {
-
-  }
+  if (db) {}
 
   cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
 }
@@ -207,34 +219,42 @@ create_raw <- function(name, path, db = F) {
 #'
 #' @examples
 #' withr::with_tempdir({
-#' path <- getwd()
-#' create_prc("prc_test", path, db = TRUE)
+#'   path <- getwd()
+#'   create_prc("prc_test", path, db = TRUE)
 #' })
 create_prc <- function(name, path, db = F) {
-
   # Check
   rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var path} must be a single element of type character!",
-                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_path", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var path} must be a single element of type character.",
+          "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
+        ),
+        class = "inpur_error_path", parent = cnd
+      )
+    }
   )
 
   rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var name} must be a single element of type character!",
-                                      "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."),
-                                    class = "inpur_error_name", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var name} must be a single element of type character.",
+          "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
+        ),
+        class = "inpur_error_name", parent = cnd
+      )
+    }
   )
 
   rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
-                   error = function(cnd) {
-                     cli::cli_abort(c("Argument {.var db} must be TRUE or FALSE!",
-                                      "i" = "{.var NA} and {.var NULL} are not allowed."),
-                                    class = "inpur_error_db", parent = cnd)
-                   }
+    error = function(cnd) {
+      cli::cli_abort(
+        c("Argument {.var db} must be TRUE or FALSE.",
+          "i" = "{.var NA} and {.var NULL} are not allowed."
+        ),
+        class = "inpur_error_db", parent = cnd
+      )
+    }
   )
 
   dir_exists <- dir.exists(path)
@@ -253,9 +273,7 @@ create_prc <- function(name, path, db = F) {
   create_new_file(path, name, "", "test_workflow.R", "test_template.R")
   create_new_file(path, name, "R", "test_script.R", "test_template.R")
 
-  if (db) {
-
-  }
+  if (db) {}
 
   cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
 }
@@ -275,17 +293,21 @@ create_prc <- function(name, path, db = F) {
 #'
 #' @examples
 #' withr::with_tempdir({
-#' create.metadata.file("my_data_set")
+#'   create.metadata.file("my_data_set")
 #' })
 create.metadata.file <- function(name, path = getwd()) {
   # Check inputs
-  if (!checkmate::test_character(name, len = 1, min.chars = 1, null.ok = FALSE,
-                                any.missing = FALSE)) {
+  if (!checkmate::test_character(name,
+    len = 1, min.chars = 1, null.ok = FALSE,
+    any.missing = FALSE
+  )) {
     cli::cli_abort("Wrong input")
   }
 
-  if (!checkmate::test_character(path, len = 1, min.chars = 1, null.ok = FALSE,
-                                any.missing = FALSE)) {
+  if (!checkmate::test_character(path,
+    len = 1, min.chars = 1, null.ok = FALSE,
+    any.missing = FALSE
+  )) {
     cli::cli_abort("Wrong input")
   }
 
@@ -293,10 +315,12 @@ create.metadata.file <- function(name, path = getwd()) {
   if (name %>% stringi::stri_detect(regex = "\\.yml$")) {
     file_name <- name
   } else if (name %>% stringi::stri_detect(regex = "\\.yaml$")) {
-    file_name <- name %>% stringi::stri_replace_all(replacement = ".yml",
-                                                    regex = "\\.yaml$")
+    file_name <- name %>% stringi::stri_replace_all(
+      replacement = ".yml",
+      regex = "\\.yaml$"
+    )
   } else if (name %>% stringi::stri_detect(regex = "\\.", negate = TRUE)) {
-    file_name <- stringi::stri_flatten(c(name,"yml"), collapse = ".")
+    file_name <- stringi::stri_flatten(c(name, "yml"), collapse = ".")
   } else {
     cli::cli_abort("Wrong file extension.")
   }

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "epicdata::metadata YAML structur validator",
+  "description": "Validating YAML metadata specification",
+  "type": "object",
+  "properties": {
+    "options": {
+      "description": "A list of options specifying study information, selecting workflow modules, and defining global variable defaults",
+      "type": [ "object", "null" ],
+      "properties": {
+        "data.name": {
+          "description": "A short name for your dataset that is used for project and file names",
+          "type": [ "string", "null" ]
+        },
+        "id.var": {
+          "description": "The name of the ID variable, which is used to identify observations",
+          "type": [ "string", "null" ],
+          "pattern": "^([A-Za-z]{1}|\\.[A-Za-z._]{1})[A-Za-z0-9._]*$"
+        },
+        "id.pattern": {
+          "description": "A Regular Expression that must be fulfilled for all values of the variable specified in id.var",
+          "type": [ "string", "null" ]
+        },
+        "consent": {
+          "description": "Indicate if informed consent will be checked",
+          "type": [ "boolean", "null" ]
+        },
+        "remove.vars": {
+          "description": "Indicate if variables in the data that are missing from the metadata should be removed",
+          "type": [ "boolean", "null" ]
+        },
+        "vars.remove": {
+          "description": "Indicate if variables in the data that are missing from the metadata should be removed",
+          "type": [ "boolean", "null" ]
+        },
+        "touch.na": {
+          "description": "Indicate if NAs should be changed to missing codes",
+          "type": [ "boolean", "null" ]
+        },
+        "na.touch": {
+          "description": "Indicate if NAs should be changed to missing codes",
+          "type": [ "boolean", "null" ]
+        }
+      },
+      "additionalProperties": false
+    },
+
+
+    "var.list": {
+      "description": "A list of all variables, where variable-specific information is provided",
+      "type": "object",
+      "patternProperties": {
+        "^([A-Za-z]{1}|\\.[A-Za-z._]{1})[A-Za-z0-9._]*$": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The variable type is the main variable characteristic and the only key that is always required",
+              "type": "string",
+              "enum": [ "text", "num", "cat", "date", "time", "datetime"]
+            },
+            "label": {
+              "description": "x",
+              "type": [ "string", "null" ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": {"const": "num"}
+                },
+                "required": [ "type" ]
+              },
+              "then": {
+                "properties": {
+                  "from": {
+                    "description": "x",
+                    "type": [ "number", "null" ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {"const": "cat"}
+                },
+                "required": [ "type" ]
+              },
+              "then": {
+                "properties": {
+                  "cats": {
+                    "description": "x",
+                    "type": [ "array", "null" ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ],
+          "required": [ "type" ]
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+
+
+    "var.groups": {
+      "description": "A list of variable groups with information that applies to the group instead of individual variables",
+      "type": [ "object", "null" ]
+    },
+
+
+    "na.codes": {
+      "description": "A list of codes that will represent missing values in the processed data set",
+      "type": [ "object", "null" ]
+    },
+
+
+    "contras": {
+      "description": "A list of implausible combinations of values from two variables",
+      "type": "object"
+    }
+  },
+  "required": [ "var.list" ],
+  "additionalProperties": false
+}
+
+
