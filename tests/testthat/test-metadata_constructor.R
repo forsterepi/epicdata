@@ -86,5 +86,3 @@ test_that("regex in json schema works", {
   )
   expect_no_error(metadata(file))
 })
-
-

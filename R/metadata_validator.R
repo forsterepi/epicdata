@@ -85,15 +85,15 @@ var.list.validator <- function(value) {
     "to.factor.default.option", "to.factor.final"
   )
   keys.factor.name <- c("factor.name", "name.factor")
-  keys.from <- c("from", "from.default.group", "from.final")
+  keys.from <- c("from", "from.default.group", "from.final", "above.equal")
   keys.from.exclude <- c(
     "from.exclude", "from.ex", "from.exclude.default.group",
-    "from.exclude.final"
+    "from.exclude.final", "above"
   )
-  keys.to <- c("to", "to.default.group", "to.final")
+  keys.to <- c("to", "to.default.group", "to.final", "below.equal")
   keys.to.exclude <- c(
     "to.exclude", "to.ex", "to.exclude.default.group",
-    "to.exclude.final"
+    "to.exclude.final", "below"
   )
   keys.date.format <- c(
     "date.format", "format.date", "format",

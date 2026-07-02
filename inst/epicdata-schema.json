@@ -42,7 +42,15 @@
           "type": [ "boolean", "null" ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "not": { "required": ["remove.vars", "vars.remove"] }
+        },
+        {
+          "not": { "required": ["touch.na", "na.touch"] }
+        }
+      ]
     },
 
 
@@ -73,12 +81,23 @@
               },
               "then": {
                 "properties": {
-                  "from": {
+                  "below": {
+                    "description": "x",
+                    "type": [ "number", "null" ]
+                  },
+                  "above": {
+                    "description": "x",
+                    "type": [ "number", "null" ]
+                  },
+                  "below.equal": {
+                    "description": "x",
+                    "type": [ "number", "null" ]
+                  },
+                  "above.equal": {
                     "description": "x",
                     "type": [ "number", "null" ]
                   }
-                },
-                "additionalProperties": false
+                }
               }
             },
             {
@@ -94,12 +113,18 @@
                     "description": "x",
                     "type": [ "array", "null" ]
                   }
-                },
-                "additionalProperties": false
+                }
               }
+            },
+            {
+              "not": { "required": ["not.above", "not.above.equal"] }
+            },
+            {
+              "not": { "required": ["not.below", "not.below.equal"] }
             }
           ],
-          "required": [ "type" ]
+          "required": [ "type" ],
+          "unevaluatedProperties": false
         }
       },
       "additionalProperties": false,
