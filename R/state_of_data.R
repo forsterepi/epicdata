@@ -24,8 +24,7 @@
 #' @export
 #'
 #' @examples
-state.of.the.data <- function(d, metadata, when,
-                              all.vars.character = NULL) {
+state.of.the.data <- function(d, metadata, when, all.vars.character = NULL) {
   # Check inputs
   checkmate::assert_data_frame(d, null.ok = FALSE)
 
@@ -61,13 +60,15 @@ state.of.the.data <- function(d, metadata, when,
         )
       }
       if (when == "after") {
-        cli::cli_abort(c("x" = "Error IE21111"),
-          .internal = TRUE, class = "IE21111", call = rlang::caller_env()
+        cli::cli_abort(
+          c("x" = "Error IE21111"),
+          .internal = TRUE,
+          class = "IE21111",
+          call = rlang::caller_env()
         )
       }
     }
   }
-
 
   invisible(d)
 }

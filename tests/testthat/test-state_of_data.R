@@ -1,6 +1,7 @@
 test_that("all.vars.character works", {
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "var.list:",
       "  a:",
@@ -36,23 +37,41 @@ test_that("all.vars.character works", {
   expect_true(checkmate::test_class(ti, classes = c("tbl_df")))
 
   ## Character ----
-  expect_no_error(state.of.the.data(df,
-    metadata = m, when = "before", all.vars.character = TRUE
+  expect_no_error(state.of.the.data(
+    df,
+    metadata = m,
+    when = "before",
+    all.vars.character = TRUE
   ))
-  expect_no_error(state.of.the.data(dt,
-    metadata = m, when = "before", all.vars.character = TRUE
+  expect_no_error(state.of.the.data(
+    dt,
+    metadata = m,
+    when = "before",
+    all.vars.character = TRUE
   ))
-  expect_no_error(state.of.the.data(ti,
-    metadata = m, when = "before", all.vars.character = TRUE
+  expect_no_error(state.of.the.data(
+    ti,
+    metadata = m,
+    when = "before",
+    all.vars.character = TRUE
   ))
-  expect_no_error(state.of.the.data(df,
-    metadata = m, when = "after", all.vars.character = TRUE
+  expect_no_error(state.of.the.data(
+    df,
+    metadata = m,
+    when = "after",
+    all.vars.character = TRUE
   ))
-  expect_no_error(state.of.the.data(dt,
-    metadata = m, when = "after", all.vars.character = TRUE
+  expect_no_error(state.of.the.data(
+    dt,
+    metadata = m,
+    when = "after",
+    all.vars.character = TRUE
   ))
-  expect_no_error(state.of.the.data(ti,
-    metadata = m, when = "after", all.vars.character = TRUE
+  expect_no_error(state.of.the.data(
+    ti,
+    metadata = m,
+    when = "after",
+    all.vars.character = TRUE
   ))
 
   ## Double ----
@@ -65,24 +84,60 @@ test_that("all.vars.character works", {
   ti <- df %>%
     tibble::as_tibble()
 
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
 
   ## Integer ----
   df <- data.frame(
@@ -94,24 +149,60 @@ test_that("all.vars.character works", {
   ti <- df %>%
     tibble::as_tibble()
 
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
 
   ## Factor ----
   df <- data.frame(
@@ -123,24 +214,60 @@ test_that("all.vars.character works", {
   ti <- df %>%
     tibble::as_tibble()
 
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
 
   ## Logical ----
   df <- data.frame(
@@ -152,24 +279,60 @@ test_that("all.vars.character works", {
   ti <- df %>%
     tibble::as_tibble()
 
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
 
   ## haven::labelled ----
   df <- data.frame(
@@ -184,23 +347,58 @@ test_that("all.vars.character works", {
   ti <- df %>%
     tibble::as_tibble()
 
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "before", all.vars.character = TRUE
-  ), class = "error.state.of.the.data.1")
-  expect_error(state.of.the.data(df,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(dt,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-  expect_error(state.of.the.data(ti,
-    metadata = m, when = "after", all.vars.character = TRUE
-  ), class = "IE21111")
-
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "before",
+      all.vars.character = TRUE
+    ),
+    class = "error.state.of.the.data.1"
+  )
+  expect_error(
+    state.of.the.data(
+      df,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      dt,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
+  expect_error(
+    state.of.the.data(
+      ti,
+      metadata = m,
+      when = "after",
+      all.vars.character = TRUE
+    ),
+    class = "IE21111"
+  )
 })

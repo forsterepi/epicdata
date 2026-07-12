@@ -1,6 +1,7 @@
 test_that("S7 class dataset works", {
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  data.name: test",

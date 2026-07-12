@@ -2,10 +2,10 @@
 NULL
 
 dataset.constructor <- function(raw, metadata) {
-
   # Preprocess raw ???
 
-  S7::new_object(S7::S7_object(),
+  S7::new_object(
+    S7::S7_object(),
     raw = raw,
     metadata = metadata,
     processed = raw,
@@ -32,15 +32,14 @@ dataset.constructor <- function(raw, metadata) {
 #'
 #' @export
 #'
-dataset <- S7::new_class("dataset",
+dataset <- S7::new_class(
+  "dataset",
   properties = list(
     raw = S7::new_property(
       class = S7::class_data.frame,
       default = quote(stop("@raw is required")),
       validator = function(value) {
-
         # Validate raw ???
-
       }
     ),
     metadata = S7::new_property(

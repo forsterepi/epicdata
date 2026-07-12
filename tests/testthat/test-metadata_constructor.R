@@ -1,6 +1,7 @@
 test_that("regex in json schema works", {
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: .3a",
@@ -13,7 +14,8 @@ test_that("regex in json schema works", {
   expect_snapshot(metadata(file), error = TRUE)
 
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: _a",
@@ -26,7 +28,8 @@ test_that("regex in json schema works", {
   expect_snapshot(metadata(file), error = TRUE)
 
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: a-a",
@@ -39,7 +42,8 @@ test_that("regex in json schema works", {
   expect_snapshot(metadata(file), error = TRUE)
 
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: aZBy3_._",
@@ -51,7 +55,8 @@ test_that("regex in json schema works", {
   expect_no_error(metadata(file))
 
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: Z",
@@ -63,7 +68,8 @@ test_that("regex in json schema works", {
   expect_no_error(metadata(file))
 
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: .test",
@@ -75,7 +81,8 @@ test_that("regex in json schema works", {
   expect_no_error(metadata(file))
 
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  id.var: ..test",

@@ -1,64 +1,77 @@
 test_that("process.cats works", {
   expect_equal(process.cats(cats = NULL, name = "var"), NULL)
-  expect_error(process.cats(cats = NA, name = "var"),
+  expect_error(
+    process.cats(cats = NA, name = "var"),
     class = "error.process.cats.1"
   )
 
   cats <- c("1=female", NA)
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.1"
   )
 
-  expect_error(process.cats(cats = 3, name = "var"),
+  expect_error(
+    process.cats(cats = 3, name = "var"),
     class = "error.process.cats.2"
   )
 
-  expect_error(process.cats(cats = "", name = "var"),
+  expect_error(
+    process.cats(cats = "", name = "var"),
     class = "error.process.cats.3"
   )
 
   cats <- c("0==male", "1=female")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.3"
   )
 
   cats <- c(male = "0", female = "1")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.3"
   )
 
   cats <- c("1.3 = male", "1 = female")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.4"
   )
 
   cats <- c("a=male", "1=female")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.5"
   )
 
   cats <- c("0=1", "2=female")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.6"
   )
 
   cats <- c("-1 = male", "-2 =male")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.7"
   )
 
   cats <- c("1 = male", "1 = female")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.8"
   )
 
   cats <- c("0 = male", "1 =male")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.9"
   )
 
   cats <- c("0 = male")
-  expect_error(process.cats(cats = cats, name = "var"),
+  expect_error(
+    process.cats(cats = cats, name = "var"),
     class = "error.process.cats.10"
   )
 
@@ -79,38 +92,47 @@ test_that("check.rules.format works", {
   expect_error(check.rules.format(NA), class = "IE006")
   expect_error(check.rules.format(""), class = "IE006")
   expect_error(check.rules.format(character(0)), class = "IE006")
-  expect_error(check.rules.format("var == 1 ~"),
+  expect_error(
+    check.rules.format("var == 1 ~"),
     class = "error.check.rules.format.1"
   )
   expect_error(check.rules.format("~"), class = "error.check.rules.format.1")
   expect_error(check.rules.format("x"), class = "error.check.rules.format.2")
   expect_error(check.rules.format("3"), class = "error.check.rules.format.2")
-  expect_error(check.rules.format("ja = yes"),
+  expect_error(
+    check.rules.format("ja = yes"),
     class = "error.check.rules.format.3"
   )
-  expect_error(check.rules.format("var > 1 ~ NA", var.names = c("x")),
+  expect_error(
+    check.rules.format("var > 1 ~ NA", var.names = c("x")),
     class = "error.check.rules.format.4"
   )
-  expect_error(check.rules.format("var > 1 ~ x", var.names = c("x", "var")),
+  expect_error(
+    check.rules.format("var > 1 ~ x", var.names = c("x", "var")),
     class = "error.check.rules.format.6"
   )
-  expect_error(check.rules.format("~ x", var.names = c("x", "var")),
+  expect_error(
+    check.rules.format("~ x", var.names = c("x", "var")),
     class = "error.check.rules.format.6"
   )
   expect_error(
     check.rules.format("var > 1 ~ mean(x)", var.names = c("x", "var")),
     class = "error.check.rules.format.6"
   )
-  expect_error(check.rules.format("~ mean(x)", var.names = c("x", "var")),
+  expect_error(
+    check.rules.format("~ mean(x)", var.names = c("x", "var")),
     class = "error.check.rules.format.6"
   )
-  expect_error(check.rules.format("var > 1 ~ NULL", var.names = c("x", "var")),
+  expect_error(
+    check.rules.format("var > 1 ~ NULL", var.names = c("x", "var")),
     class = "error.check.rules.format.7"
   )
-  expect_error(check.rules.format("~ NULL", var.names = c("x", "var")),
+  expect_error(
+    check.rules.format("~ NULL", var.names = c("x", "var")),
     class = "error.check.rules.format.7"
   )
-  expect_error(check.rules.format(c("~ 1", "~ 2")),
+  expect_error(
+    check.rules.format(c("~ 1", "~ 2")),
     class = "error.check.rules.format.8"
   )
 

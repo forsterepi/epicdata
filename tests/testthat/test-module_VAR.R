@@ -1,6 +1,7 @@
 test_that("VAR_DF.NOT.META_NOTE works", {
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "var.list:",
       "  a:",
@@ -92,7 +93,8 @@ test_that("VAR_DF.NOT.META_NOTE works", {
 
 test_that("VAR_DF.NOT.META_RM works", {
   file <- withr::local_tempfile(
-    pattern = "test", fileext = "yml",
+    pattern = "test",
+    fileext = "yml",
     lines = c(
       "options:",
       "  remove.vars: true",

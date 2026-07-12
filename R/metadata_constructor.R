@@ -4,13 +4,17 @@ metadata.constructor <- function(file) {
   # Check file exists
   rlang::try_fetch(
     {
-      checkmate::assert_file_exists(file,
-        access = "r", extension = c("yml", "yaml")
+      checkmate::assert_file_exists(
+        file,
+        access = "r",
+        extension = c("yml", "yaml")
       )
     },
     error = function(cnd) {
-      cli::cli_abort(cnd$message,
-        call = rlang::caller_env(), class = "error.metadata.constructor.1"
+      cli::cli_abort(
+        cnd$message,
+        call = rlang::caller_env(),
+        class = "error.metadata.constructor.1"
       )
     }
   )
@@ -36,7 +40,8 @@ metadata.constructor <- function(file) {
               stringi::stri_detect(cnd$message, fixed = "line")
             ))
         ), # add info only if applicable
-        call = rlang::caller_env(), class = "error.metadata.constructor.2"
+        call = rlang::caller_env(),
+        class = "error.metadata.constructor.2"
       )
     }
   )
@@ -58,10 +63,11 @@ metadata.constructor <- function(file) {
   ## Report results
   if (!is.null(res)) {
     ## Merge good error messages
-    res %<>% dplyr::left_join(
-      better.json.validate.error.messages,
-      by = "schemaPath"
-    ) %>%
+    res %<>%
+      dplyr::left_join(
+        better.json.validate.error.messages,
+        by = "schemaPath"
+      ) %>%
       dplyr::select(my_error, my_hint)
 
     ## Prepare messages for cli_abort()
@@ -82,7 +88,9 @@ metadata.constructor <- function(file) {
         error_number = 0L,
         message = "The YAML input has an incorrect structure.",
         type = "x"
-      ), res_error, res_hint
+      ),
+      res_error,
+      res_hint
     ) %>%
       dplyr::arrange(error_number, dplyr::desc(type))
 
@@ -106,9 +114,10 @@ metadata.constructor <- function(file) {
       )
     }
 
-
-    cli::cli_abort(errors,
-      call = rlang::caller_env(), class = "error.metadata.constructor.2"
+    cli::cli_abort(
+      errors,
+      call = rlang::caller_env(),
+      class = "error.metadata.constructor.2"
     )
   }
 
@@ -138,7 +147,8 @@ metadata.constructor <- function(file) {
   }
 
   # Create S7 object
-  S7::new_object(S7::S7_object(),
+  S7::new_object(
+    S7::S7_object(),
     ## Run the setter of var.list first
     var.list = yaml_input$var.list,
     ## Run var.groups always after var.list
@@ -199,10 +209,6 @@ better.json.validate.error.messages <- matrix(
   magrittr::set_colnames(c("schemaPath", "my_error", "my_hint"))
 
 
-
-
-
-
 yaml.add.name <- function(x) {
   for (i in seq_along(x$var.list)) {
     x$var.list[[i]]$var.name <- names(x$var.list)[i]
@@ -216,7 +222,6 @@ yaml.add.name <- function(x) {
 
   x
 }
-
 
 ### START Extraction test
 
@@ -234,9 +239,7 @@ yaml.add.name <- function(x) {
 
 # x %>% stringi::stri_split("&") %>% stringi::stri_trim_both())
 
-
 ### END Extraction test
-
 
 # creating new variables with mutate
 # var_name <- "log_var3"

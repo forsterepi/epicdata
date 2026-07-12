@@ -39,8 +39,16 @@ create_new_file <- function(path, project_name, folder, script_name, template) {
   new_file <- file.path(path, project_name, folder, script_name)
   file.create(new_file)
 
-  template_code <- readLines(system.file("script_templates", template, package = "epicdata"))
-  template_code <- gsub(pattern = "<<add_package_title>>", replacement = project_name, x = template_code)
+  template_code <- readLines(system.file(
+    "script_templates",
+    template,
+    package = "epicdata"
+  ))
+  template_code <- gsub(
+    pattern = "<<add_package_title>>",
+    replacement = project_name,
+    x = template_code
+  )
   writeLines(template_code, con = new_file)
 }
 
@@ -68,35 +76,56 @@ create_new_file <- function(path, project_name, folder, script_name, template) {
 #' })
 create_meta <- function(name, path, db = F) {
   # Check
-  rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_character(
+      path,
+      len = 1,
+      min.chars = 1,
+      any.missing = F,
+      null.ok = F
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var path} must be a single element of type character.",
+        c(
+          "Argument {.var path} must be a single element of type character.",
           "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
         ),
-        class = "inpur_error_path", parent = cnd
+        class = "inpur_error_path",
+        parent = cnd
       )
     }
   )
 
-  rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_character(
+      name,
+      len = 1,
+      min.chars = 1,
+      any.missing = F,
+      null.ok = F
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var name} must be a single element of type character.",
+        c(
+          "Argument {.var name} must be a single element of type character.",
           "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
         ),
-        class = "inpur_error_name", parent = cnd
+        class = "inpur_error_name",
+        parent = cnd
       )
     }
   )
 
-  rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var db} must be TRUE or FALSE.",
+        c(
+          "Argument {.var db} must be TRUE or FALSE.",
           "i" = "{.var NA} and {.var NULL} are not allowed."
         ),
-        class = "inpur_error_db", parent = cnd
+        class = "inpur_error_db",
+        parent = cnd
       )
     }
   )
@@ -119,7 +148,9 @@ create_meta <- function(name, path, db = F) {
 
   if (db) {}
 
-  cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
+  cli::cli_alert_success(
+    "R project {.emph {name}} was successfully created in {.emph {path}}."
+  )
 }
 
 #' Creating a raw project
@@ -146,35 +177,56 @@ create_meta <- function(name, path, db = F) {
 #' })
 create_raw <- function(name, path, db = F) {
   # Check
-  rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_character(
+      path,
+      len = 1,
+      min.chars = 1,
+      any.missing = F,
+      null.ok = F
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var path} must be a single element of type character.",
+        c(
+          "Argument {.var path} must be a single element of type character.",
           "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
         ),
-        class = "inpur_error_path", parent = cnd
+        class = "inpur_error_path",
+        parent = cnd
       )
     }
   )
 
-  rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_character(
+      name,
+      len = 1,
+      min.chars = 1,
+      any.missing = F,
+      null.ok = F
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var name} must be a single element of type character.",
+        c(
+          "Argument {.var name} must be a single element of type character.",
           "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
         ),
-        class = "inpur_error_name", parent = cnd
+        class = "inpur_error_name",
+        parent = cnd
       )
     }
   )
 
-  rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var db} must be TRUE or FALSE.",
+        c(
+          "Argument {.var db} must be TRUE or FALSE.",
           "i" = "{.var NA} and {.var NULL} are not allowed."
         ),
-        class = "inpur_error_db", parent = cnd
+        class = "inpur_error_db",
+        parent = cnd
       )
     }
   )
@@ -197,7 +249,9 @@ create_raw <- function(name, path, db = F) {
 
   if (db) {}
 
-  cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
+  cli::cli_alert_success(
+    "R project {.emph {name}} was successfully created in {.emph {path}}."
+  )
 }
 
 #' Creating a prc project
@@ -224,35 +278,56 @@ create_raw <- function(name, path, db = F) {
 #' })
 create_prc <- function(name, path, db = F) {
   # Check
-  rlang::try_fetch(checkmate::assert_character(path, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_character(
+      path,
+      len = 1,
+      min.chars = 1,
+      any.missing = F,
+      null.ok = F
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var path} must be a single element of type character.",
+        c(
+          "Argument {.var path} must be a single element of type character.",
           "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
         ),
-        class = "inpur_error_path", parent = cnd
+        class = "inpur_error_path",
+        parent = cnd
       )
     }
   )
 
-  rlang::try_fetch(checkmate::assert_character(name, len = 1, min.chars = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_character(
+      name,
+      len = 1,
+      min.chars = 1,
+      any.missing = F,
+      null.ok = F
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var name} must be a single element of type character.",
+        c(
+          "Argument {.var name} must be a single element of type character.",
           "i" = "{.var NA}, {.var NULL}, and empty elements are not allowed."
         ),
-        class = "inpur_error_name", parent = cnd
+        class = "inpur_error_name",
+        parent = cnd
       )
     }
   )
 
-  rlang::try_fetch(checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
+  rlang::try_fetch(
+    checkmate::assert_logical(db, len = 1, any.missing = F, null.ok = F),
     error = function(cnd) {
       cli::cli_abort(
-        c("Argument {.var db} must be TRUE or FALSE.",
+        c(
+          "Argument {.var db} must be TRUE or FALSE.",
           "i" = "{.var NA} and {.var NULL} are not allowed."
         ),
-        class = "inpur_error_db", parent = cnd
+        class = "inpur_error_db",
+        parent = cnd
       )
     }
   )
@@ -275,7 +350,9 @@ create_prc <- function(name, path, db = F) {
 
   if (db) {}
 
-  cli::cli_alert_success("R project {.emph {name}} was successfully created in {.emph {path}}.")
+  cli::cli_alert_success(
+    "R project {.emph {name}} was successfully created in {.emph {path}}."
+  )
 }
 
 
@@ -297,17 +374,27 @@ create_prc <- function(name, path, db = F) {
 #' })
 create.metadata.file <- function(name, path = getwd()) {
   # Check inputs
-  if (!checkmate::test_character(name,
-    len = 1, min.chars = 1, null.ok = FALSE,
-    any.missing = FALSE
-  )) {
+  if (
+    !checkmate::test_character(
+      name,
+      len = 1,
+      min.chars = 1,
+      null.ok = FALSE,
+      any.missing = FALSE
+    )
+  ) {
     cli::cli_abort("Wrong input")
   }
 
-  if (!checkmate::test_character(path,
-    len = 1, min.chars = 1, null.ok = FALSE,
-    any.missing = FALSE
-  )) {
+  if (
+    !checkmate::test_character(
+      path,
+      len = 1,
+      min.chars = 1,
+      null.ok = FALSE,
+      any.missing = FALSE
+    )
+  ) {
     cli::cli_abort("Wrong input")
   }
 
@@ -315,10 +402,11 @@ create.metadata.file <- function(name, path = getwd()) {
   if (name %>% stringi::stri_detect(regex = "\\.yml$")) {
     file_name <- name
   } else if (name %>% stringi::stri_detect(regex = "\\.yaml$")) {
-    file_name <- name %>% stringi::stri_replace_all(
-      replacement = ".yml",
-      regex = "\\.yaml$"
-    )
+    file_name <- name %>%
+      stringi::stri_replace_all(
+        replacement = ".yml",
+        regex = "\\.yaml$"
+      )
   } else if (name %>% stringi::stri_detect(regex = "\\.", negate = TRUE)) {
     file_name <- stringi::stri_flatten(c(name, "yml"), collapse = ".")
   } else {
@@ -337,8 +425,16 @@ create.metadata.file <- function(name, path = getwd()) {
   new_file <- file.path(path, file_name)
   file.create(new_file)
 
-  template_code <- readLines(system.file("script_templates", "yaml_template.yml", package = "epicdata"))
-  template_code <- gsub(pattern = "<<add_data_name>>", replacement = name, x = template_code)
+  template_code <- readLines(system.file(
+    "script_templates",
+    "yaml_template.yml",
+    package = "epicdata"
+  ))
+  template_code <- gsub(
+    pattern = "<<add_data_name>>",
+    replacement = name,
+    x = template_code
+  )
   writeLines(template_code, con = new_file)
 
   # Open file

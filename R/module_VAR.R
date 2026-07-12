@@ -15,7 +15,9 @@ VAR_DF.NOT.META_NOTE <- function(dataset) {
 
   # State of the data (before)
   state.of.the.data(
-    d = dataset@processed, metadata = dataset@metadata, when = "before",
+    d = dataset@processed,
+    metadata = dataset@metadata,
+    when = "before",
     all.vars.character = TRUE
   )
 
@@ -33,7 +35,9 @@ VAR_DF.NOT.META_NOTE <- function(dataset) {
 
   # State of the data (after)
   state.of.the.data(
-    d = dataset_new@processed, metadata = dataset_new@metadata, when = "after",
+    d = dataset_new@processed,
+    metadata = dataset_new@metadata,
+    when = "after",
     all.vars.character = TRUE
   )
 
@@ -58,7 +62,9 @@ VAR_DF.NOT.META_RM <- function(dataset) {
 
   # State of the data (before)
   state.of.the.data(
-    d = dataset@processed, metadata = dataset@metadata, when = "before",
+    d = dataset@processed,
+    metadata = dataset@metadata,
+    when = "before",
     all.vars.character = TRUE
   )
 
@@ -81,7 +87,9 @@ VAR_DF.NOT.META_RM <- function(dataset) {
 
   # State of the data (after)
   state.of.the.data(
-    d = dataset_new@processed, metadata = dataset_new@metadata, when = "after",
+    d = dataset_new@processed,
+    metadata = dataset_new@metadata,
+    when = "after",
     all.vars.character = TRUE
   )
 

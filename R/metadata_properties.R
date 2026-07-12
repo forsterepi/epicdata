@@ -10,10 +10,15 @@ meta.prop.data.name <- S7::new_property(
   validator = function(value) {
     test.mode("option.data.name.validator")
 
-    if (!checkmate::test_character(value,
-      len = 1, min.chars = 1,
-      any.missing = FALSE, null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_character(
+        value,
+        len = 1,
+        min.chars = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be empty or NA")
     }
   },
@@ -30,10 +35,15 @@ meta.prop.id.var <- S7::new_property(
   validator = function(value) {
     test.mode("option.id.var.validator")
 
-    if (!checkmate::test_character(value,
-      len = 1, min.chars = 1,
-      any.missing = FALSE, null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_character(
+        value,
+        len = 1,
+        min.chars = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be empty or NA")
     }
     if (!is.null(value)) {
@@ -49,10 +59,15 @@ meta.prop.id.pattern <- S7::new_property(
   validator = function(value) {
     test.mode("option.id.pattern.validator")
 
-    if (!checkmate::test_character(value,
-      len = 1, min.chars = 1,
-      any.missing = FALSE, null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_character(
+        value,
+        len = 1,
+        min.chars = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be empty or NA")
     }
   }
@@ -65,10 +80,14 @@ meta.prop.consent <- S7::new_property(
   validator = function(value) {
     test.mode("option.consent.validator")
 
-    if (!checkmate::test_logical(value,
-      len = 1, any.missing = FALSE,
-      null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_logical(
+        value,
+        len = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be NA")
     }
   }
@@ -89,9 +108,14 @@ meta.prop.consent.final <- S7::new_property(
 meta.prop.remove.vars <- S7::new_property(
   class = NULL | S7::class_logical,
   validator = function(value) {
-    if (!checkmate::test_logical(value,
-      len = 1, any.missing = FALSE, null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_logical(
+        value,
+        len = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be NA")
     }
   },
@@ -118,9 +142,14 @@ meta.prop.remove.vars <- S7::new_property(
 meta.prop.vars.remove <- S7::new_property(
   class = NULL | S7::class_logical,
   validator = function(value) {
-    if (!checkmate::test_logical(value,
-      len = 1, any.missing = FALSE, null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_logical(
+        value,
+        len = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be NA")
     }
   },
@@ -149,9 +178,14 @@ meta.prop.touch.na <- S7::new_property(
   validator = function(value) {
     test.mode("option.touch.na.validator")
 
-    if (!checkmate::test_logical(value,
-      len = 1, any.missing = FALSE, null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_logical(
+        value,
+        len = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be NA")
     }
   },
@@ -184,10 +218,14 @@ meta.prop.na.touch <- S7::new_property(
   validator = function(value) {
     test.mode("option.na.touch.validator")
 
-    if (!checkmate::test_logical(value,
-      len = 1, any.missing = FALSE,
-      null.ok = TRUE
-    )) {
+    if (
+      !checkmate::test_logical(
+        value,
+        len = 1,
+        any.missing = FALSE,
+        null.ok = TRUE
+      )
+    ) {
       return("must have length 1 and must not be NA")
     }
   },
@@ -220,7 +258,8 @@ meta.prop.var.list <- S7::new_property(
     if (!is.null(self@var.list)) {
       if (length(value) > length(self@var.list)) {
         cli::cli_abort(
-          c("Error in creating new variables",
+          c(
+            "Error in creating new variables",
             "i" = "Please create new variables via the YAML file."
           ),
           call = rlang::expr(metadata@var.list <- value),
@@ -238,13 +277,15 @@ meta.prop.var.list <- S7::new_property(
         },
         error = function(cnd) {
           cli::cli_abort(
-            c("Key {.var var.name} cannot be set to {.var NULL}",
+            c(
+              "Key {.var var.name} cannot be set to {.var NULL}",
               "i" = "To delete the variable, set @var.list${names(value)[i]}
             to {.var NULL}."
             ),
             call = craft.call.var.list(
               variable = names(value)[i],
-              key = "var.name", value = NULL
+              key = "var.name",
+              value = NULL
             ),
             class = "error.meta.prop.var.list.2"
           )
@@ -256,8 +297,10 @@ meta.prop.var.list <- S7::new_property(
     # must be validated in the corresponding processing function)
     check_result <- var.list.validator(value)
     if (!is.null(check_result)) {
-      cli::cli_abort(paste0("@var.list ", check_result),
-        call = rlang::caller_env(), class = "error.meta.prop.var.list.3"
+      cli::cli_abort(
+        paste0("@var.list ", check_result),
+        call = rlang::caller_env(),
+        class = "error.meta.prop.var.list.3"
       )
       ## SOLVE CALLER_ENV PROBLEMS
     }
@@ -324,13 +367,15 @@ meta.prop.var.groups <- S7::new_property(
         },
         error = function(cnd) {
           cli::cli_abort(
-            c("Error in creating/deleting {.var var.group}.",
+            c(
+              "Error in creating/deleting {.var var.group}.",
               "i" = "To delete a group, set @var.groups${names(value)[i]}
             <- NULL.",
               "i" = 'To create a new group, set
               @var.groups${names(value)[i]}$group.name <- "{names(value)[i]}"'
             ),
-            call = rlang::caller_env(), class = "error.meta.prop.var.groups.1"
+            call = rlang::caller_env(),
+            class = "error.meta.prop.var.groups.1"
           )
           ## SOLVE CALLER_ENV PROBLEMS
         }
@@ -340,8 +385,10 @@ meta.prop.var.groups <- S7::new_property(
     # Pre-validate
     check_result <- var.groups.validator(value)
     if (!is.null(check_result)) {
-      cli::cli_abort(paste0("@var.groups ", check_result),
-        call = rlang::caller_env(), class = "error.meta.prop.var.groups.2"
+      cli::cli_abort(
+        paste0("@var.groups ", check_result),
+        call = rlang::caller_env(),
+        class = "error.meta.prop.var.groups.2"
       )
       ## SOLVE CALLER_ENV PROBLEMS
     }
@@ -459,10 +506,12 @@ setter.variable.process.inputs <- function(value, self) {
     current_var <- names(value)[i]
 
     # Process cats input
-    if (!identical(
-      value[[current_var]]$cats,
-      self@var.list[[current_var]]$cats
-    )) {
+    if (
+      !identical(
+        value[[current_var]]$cats,
+        self@var.list[[current_var]]$cats
+      )
+    ) {
       value[[i]]$cats <- process.cats(
         cats = value[[i]]$cats,
         name = value[[i]]$var.name,
@@ -470,10 +519,12 @@ setter.variable.process.inputs <- function(value, self) {
       )
     }
     # Process cats.eng input
-    if (!identical(
-      value[[current_var]]$cats.eng,
-      self@var.list[[current_var]]$cats.eng
-    )) {
+    if (
+      !identical(
+        value[[current_var]]$cats.eng,
+        self@var.list[[current_var]]$cats.eng
+      )
+    ) {
       value[[i]]$cats.eng <- process.cats(
         cats = value[[i]]$cats.eng,
         name = value[[i]]$var.name,
@@ -481,10 +532,12 @@ setter.variable.process.inputs <- function(value, self) {
       )
     }
     # Process new input
-    if (!identical(
-      value[[current_var]]$new,
-      self@var.list[[current_var]]$new
-    )) {
+    if (
+      !identical(
+        value[[current_var]]$new,
+        self@var.list[[current_var]]$new
+      )
+    ) {
       value[[i]]$new <- process.new(
         new = value[[i]]$new,
         var = value[[i]]$var.name,
@@ -511,16 +564,20 @@ setter.variable.update.alternative.names <- function(value, self) {
     current_var <- value[[i]][["var.name"]]
 
     # touch.na / na.touch
-    if (!identical(
-      self@var.list[[current_var]][["touch.na"]],
-      value[[current_var]][["touch.na"]]
-    )) {
+    if (
+      !identical(
+        self@var.list[[current_var]][["touch.na"]],
+        value[[current_var]][["touch.na"]]
+      )
+    ) {
       value[[i]][["na.touch"]] <- value[[i]][["touch.na"]]
     }
-    if (!identical(
-      self@var.list[[current_var]][["na.touch"]],
-      value[[current_var]][["na.touch"]]
-    )) {
+    if (
+      !identical(
+        self@var.list[[current_var]][["na.touch"]],
+        value[[current_var]][["na.touch"]]
+      )
+    ) {
       value[[i]][["touch.na"]] <- value[[i]][["na.touch"]]
     }
   }
@@ -542,16 +599,20 @@ setter.group.update.alternative.names <- function(value, self) {
     current_group <- value[[i]][["group.name"]]
 
     # touch.na / na.touch
-    if (!identical(
-      self@var.groups[[current_group]][["touch.na"]],
-      value[[current_group]][["touch.na"]]
-    )) {
+    if (
+      !identical(
+        self@var.groups[[current_group]][["touch.na"]],
+        value[[current_group]][["touch.na"]]
+      )
+    ) {
       value[[i]][["na.touch"]] <- value[[i]][["touch.na"]]
     }
-    if (!identical(
-      self@var.groups[[current_group]][["na.touch"]],
-      value[[current_group]][["na.touch"]]
-    )) {
+    if (
+      !identical(
+        self@var.groups[[current_group]][["na.touch"]],
+        value[[current_group]][["na.touch"]]
+      )
+    ) {
       value[[i]][["touch.na"]] <- value[[i]][["na.touch"]]
     }
   }
@@ -583,10 +644,12 @@ setter.variable.update.default.group <- function(value, self) {
     current_var <- value[[i]][["var.name"]]
 
     # Only make adjustments if the value for group actually changed
-    if (!identical(
-      self@var.list[[current_var]][["group"]],
-      value[[current_var]][["group"]]
-    )) {
+    if (
+      !identical(
+        self@var.list[[current_var]][["group"]],
+        value[[current_var]][["group"]]
+      )
+    ) {
       # If group is now NULL, turn all .default.group elements to NULL as well
       if (is.null(value[[i]][["group"]])) {
         value[[i]][["touch.na.default.group"]] <- NULL
@@ -596,10 +659,12 @@ setter.variable.update.default.group <- function(value, self) {
         if (value[[i]][["group"]] %in% group_names) {
           # If the new group exists, search for the correct group
           for (j in seq_along(self@var.groups)) {
-            if (identical(
-              self@var.groups[[j]][["group.name"]],
-              value[[i]][["group"]]
-            )) {
+            if (
+              identical(
+                self@var.groups[[j]][["group.name"]],
+                value[[i]][["group"]]
+              )
+            ) {
               # Update the .default.group value
               value[[i]][["touch.na.default.group"]] <-
                 self@var.groups[[j]][["touch.na"]]
@@ -723,8 +788,12 @@ setter.group.update.var.list <- function(self, value) {
 #' @returns One of the 4 provided values, based on which ones are available.
 #'
 #' @noRd
-setter.select.default <- function(var = NULL, group = NULL, option = NULL,
-                                  pre = NULL) {
+setter.select.default <- function(
+  var = NULL,
+  group = NULL,
+  option = NULL,
+  pre = NULL
+) {
   if (!is.null(var)) {
     out <- var
   } else {
@@ -742,12 +811,10 @@ setter.select.default <- function(var = NULL, group = NULL, option = NULL,
   out
 }
 
-
 # viol <- y$var.list$id$dict.viol
 #
 # lobstr::ast(!!rlang::parse_expr(viol[3]))
 # rlang::expr(mutate(df, type := case_when(height > 200 | mass > 200 ~ "large", species == "Droid" ~ "robot", .default = type))) %>% View()
-
 
 # variable property remains
 

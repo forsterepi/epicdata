@@ -18,7 +18,8 @@ NULL
 #'
 #' @export
 #'
-metadata <- S7::new_class("metadata",
+metadata <- S7::new_class(
+  "metadata",
   properties = list(
     # options
     data.name = meta.prop.data.name,
@@ -67,7 +68,8 @@ metadata.all.vars.of.type <- function(metadata, type) {
   checkmate::assert_class(metadata, "epicdata::metadata", null.ok = FALSE)
 
   checkmate::assert_string(type, na.ok = FALSE, null.ok = FALSE)
-  checkmate::assert_choice(type,
+  checkmate::assert_choice(
+    type,
     choices = c("text", "num", "cat", "date", "time", "datetime")
   )
 

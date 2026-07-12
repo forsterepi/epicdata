@@ -2,13 +2,15 @@ validate.metadata <- function(file) {
   # Check file exists
   rlang::try_fetch(
     {
-      checkmate::assert_file_exists(file,
+      checkmate::assert_file_exists(
+        file,
         access = "r",
         extension = c("yml", "yaml")
       )
     },
     error = function(cnd) {
-      cli::cli_abort(cnd$message,
+      cli::cli_abort(
+        cnd$message,
         call = rlang::caller_env(),
         class = "error.validate.metadata.1"
       )
@@ -46,14 +48,15 @@ check.yaml <- function(file = NULL) {
   ##### Check structure with JSON schema!!!!!!!!!!!!
   ##### Check logic via validator of the S7 object
 
-
   # Read file or active file
   if (is.null(file)) {
     rlang::check_installed(c("rstudioapi"))
     activefile <- rstudioapi::getSourceEditorContext()
-    if (activefile$path %>%
-      stringi::stri_trans_tolower() %>%
-      stringi::stri_detect_regex("\\.yml$|\\.yaml$")) {
+    if (
+      activefile$path %>%
+        stringi::stri_trans_tolower() %>%
+        stringi::stri_detect_regex("\\.yml$|\\.yaml$")
+    ) {
       lines <- activefile[["contents"]]
     } else {
       cli::cli_abort(
@@ -95,12 +98,10 @@ check.yaml <- function(file = NULL) {
   # Start validating the first layer, i.e., the components
   out[[length(out) + 1]] <- cy.hierarchie(lines)
 
-
   out[[length(out) + 1]] <- cy.comments(lines)
 
   # NOTE: I need to keep empty lines in, because otherwise line numbers are wrong.
   # Therefore, empty lines cannot cause any errors or warnings.
-
 
   out <- do.call(rbind, out)
 
@@ -135,14 +136,16 @@ check.yaml <- function(file = NULL) {
 #'
 #' @noRd
 remove.comments.yaml.lines <- function(lines) {
-  lines %<>% stringi::stri_replace_all_regex(
-    pattern = "\\s+#.*",
-    replacement = ""
-  )
-  lines %<>% stringi::stri_replace_all_regex(
-    pattern = "^#.*",
-    replacement = ""
-  )
+  lines %<>%
+    stringi::stri_replace_all_regex(
+      pattern = "\\s+#.*",
+      replacement = ""
+    )
+  lines %<>%
+    stringi::stri_replace_all_regex(
+      pattern = "^#.*",
+      replacement = ""
+    )
 
   lines
 }

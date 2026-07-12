@@ -4,7 +4,6 @@ expect_metadata <- function(object, meta) {
 
   # Fail
 
-
   # Pass
 
   # Invisibly return the input value
