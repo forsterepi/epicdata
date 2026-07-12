@@ -142,20 +142,6 @@ x
 
 None
 
-### 1.4 Combine multiple datasets (Sub-Module ID: LOAD\_)
-
-#### Activity
-
-x
-
-#### State of the data
-
-x
-
-#### User input
-
-x
-
 ## 2) Variables (Module ID: VAR)
 
 ### 2.1) Variables that are in the data but not in the metadata (Sub-Module ID: VAR_DF.NOT.META)
@@ -471,6 +457,9 @@ Use lubri`date::hms()`, `lubridate::ms()`, `lubridate::hm()` (or functions from 
 Use `readr::parse_double()` for numbers (add decimal.mark and grouping.mark as metadata fields)
 
 Well, probably use `vctrs::vec_cast()` for all of them?
+
+## Probably here: import variables from other datasets
+
 
 ## 11) Create new variables (Module ID: NEW)
 

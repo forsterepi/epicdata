@@ -170,6 +170,8 @@ na.codes:
   tbd
 contras:
   tbd
+import:
+  tbd
 ```
 
 # Component: options
@@ -643,6 +645,10 @@ var.groups:
   sport_where:
     group.label: Where do you exercise?
 ```
+
+# Component: import
+
+See vignette multiple_datasets
 
 # Defaults
 

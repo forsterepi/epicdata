@@ -1,0 +1,19 @@
+---
+title: "Multiple datasets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{multiple_datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+When having multiple datasets that together form your data, create metadata for each dataset separately and clean/process them individually. However, when information from one dataset is necessary for processing of a second dataset, you can import variables from another dataset. Imported datasets must be already processed, i.e., the variables are expected to be in their correct format, missing values have been dealt with, etc. Only variables can be imported for which there is a 1:1 correspondence, i.e., there is no duplication of rows in the dataset that is supposed to be processed. Both datasets need to have an ID variable. In rules, e.g., limit rules, address imported variables as `datasetname.firstvar`.
+
+```{yaml}
+import:
+  datasetname:
+    id: idvarname
+    vars:
+    - firstvar
+    - secondvar
+```
