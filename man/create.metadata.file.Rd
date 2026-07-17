@@ -20,6 +20,6 @@ Create a new YAML file for specifying metadata specifications.
 }
 \examples{
 withr::with_tempdir({
-create.metadata.file("my_data_set")
+  create.metadata.file("my_data_set")
 })
 }

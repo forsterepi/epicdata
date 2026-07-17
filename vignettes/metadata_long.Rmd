@@ -122,26 +122,20 @@ countries:
     capital: Paris# not a valid comment since there is no space before the hashtag symbol
 ```
 
+Don't include keys without value. Note, however, that the value does not need to be in the same line as it can consist of other key-value pairs on a lower layer, i.e., indented/moved to the right.
+
+``` yaml
+countries: # valid, because the value for country are all indented lines below
+  Germany: # valid, because the value for Germany are all indented lines below
+    capital: Berlin
+    population.million: # invalid, because value is missing
+    eu.member: true
+  France: # invalid, because there are no indented lines below it
+```
+
 YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `xx()` and edited in R Studio. Therefore, the use of R Studio is recommended. See `xx` for more information on how to create your metadata.
 
 # Metadata design principles
-
-- Including a key without specifying a value is equal to not including the key at all.
-
-``` yaml
-options:
-  data.name: epicdata
-  id.var:
-  load.from: folder
-```
-
-is equal to
-
-``` yaml
-options:
-  data.name: epicdata
-  load.from: folder
-```
 
 - Not specifying a key contains information for some keys as it defaults to a pre-specified value. (See the end of this vignette for a complete list of defaults.)
 
@@ -156,6 +150,7 @@ In `epicdata`, metadata consists of several components:
 - `var.groups`: A list of variable groups with information that applies to the group instead of individual variables.
 - `na.codes`: A list of codes that will represent missing values in the processed data set.
 - `contras`: A list of implausible combinations of values from two variables.
+- `import`: Make variables from related datasets available for inclusion in rules
 
 The components form the first layer of the metadata hierarchy. They are the only values specified in the first layer. Specify them with a colon and without any dashes. The components can be specified in any order. If you are not adding any values below a certain component, you can leave it out completely.
 

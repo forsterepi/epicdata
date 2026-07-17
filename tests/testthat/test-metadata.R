@@ -26,7 +26,6 @@ test_that("property data.name works", {
     pattern = "test",
     fileext = "yml",
     lines = c(
-      "options:",
       "var.list:",
       "  id:",
       "    type: text"
