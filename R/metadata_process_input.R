@@ -40,7 +40,7 @@ process.cats <- function(cats, name, eng = FALSE, call = rlang::caller_env()) {
         "!" = "{.var {cats_type}} must not be NA or contain any NA.",
         "i" = "Applies to variable {.var {name}}."
       ),
-      call = call,
+      #call = call,
       class = "error.process.cats.1"
     )
   }

@@ -33,6 +33,7 @@ Imports:
     yaml12
 Suggests: 
     data.table,
+    fs,
     haven,
     knitr,
     learnr,
@@ -49,6 +50,7 @@ VignetteBuilder: knitr
 Collate: 
     'check_yaml.R'
     'create_projects.R'
+    'create_yaml.R'
     'custom_expectations.R'
     'data.R'
     'metadata_process_input.R'

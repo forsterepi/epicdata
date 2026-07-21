@@ -3,18 +3,16 @@ metadata.constructor <- function(file) {
 
   # Check file exists
   rlang::try_fetch(
-    {
-      checkmate::assert_file_exists(
-        file,
-        access = "r",
-        extension = c("yml", "yaml")
-      )
-    },
+    checkmate::assert_file_exists(
+      file,
+      access = "r",
+      extension = c("yml", "yaml")
+    ),
     error = function(cnd) {
       cli::cli_abort(
-        cnd$message,
-        call = rlang::caller_env(),
-        class = "error.metadata.constructor.1"
+        c("x" = "Error!", "!" = cnd$message),
+        class = "error.metadata.constructor.1",
+        parent = NA
       )
     }
   )
@@ -40,8 +38,8 @@ metadata.constructor <- function(file) {
               stringi::stri_detect(cnd$message, fixed = "line")
             ))
         ), # add info only if applicable
-        call = rlang::caller_env(),
-        class = "error.metadata.constructor.2"
+        class = "error.metadata.constructor.2",
+        parent = NA
       )
     }
   )
@@ -116,8 +114,8 @@ metadata.constructor <- function(file) {
 
     cli::cli_abort(
       errors,
-      call = rlang::caller_env(),
-      class = "error.metadata.constructor.2"
+      class = "error.metadata.constructor.3",
+      parent = NA
     )
   }
 
@@ -171,7 +169,15 @@ better.json.validate.error.messages <- matrix(
     "Check {.vignette epicdata::metadata_long} for more information.",
 
     "#/required",
-    "The metadata specification must at least contain a variable list.",
+    "The metadata specification must at least contain {.strong var.list}.",
+    "Check {.vignette epicdata::metadata_long} for more information.",
+
+    "#/additionalProperties",
+    paste0(
+      "The first level can only contain keys {.strong options}, ",
+      "{.strong var.list}, {.strong var.groups}, {.strong na.codes}, ",
+      "{.strong contras}, and {.strong inport}."
+    ),
     "Check {.vignette epicdata::metadata_long} for more information.",
 
     ###

@@ -20,6 +20,7 @@ NULL
 #'
 metadata <- S7::new_class(
   "metadata",
+  package = "epicdata",
   properties = list(
     # options
     data.name = meta.prop.data.name,

@@ -63,8 +63,7 @@ state.of.the.data <- function(d, metadata, when, all.vars.character = NULL) {
         cli::cli_abort(
           c("x" = "Error IE21111"),
           .internal = TRUE,
-          class = "IE21111",
-          call = rlang::caller_env()
+          class = "IE21111"
         )
       }
     }

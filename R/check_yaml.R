@@ -11,7 +11,7 @@ validate.metadata <- function(file) {
     error = function(cnd) {
       cli::cli_abort(
         cnd$message,
-        call = rlang::caller_env(),
+        parent = NA,
         class = "error.validate.metadata.1"
       )
     }

@@ -21,11 +21,56 @@ There are two types of errors:
 - External (i.e., normal) errors: They appear because the **user** made a mistake.
 - Internal errors: They appear because the **developer** made a mistake.
 
-### Implementation of external errors
+### Implementation of errors
 
-Function `cli::cli_abort()` is used with arguments `call` and `class` specified.
+- Function `cli::cli_abort()` is used.
+- Specify argument `class` in `cli::cli_abort()` to directly refer to this error in testthat
+- Use `rlang::try_fetch()` to try if a call works and provide a specific error message if it fails. Set `parent = NA` if the reported function ("Error in function()") should be the function in which the `try_fetch()` call is located. If the expression, i.e., `some_function()` in the example below throws an error message that you want to keep, set `parent = cnd`.
 
-- `call`: All functions unrelated to S7 classes provide `rlang::caller_env()`. For S7-related functions, it is more complicated:
+```{r}
+#| eval: false
+
+rlang::try_fetch(
+    some_call() # use {} for multi-line
+    error = function(cnd) {
+      cli::cli_abort(
+        "message",
+        class = "errorclass",
+        parent = NA
+      )
+    }
+  )
+```
+
+- When throwing errors from checkmate functions, wrap them in `try_fetch()` as shown below with error message `cnd$message` and `parent = NA`
+
+```{r}
+#| eval: false
+
+rlang::try_fetch(
+    checkmate::assert_something(),
+    error = function(cnd) {
+      cli::cli_abort(
+        c(
+          "x" = "Invalid input for function `xx()`",
+          "i" = cnd$message
+        ),
+        class = "errorclass",
+        parent = NA
+      )
+    }
+  )
+```
+
+- If you want to include multi-line error messages, use a named character vector with the names as the symbols you want to show (No name = no prefix, single space = indented item, * = bullet, > = arrow, v = green "tick" symbol, x = red cross, ! = exclamation mark, i = info). You can use `cnd$message` inside these named character vectors as well.
+
+
+
+####- `call`: All functions unrelated to S7 classes provide `rlang::caller_env()`. For ####S7-related functions, it is more complicated: ????
+
+- For internal errors, use `.internal = TRUE` when calling `cli::cli_abort()` 
+- Internal error messages: xxxx
+
 
 ### Implementation of internal errors
 

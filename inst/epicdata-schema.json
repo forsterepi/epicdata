@@ -217,6 +217,14 @@
                   "not.below.equal"
                 ]
               }
+            },
+            {
+              "not": {
+                "required": [
+                  "touch.na",
+                  "na.touch"
+                ]
+              }
             }
           ],
           "required": [
@@ -250,7 +258,17 @@
               ]
             }
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "not": {
+                "required": [
+                  "touch.na",
+                  "na.touch"
+                ]
+              }
+            }
+          ]
         }
       }
     },
