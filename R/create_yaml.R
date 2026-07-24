@@ -1,10 +1,21 @@
-#' Title
+#' Create YAML metadata file
 #'
-#' @param file
-#' @param include_schema
-#' @param open
+#' Create and open a YAML file for specifying metadata.
 #'
-#' @returns
+#' Set `include_schema` to `TRUE` when working with the YAML extension by Red Hat
+#' in Positron. Please note that you use all software at your own risk. Press
+#' Ctrl+Space to open the suggestions menu. Errors in Positron's Problems tab
+#' might be difficult to understand. Try creating the metadata object with
+#' `epicdata::metadata()` for better error messages.
+#'
+#' @param file A path where the file should be created as a string
+#' @param include_schema If `TRUE`, includes an additional line at the top
+#' of the file that links it to a JSON schema, which describes the format that
+#' the YAML needs to have. This allows for auto complete, YAML validation and
+#' hover support. Default is `FALSE`.
+#' @param open If `TRUE` (default), opens the newly created file in the editor
+#'
+#' @returns Saves (and potentially opens) a new YAML file.
 #'
 #' @export
 #' @examples
@@ -90,10 +101,7 @@ create_yaml <- function(file, include_schema = FALSE, open = TRUE) {
     lines <- c(
       paste0(
         "# yaml-language-server: $schema=",
-        fs::path_rel(
-          path = schema_path,
-          start = file
-        )
+        schema_path
       ),
       "",
       lines

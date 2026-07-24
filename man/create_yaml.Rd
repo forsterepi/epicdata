@@ -2,10 +2,30 @@
 % Please edit documentation in R/create_yaml.R
 \name{create_yaml}
 \alias{create_yaml}
-\title{Title}
+\title{Create YAML metadata file}
 \usage{
-create_yaml(file, include_schema = FALSE)
+create_yaml(file, include_schema = FALSE, open = TRUE)
+}
+\arguments{
+\item{file}{A path where the file should be created as a string}
+
+\item{include_schema}{If \code{TRUE}, includes an additional line at the top
+of the file that links it to a JSON schema, which describes the format that
+the YAML needs to have. This allows for auto complete, YAML validation and
+hover support. Default is \code{FALSE}.}
+
+\item{open}{If \code{TRUE} (default), opens the newly created file in the editor}
+}
+\value{
+Saves (and potentially opens) a new YAML file.
 }
 \description{
-Title
+Create and open a YAML file for specifying metadata.
+}
+\details{
+Set \code{include_schema} to \code{TRUE} when working with the YAML extension by Red Hat
+in Positron. Please note that you use all software at your own risk. Press
+Ctrl+Space to open the suggestions menu. Errors in Positron's Problems tab
+might be difficult to understand. Try creating the metadata object with
+\code{epicdata::metadata()} for better error messages.
 }
