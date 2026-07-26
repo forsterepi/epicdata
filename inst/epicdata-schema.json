@@ -10,60 +10,40 @@
       "properties": {
         "data.name": {
           "description": "A short name for your dataset that is used for project and file names",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": "string"
         },
         "id.var": {
           "description": "The name of the ID variable, which is used to identify observations",
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": "string",
           "pattern": "^([A-Za-z]{1}|\\.[A-Za-z._]{1})[A-Za-z0-9._]*$"
         },
         "id.pattern": {
           "description": "A Regular Expression that must be fulfilled for all values of the variable specified in id.var",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": "string"
+        },
+        "id.list": {
+          "description": "x",
+          "type": "boolean"
         },
         "consent": {
           "description": "Indicate if informed consent will be checked",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": "boolean"
         },
         "remove.vars": {
           "description": "Indicate if variables in the data that are missing from the metadata should be removed",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": "boolean"
         },
         "vars.remove": {
           "description": "Indicate if variables in the data that are missing from the metadata should be removed",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": "boolean"
         },
         "touch.na": {
           "description": "Indicate if NAs should be changed to missing codes",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": "boolean"
         },
         "na.touch": {
           "description": "Indicate if NAs should be changed to missing codes",
-          "type": [
-            "boolean",
-            "null"
-          ]
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -107,31 +87,20 @@
             },
             "label": {
               "description": "x",
-              "type": [
-                "string",
-                "null"
-              ]
+              "type": "string"
             },
             "group": {
               "description": "x",
-              "type": [
-                "string",
-                "null"
-              ]
+              "type": "string",
+              "pattern": "^([A-Za-z]{1}|\\.[A-Za-z._]{1})[A-Za-z0-9._]*$"
             },
             "touch.na": {
               "description": "Indicate if NAs should be changed to missing codes",
-              "type": [
-                "boolean",
-                "null"
-              ]
+              "type": "boolean"
             },
             "na.touch": {
               "description": "Indicate if NAs should be changed to missing codes",
-              "type": [
-                "boolean",
-                "null"
-              ]
+              "type": "boolean"
             }
           },
           "allOf": [
@@ -150,31 +119,19 @@
                 "properties": {
                   "below": {
                     "description": "x",
-                    "type": [
-                      "number",
-                      "null"
-                    ]
+                    "type": "number"
                   },
                   "above": {
                     "description": "x",
-                    "type": [
-                      "number",
-                      "null"
-                    ]
+                    "type": "number"
                   },
                   "below.equal": {
                     "description": "x",
-                    "type": [
-                      "number",
-                      "null"
-                    ]
+                    "type": "number"
                   },
                   "above.equal": {
                     "description": "x",
-                    "type": [
-                      "number",
-                      "null"
-                    ]
+                    "type": "number"
                   }
                 }
               }
@@ -194,10 +151,7 @@
                 "properties": {
                   "cats": {
                     "description": "x",
-                    "type": [
-                      "array",
-                      "null"
-                    ]
+                    "type": "array"
                   }
                 }
               }
@@ -245,17 +199,11 @@
           "properties": {
             "touch.na": {
               "description": "Indicate if NAs should be changed to missing codes",
-              "type": [
-                "boolean",
-                "null"
-              ]
+              "type": "boolean"
             },
             "na.touch": {
               "description": "Indicate if NAs should be changed to missing codes",
-              "type": [
-                "boolean",
-                "null"
-              ]
+              "type": "boolean"
             }
           },
           "additionalProperties": false,
@@ -270,15 +218,22 @@
             }
           ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "na.codes": {
       "description": "A list of codes that will represent missing values in the processed data set",
-      "type": "object"
+      "type": "object",
+      "patternProperties": {
+        "^[1-9][0-9]{0,3}$": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
     },
     "contras": {
       "description": "A list of implausible combinations of values from two variables",
-      "type": "object"
+      "type": "array"
     },
     "import": {
       "description": "A list of related datasets, from which variables are made available for use in rules",
