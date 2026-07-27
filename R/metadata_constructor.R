@@ -21,16 +21,6 @@ metadata.constructor <- function(file) {
   rlang::try_fetch(
     {
       yaml_input <- yaml12::read_yaml(file)
-
-      # na.codes as key names (as.character)
-      if (!is.null(yaml_input$na.codes)) {
-        if (!is.null(yaml_input$na.codes |> attr("yaml_keys"))) {
-          names(yaml_input$na.codes) <- yaml_input$na.codes |>
-            attr("yaml_keys") |>
-            unlist() |>
-            as.character()
-        }
-      }
     },
     error = function(cnd) {
       cli::cli_abort(
@@ -61,6 +51,61 @@ metadata.constructor <- function(file) {
     }
   )
 
+  # Turn non-character keys into character
+  rlang::try_fetch(
+    {
+      # var.list
+      if (!is.null(yaml_input$var.list)) {
+        if (!is.null(yaml_input$var.list |> attr("yaml_keys"))) {
+          names(yaml_input$var.list) <- yaml_input$var.list |>
+            attr("yaml_keys") |>
+            unlist() |>
+            as.character()
+        }
+      }
+
+      # var.groups
+      if (!is.null(yaml_input$var.groups)) {
+        if (!is.null(yaml_input$var.groups |> attr("yaml_keys"))) {
+          names(yaml_input$var.groups) <- yaml_input$var.groups |>
+            attr("yaml_keys") |>
+            unlist() |>
+            as.character()
+        }
+      }
+
+      # na.codes
+      if (!is.null(yaml_input$na.codes)) {
+        if (!is.null(yaml_input$na.codes |> attr("yaml_keys"))) {
+          names(yaml_input$na.codes) <- yaml_input$na.codes |>
+            attr("yaml_keys") |>
+            unlist() |>
+            as.character()
+        }
+      }
+
+      # import
+      if (!is.null(yaml_input$import)) {
+        if (!is.null(yaml_input$import |> attr("yaml_keys"))) {
+          names(yaml_input$import) <- yaml_input$import |>
+            attr("yaml_keys") |>
+            unlist() |>
+            as.character()
+        }
+      }
+    },
+    error = function(cnd) {
+      cli::cli_abort(
+        c(
+          "x" = "Transforming YAML keys to character failed!",
+          "i" = "Please check your key formats."
+        ),
+        class = "error.metadata.constructor.3",
+        parent = NA
+      )
+    }
+  )
+
   # Check structure with JSON schema
   ## Load schema
   schema_path <- system.file("epicdata-schema.json", package = "epicdata")
@@ -79,10 +124,15 @@ metadata.constructor <- function(file) {
   if (!is.null(res)) {
     ## Extract information from validation results
     res <- res |>
-      tidyr::hoist(schema, "required", .transform = \(x) {
-        stringi::stri_c(x, collapse = " & ")
-      }) |>
-      tidyr::hoist(data, "type") |>
+      dplyr::mutate(
+        required = schema |>
+          purrr::map(\(x) purrr::pluck(x, "required", .default = NA)) |>
+          purrr::map(\(x) stringi::stri_c(x, collapse = " & ")) |>
+          unlist(),
+        type = data |>
+          purrr::map(\(x) purrr::pluck(x, "type", .default = NA)) |>
+          unlist()
+      ) |>
       dplyr::mutate(
         schemaPath = schemaPath |>
           stringi::stri_replace_all_regex(
@@ -235,7 +285,7 @@ metadata.constructor <- function(file) {
 
     cli::cli_abort(
       errors,
-      class = "error.metadata.constructor.3",
+      class = "error.metadata.constructor.4",
       parent = NA
     )
   }
@@ -286,22 +336,22 @@ metadata.constructor <- function(file) {
 better.json.validate.error.messages <- matrix(
   c(
     "#/type",
-    "The metadata specification must at least contain a variable list.",
+    "The metadata specification must at least contain {.pkg var.list}.",
     "TRUE",
     "FALSE",
     "FALSE",
 
     "#/required",
-    "The metadata specification must at least contain {.strong var.list}.",
+    "The metadata specification must at least contain {.pkg var.list}.",
     "TRUE",
     "FALSE",
     "FALSE",
 
     "#/additionalProperties",
     paste0(
-      "The first level can only contain keys {.strong options}, ",
-      "{.strong var.list}, {.strong var.groups}, {.strong na.codes}, ",
-      "{.strong contras}, and {.strong inport}."
+      "The first level can only contain keys {.pkg options}, ",
+      "{.pkg var.list}, {.pkg var.groups}, {.pkg na.codes}, ",
+      "{.pkg contras}, and {.pkg import}."
     ),
     "TRUE",
     "FALSE",
@@ -313,75 +363,93 @@ better.json.validate.error.messages <- matrix(
 
     "#/properties/options/type",
     paste0(
-      "Key `options` must have options specified below it.",
+      "Key {.pkg options} must have options specified below it.",
       "These options must be in a new line and indented by two spaces."
     ),
-    "FALSE",
+    "TRUE",
     "FALSE",
     "FALSE",
 
     "#/properties/options/properties/data.name/type",
-    "Option `data.name` must be a string.",
+    "In {.pkg options}, key `data.name` must be a string.",
     "FALSE",
     "FALSE",
     "FALSE",
 
     "#/properties/options/properties/id.var/pattern",
-    "Option `id.var` must contain a valid variable name.",
+    "In {.pkg options}, key `id.var` must contain a valid variable name.",
     "FALSE",
     "TRUE",
     "FALSE",
 
     "#/properties/options/properties/id.var/type",
-    "Option `id.var` must contain a valid variable name.",
+    "In {.pkg options}, key `id.var` must contain a valid variable name.",
     "FALSE",
     "TRUE",
     "FALSE",
 
     "#/properties/options/properties/consent/type",
-    "Option `consent` must be `true` or `false`.",
+    "In {.pkg options}, key `consent` must be `true` or `false`.",
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/options/properties/id.list/type",
-    "Option `id.list` must be `true` or `false`.",
+    "In {.pkg options}, key `id.list` must be `true` or `false`.",
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/options/properties/na.touch/type",
-    "Option `na.touch` must be `true` or `false`.",
+    "In {.pkg options}, key `na.touch` must be `true` or `false`.",
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/options/properties/touch.na/type",
-    "Option `touch.na` must be `true` or `false`.",
+    "In {.pkg options}, key `touch.na` must be `true` or `false`.",
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/options/properties/remove.vars/type",
-    "Option `remove.vars` must be `true` or `false`.",
+    "In {.pkg options}, key `remove.vars` must be `true` or `false`.",
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/options/properties/vars.remove/type",
-    "Option `vars.remove` must be `true` or `false`.",
+    "In {.pkg options}, key `vars.remove` must be `true` or `false`.",
     "FALSE",
     "FALSE",
     "TRUE",
+
+    "#/properties/options/allOf/not",
+    paste0(
+      "In {.pkg options}, multiple versions of the same keys have been",
+      " specified, namely: {.strong {insert_aliases}}."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
 
     ###
     # var.list
     ###
 
+    "#/properties/var.list/patternProperties/required",
+    paste0(
+      "In {.pkg var.list}, key `type` is missing for variable/s ",
+      "{.strong {insert_keys}}."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/var.list/type",
     paste0(
-      "`var.list` must have at least one variable specified.",
-      "Variables must be in a new line and indented by two spaces.",
+      "{.pkg var.list} must have at least one variable specified. ",
+      "Variables must be in a new line and indented by two spaces. ",
       "Variable-specific keys must again be in a new line and indented."
     ),
     "TRUE",
@@ -389,21 +457,28 @@ better.json.validate.error.messages <- matrix(
     "FALSE",
 
     "#/properties/var.list/additionalProperties",
-    "In `var.list`, variable/s {.strong {insert_invalid_props}} has/have invalid names.",
-    "TRUE",
+    paste0(
+      "In {.pkg var.list}, the name of variable/s ",
+      "{.strong {insert_invalid_props}} must be syntactically valid."
+    ),
     "FALSE",
+    "TRUE",
     "FALSE",
 
     "#/properties/var.list/patternProperties/unevaluatedProperties",
-    "All variable names must be syntactically valid.",
-    "FALSE",
+    paste0(
+      "In {.pkg var.list}, variable {.strong {insert_keys}} has keys that are ",
+      "invalid, either in general or for the specified variable `type`.",
+      " The invalid key/s is/are: {.strong {insert_invalid_props}}."
+    ),
     "TRUE",
+    "FALSE",
     "FALSE",
 
     "#/properties/var.list/patternProperties/properties/type/type",
     paste0(
-      "Key `type` must be one of `text`, `num`, `cat`, `date`, ",
-      "`datetime`, or `time.`"
+      "In {.pkg var.list}, key `type` of variable/s {.strong {insert_keys}}",
+      " must be one of `text`, `num`, `cat`, `date`, `datetime`, or `time.`"
     ),
     "TRUE",
     "FALSE",
@@ -411,47 +486,63 @@ better.json.validate.error.messages <- matrix(
 
     "#/properties/var.list/patternProperties/properties/type/enum",
     paste0(
-      "Key `type` must be one of `text`, `num`, `cat`, `date`, ",
-      "`datetime`, or `time.`"
+      "In {.pkg var.list}, key `type` of variable/s {.strong {insert_keys}}",
+      " must be one of `text`, `num`, `cat`, `date`, `datetime`, or `time.`"
     ),
     "TRUE",
     "FALSE",
     "FALSE",
 
     "#/properties/var.list/patternProperties/properties/label/type",
-    "Key `label` must be a string.",
+    paste0(
+      "In {.pkg var.list}, key `label` of variable/s {.strong {insert_keys}}",
+      " must be a string."
+    ),
     "FALSE",
     "FALSE",
     "FALSE",
 
     "#/properties/var.list/patternProperties/properties/group/pattern",
-    "Key `group` must contain a valid variable name.",
+    paste0(
+      "In {.pkg var.list}, key `group` of variable/s {.strong {insert_keys}}",
+      " must contain a valid variable name."
+    ),
     "FALSE",
     "TRUE",
     "FALSE",
 
     "#/properties/var.list/patternProperties/properties/group/type",
-    "Key `group` must contain a valid variable name.",
+    paste0(
+      "In {.pkg var.list}, key `group` of variable/s {.strong {insert_keys}}",
+      " must contain a valid variable name."
+    ),
     "FALSE",
     "TRUE",
     "FALSE",
 
     "#/properties/var.list/patternProperties/properties/na.touch/type",
-    "Key `na.touch` must be `true` or `false`.",
+    paste0(
+      "In {.pkg var.list}, key `na.touch` of variable/s ",
+      "{.strong {insert_keys}} must be `true` or `false`."
+    ),
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/var.list/patternProperties/properties/touch.na/type",
-    "Key `touch.na` must be `true` or `false`.",
+    paste0(
+      "In {.pkg var.list}, key `touch.na` of variable/s ",
+      "{.strong {insert_keys}} must be `true` or `false`."
+    ),
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/var.list/patternProperties/allOf/not",
     paste0(
-      "In `var.list`, for variable/s {.strong {insert_keys}} multiple versions ",
-      "of the same key have been specified, namely for: {.strong {insert_aliases}}."
+      "In {.pkg var.list}, for variable/s {.strong {insert_keys}} multiple ",
+      "versions of the same keys have been specified, namely: ",
+      "{.strong {insert_aliases}}."
     ),
     "TRUE",
     "FALSE",
@@ -461,24 +552,71 @@ better.json.validate.error.messages <- matrix(
     # var.groups
     ###
 
+    "#/properties/var.groups/additionalProperties",
+    paste0(
+      "In {.pkg var.groups}, the name of group/s ",
+      "{.strong {insert_invalid_props}} must be syntactically valid."
+    ),
+    "FALSE",
+    "TRUE",
+    "FALSE",
+
+    "#/properties/var.groups/patternProperties/additionalProperties",
+    paste0(
+      "In {.pkg var.groups}, group {.strong {insert_keys}} has invalid keys, ",
+      "namely: {.strong {insert_invalid_props}}."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/var.groups/patternProperties/properties/na.touch/type",
-    "Key `na.touch` must be `true` or `false`.",
+    paste0(
+      "In {.pkg var.groups}, key `na.touch` of group {.strong {insert_keys}} ",
+      " must be `true` or `false`."
+    ),
     "FALSE",
     "FALSE",
     "TRUE",
 
     "#/properties/var.groups/patternProperties/properties/touch.na/type",
-    "Key `touch.na` must be `true` or `false`.",
+    paste0(
+      "In {.pkg var.groups}, key `touch.na` of group {.strong {insert_keys}} ",
+      " must be `true` or `false`."
+    ),
     "FALSE",
     "FALSE",
     "TRUE",
+
+    "#/properties/var.groups/patternProperties/allOf/not",
+    paste0(
+      "In {.pkg var.groups}, for group/s {.strong {insert_keys}} multiple ",
+      "versions of the same key/s have been specified, namely: ",
+      "{.strong {insert_aliases}}."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
 
     ###
     # na.codes
     ###
 
+    "#/properties/na.codes/additionalProperties",
+    paste0(
+      "In {.pkg na.codes}, the name of missing code/s ",
+      "{.strong {insert_invalid_props}} is/are invalid. Only integers between",
+      " 1 and 9999 are allowed."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/na.codes/patternProperties/type",
-    "For NA codes, after the colon, define the missingness type with text.",
+    paste0(
+      "In {.pkg na.codes}, values for missing code/s {.strong {insert_keys}}",
+      " must be strings."
+    ),
     "TRUE",
     "FALSE",
     "FALSE",
@@ -486,20 +624,30 @@ better.json.validate.error.messages <- matrix(
     ###
     # import
     ###
+
     "#/properties/import/additionalProperties",
-    "All imported datasets must have syntactically valid names.",
+    paste0(
+      "In {.pkg import}, the name of imported dataset/s ",
+      "{.strong {insert_invalid_props}} must be syntactically valid."
+    ),
     "FALSE",
     "TRUE",
     "FALSE",
 
     "#/properties/import/patternProperties/required",
-    "All imported datasets need keys `id` and `vars`.",
+    paste0(
+      "In {.pkg import}, imported dataset/s {.strong {insert_keys}} need/s ",
+      "keys `id` and `vars`."
+    ),
     "TRUE",
     "FALSE",
     "FALSE",
 
     "#/properties/import/patternProperties/additionalProperties",
-    "For imported datasets, only keys `id` and `var` are allowed.",
+    paste0(
+      "In {.pkg import}, imported dataset/s {.strong {insert_keys}} has/have ",
+      "invalid keys. Only `id` and `vars` are allowed."
+    ),
     "TRUE",
     "FALSE",
     "FALSE"
@@ -520,7 +668,9 @@ better.json.validate.error.messages <- matrix(
   )
 
 better.json.validate.error.messages.hints <- c(
-  vignette_hint = "Check {.vignette epicdata::metadata_long} for more information.",
+  vignette_hint = paste0(
+    "Check {.vignette epicdata::metadata_long} for more information."
+  ),
   names_hint = "Look at `?make.names` for details.",
   boolean_hint = "Please don't use `yes`, `no`, `on`, `off`, `y`, or `n`."
 )

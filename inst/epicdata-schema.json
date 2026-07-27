@@ -248,7 +248,7 @@
             },
             "vars": {
               "description": "",
-              "type": "array"
+              "type": ["array", "string"]
             }
           },
           "required": [
