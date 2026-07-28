@@ -538,6 +538,44 @@ better.json.validate.error.messages <- matrix(
     "FALSE",
     "TRUE",
 
+    "#/properties/var.list/patternProperties/properties/cats/type",
+    paste0(
+      "In {.pkg var.list}, key `cats` of variable/s {.strong {insert_keys}}",
+      " must be an array with string elements. Arrays are written as lists",
+      " with dashes (`- element`)."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/var.list/patternProperties/properties/cats/minLength",
+    paste0(
+      "In {.pkg var.list}, key `cats` of variable/s {.strong {insert_keys}}",
+      " must have string elements with at least one character."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/var.list/patternProperties/properties/cats/uniqueItems",
+    paste0(
+      "In {.pkg var.list}, key `cats` of variable/s {.strong {insert_keys}}",
+      " must only have unique elements."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/var.list/patternProperties/properties/cats/items/type",
+    paste0(
+      "In {.pkg var.list}, key `cats` of variable/s {.strong {insert_keys}}",
+      " must only have string elements. Try wrapping the elements in ",
+      "quotation marks if this error persists."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/var.list/patternProperties/allOf/not",
     paste0(
       "In {.pkg var.list}, for variable/s {.strong {insert_keys}} multiple ",
@@ -647,6 +685,45 @@ better.json.validate.error.messages <- matrix(
     paste0(
       "In {.pkg import}, imported dataset/s {.strong {insert_keys}} has/have ",
       "invalid keys. Only `id` and `vars` are allowed."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/import/patternProperties/properties/vars/type",
+    paste0(
+      "In {.pkg import}, key `vars` of imported dataset/s ",
+      "{.strong {insert_keys}} must be an array with string elements. Arrays ",
+      "are written as lists with dashes (`- element`)."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/import/patternProperties/properties/vars/minLength",
+    paste0(
+      "In {.pkg import}, key `vars` of imported dataset/s ",
+      "{.strong {insert_keys}} must have string elements with at least one ",
+      "character."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/import/patternProperties/properties/vars/uniqueItems",
+    paste0(
+      "In {.pkg import}, key `vars` of imported dataset/s ",
+      "{.strong {insert_keys}} must only have unique elements."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/import/patternProperties/properties/vars/items/type",
+    paste0(
+      "In {.pkg import}, key `vars` of imported dataset/s ",
+      "{.strong {insert_keys}} must only have string elements. Try wrapping the",
+      " elements in quotation marks if this error persists."
     ),
     "TRUE",
     "FALSE",

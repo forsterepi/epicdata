@@ -81,7 +81,7 @@ countries:
     calling.code: "+49"
 ```
 
-Dashes `-` are used to form **lists**. Even though the YAML language can be more complicated, we only use dashes for lists of values when you need to map multiple values to the same key. All values in the same list need to have the same indentation and all of them have a dash. For this, the two space indentation is replaced by one dash and one space (`- value`). In the example below, since France only has one city with more than one million inhabitants, the value is specified as an ordinary key-value pair. However, since Germany has four cities with more than one million inhabitants, we need to specify a list. Notice that the dash has the same indentation as `million.cities`, but due to the dash and the additional space, the values themselves (`Berlin`, `Hamburg`, etc.) are indented by two characters, as usual.
+Dashes `-` are used to form **lists** or **arrays**. Even though the YAML language can be more complicated, we only use dashes for lists of values when you need to map multiple values to the same key. All values in the same list need to have the same indentation and all of them have a dash. For this, the two space indentation is replaced by one dash and one space (`- value`). In the example below, `million.cities` expects an array and, therefore, even though France only has one city with more than one million inhabitants, the value is specified as an array. Germany has four cities with more than one million inhabitants and each element is specified in a new line. Notice that the dash has the same indentation as `million.cities`, but due to the dash and the additional space, the values themselves (`Berlin`, `Hamburg`, etc.) are indented by two characters, as usual. `epicdata` usually expects the individual elements of an array to be strings, i.e., text. You will get an error message when, e.g., one of the elements is a number without any letters. You can force these values to be strings by wrapping them in quotation marks.
 
 ``` yaml
 countries:
@@ -90,7 +90,8 @@ countries:
     population.million: 68
     eu.member: true
     calling.code: "+33"
-    million.cities: Paris
+    million.cities: 
+    - Paris
   Germany:
     capital: Berlin
     population.million: 84
@@ -130,10 +131,10 @@ countries: # valid, because the value for country are all indented lines below
     capital: Berlin
     population.million: # invalid, because value is missing
     eu.member: true
-  France: # invalid, because there are no indented lines below it
+  France: # invalid, because there are no indented lines below France
 ```
 
-YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `xx()` and edited in R Studio. Therefore, the use of R Studio is recommended. See `xx` for more information on how to create your metadata.
+YAML code is not specified in R files but in special text files with file extension `.yml`. The `yml` files can be created by function `create_yaml()` and edited in R Studio or Positron. When using Positron together with the YAML extension by Red Hat, auto complete, YAML validation, and hover support are available. Please note that you use all software at your own risk. In `create_yaml()`, set `include_schema` to `TRUE` to the file with a JSON schema, which describes the format that the YAML needs to have. When editing the YAML file in, press Ctrl+Space to open the suggestions menu. Errors in Positron's Problems tab might be difficult to understand. Try creating the metadata object with `epicdata::metadata()` for better error messages. Advanced YAML editing features are not available in R Studio. 
 
 # Metadata design principles
 

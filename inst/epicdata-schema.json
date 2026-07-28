@@ -151,7 +151,12 @@
                 "properties": {
                   "cats": {
                     "description": "x",
-                    "type": "array"
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minLength": 1,
+                    "uniqueItems": true
                   }
                 }
               }
@@ -233,7 +238,12 @@
     },
     "contras": {
       "description": "A list of implausible combinations of values from two variables",
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1,
+      "uniqueItems": true
     },
     "import": {
       "description": "A list of related datasets, from which variables are made available for use in rules",
@@ -248,7 +258,12 @@
             },
             "vars": {
               "description": "",
-              "type": ["array", "string"]
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minLength": 1,
+              "uniqueItems": true
             }
           },
           "required": [
