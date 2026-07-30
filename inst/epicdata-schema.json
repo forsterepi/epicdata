@@ -117,19 +117,35 @@
               },
               "then": {
                 "properties": {
-                  "below": {
+                  "less.than": {
                     "description": "x",
                     "type": "number"
                   },
-                  "above": {
+                  "greater.than": {
                     "description": "x",
                     "type": "number"
                   },
-                  "below.equal": {
+                  "less.than.or.equal": {
                     "description": "x",
                     "type": "number"
                   },
-                  "above.equal": {
+                  "greater.than.or.equal": {
+                    "description": "x",
+                    "type": "number"
+                  },
+                  "lt": {
+                    "description": "x",
+                    "type": "number"
+                  },
+                  "gt": {
+                    "description": "x",
+                    "type": "number"
+                  },
+                  "lte": {
+                    "description": "x",
+                    "type": "number"
+                  },
+                  "gte": {
                     "description": "x",
                     "type": "number"
                   }
@@ -164,16 +180,96 @@
             {
               "not": {
                 "required": [
-                  "not.above",
-                  "not.above.equal"
+                  "greater.than",
+                  "gt"
                 ]
               }
             },
             {
               "not": {
                 "required": [
-                  "not.below",
-                  "not.below.equal"
+                  "greater.than",
+                  "gte"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "greater.than",
+                  "greater.than.or.equal"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "greater.than.or.equal",
+                  "gt"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "greater.than.or.equal",
+                  "gte"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "gt",
+                  "gte"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "less.than",
+                  "lt"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "less.than",
+                  "lte"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "less.than",
+                  "less.than.or.equal"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "less.than.or.equal",
+                  "lt"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "less.than.or.equal",
+                  "lte"
+                ]
+              }
+            },
+            {
+              "not": {
+                "required": [
+                  "lt",
+                  "lte"
                 ]
               }
             },
@@ -281,3 +377,4 @@
   ],
   "additionalProperties": false
 }
+

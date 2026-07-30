@@ -94,9 +94,6 @@ test_that("property consent works", {
     pattern = "test",
     fileext = "yml",
     lines = c(
-      "options:",
-      "  id.var:",
-      "  consent:",
       "var.list:",
       "  id:",
       "    type: text"
@@ -162,17 +159,12 @@ test_that("touch.na works", {
     pattern = "test",
     fileext = "yml",
     lines = c(
-      "options:",
-      "  touch.na:",
       "var.list:",
       "  b:",
       "    type: text",
       "  a:",
       "    type: text",
-      "    group: g",
-      "var.groups:",
-      "  g:",
-      "    touch.na:"
+      "    group: g"
     )
   )
 
@@ -256,6 +248,7 @@ test_that("touch.na works", {
   expect_equal(m@var.list$a[["touch.na.final"]], TRUE)
   expect_equal(m@var.list$b[["touch.na.final"]], TRUE)
 
+  m@var.groups$g$group.name <- "g"
   m@var.groups$g$touch.na <- TRUE
   expect_equal(m@touch.na, NULL)
   expect_equal(m@na.touch, NULL)
@@ -449,6 +442,8 @@ test_that("touch.na works", {
   expect_equal(m@var.list$b[["touch.na.final"]], TRUE)
 
   m <- metadata(file)
+
+  m@var.groups$g$group.name <- "g"
   m@var.groups$g$touch.na <- FALSE
   expect_equal(m@var.groups$g[["touch.na"]], FALSE)
   expect_equal(m@var.groups$g[["na.touch"]], FALSE)
@@ -697,17 +692,12 @@ test_that("touch.na works", {
     pattern = "test",
     fileext = "yml",
     lines = c(
-      "options:",
-      "  na.touch:",
       "var.list:",
       "  b:",
       "    type: text",
       "  a:",
       "    type: text",
-      "    group: g",
-      "var.groups:",
-      "  g:",
-      "    na.touch:"
+      "    group: g"
     )
   )
 
@@ -791,6 +781,7 @@ test_that("touch.na works", {
   expect_equal(m@var.list$a[["touch.na.final"]], TRUE)
   expect_equal(m@var.list$b[["touch.na.final"]], TRUE)
 
+  m@var.groups$g$group.name <- "g"
   m@var.groups$g$na.touch <- TRUE
   expect_equal(m@touch.na, NULL)
   expect_equal(m@na.touch, NULL)
@@ -876,6 +867,7 @@ test_that("touch.na works", {
   expect_equal(m@var.list$b[["touch.na.final"]], TRUE)
 
   m <- metadata(file)
+  m@var.groups$g$group.name <- "g"
   m@var.groups$g$na.touch <- FALSE
   expect_equal(m@var.groups$g[["touch.na"]], FALSE)
   expect_equal(m@var.groups$g[["na.touch"]], FALSE)

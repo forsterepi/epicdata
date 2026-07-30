@@ -163,8 +163,14 @@ metadata.constructor <- function(file) {
             unlist()
         ),
         invalid_prop = dplyr::case_when(
-          keyword == "additionalProperties" ~ params[["additionalProperty"]],
-          keyword == "unevaluatedProperties" ~ params[["unevaluatedProperty"]]
+          keyword == "additionalProperties" ~ params[[
+            "additionalProperty"
+          ]] %||%
+            NA,
+          keyword == "unevaluatedProperties" ~ params[[
+            "unevaluatedProperty"
+          ]] %||%
+            NA
         ),
         alias = dplyr::case_when(
           required != "" ~ required,
@@ -239,53 +245,132 @@ metadata.constructor <- function(file) {
           )
       )
 
-    ## Prepare messages for cli_abort()
+    # It seems like allOf in options activates when options is not an object,
+    # e.g., when it's empty. Adjusting the schema seemed more work than just
+    # fixing it in post. Should be fine for var.list and var.groups because they
+    # have properties
+    if (
+      c("#/properties/options/allOf/not", "#/properties/options/type") |>
+        magrittr::is_in(res$schemaPath) |>
+        all()
+    ) {
+      res <- res |>
+        dplyr::filter_out(schemaPath == "#/properties/options/allOf/not")
+    }
+
+    # Prepare messages for cli_abort()
     res$error_number <- seq_len(nrow(res))
-    res_error <- res %>%
-      dplyr::select(error_number, message = my_error) %>%
+    res <- res |>
+      dplyr::select(
+        error_number,
+        message = my_error,
+        vignette_hint,
+        names_hint,
+        boolean_hint
+      ) |>
       dplyr::mutate(
-        type = "x"
+        type = "!"
       )
-    res_hint <- res %>%
-      dplyr::select(error_number, message = my_hint) %>%
-      dplyr::mutate(
-        type = "i"
-      ) %>%
-      dplyr::filter(message != "")
-    res <- rbind(
-      data.frame(
-        error_number = 0L,
-        message = "The YAML input has an incorrect structure.",
-        type = "x"
-      ),
-      res_error,
-      res_hint
-    ) %>%
-      dplyr::arrange(error_number, dplyr::desc(type))
 
     number_of_errors <- max(res$error_number)
-    ### Only report up to 5 errors
+    # Only report up to 5 errors
     if (number_of_errors > 5) {
-      res %<>%
-        filter(error_number <= 5)
+      res <- res |>
+        dplyr::filter(error_number <= 5)
+    }
+
+    # Add hints
+
+    add_vignette_hint <- any(res$vignette_hint)
+    add_names_hint <- any(res$names_hint)
+    add_boolean_hint <- any(res$boolean_hint)
+
+    res <- res |>
+      dplyr::select(type, message)
+
+    # Catch error that is thrown when some errors have no message specified in
+    # better.json.validate.error.messages
+    rlang::try_fetch(
+      {
+        if (add_vignette_hint) {
+          res <- rbind(
+            res,
+            data.frame(
+              type = "i",
+              message = better.json.validate.error.messages.hints[
+                "vignette_hint"
+              ]
+            )
+          )
+        }
+
+        if (add_names_hint) {
+          res <- rbind(
+            res,
+            data.frame(
+              type = "i",
+              message = better.json.validate.error.messages.hints["names_hint"]
+            )
+          )
+        }
+
+        if (add_boolean_hint) {
+          res <- rbind(
+            res,
+            data.frame(
+              type = "i",
+              message = better.json.validate.error.messages.hints[
+                "boolean_hint"
+              ]
+            )
+          )
+        }
+      },
+      error = function(cnd) {
+        cli::cli_abort(
+          "Internal error (ID: error.metadata.constructor.4)",
+          class = "error.metadata.constructor.4",
+          parent = NA,
+          .internal = TRUE
+        )
+      }
+    )
+
+    # Add main line
+    res <- rbind(
+      data.frame(
+        type = "x",
+        message = "The YAML input has an incorrect structure."
+      ),
+      res
+    )
+
+    # Add line about additional errors
+    if (number_of_errors == 6) {
+      res <- rbind(
+        res,
+        data.frame(
+          type = " ",
+          message = "... and 1 more problem"
+        )
+      )
+    }
+    if (number_of_errors > 6) {
+      res <- rbind(
+        res,
+        data.frame(
+          type = " ",
+          message = paste0("... and ", number_of_errors - 5, " more problems")
+        )
+      )
     }
 
     errors <- res$message %>%
       magrittr::set_names(res$type)
 
-    if (number_of_errors == 6) {
-      errors <- c(errors, "... and 1 more problem")
-    }
-    if (number_of_errors > 6) {
-      errors <- c(
-        errors,
-        paste0("... and ", number_of_errors - 5, " more problems")
-      )
-    }
-
     cli::cli_abort(
       errors,
-      class = "error.metadata.constructor.4",
+      class = "error.metadata.constructor.5",
       parent = NA
     )
   }
@@ -361,9 +446,18 @@ better.json.validate.error.messages <- matrix(
     # options
     ###
 
+    "#/properties/options/additionalProperties",
+    paste0(
+      "In {.pkg options}, there are invalid options, namely: ",
+      "{.strong {insert_invalid_props}}"
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/options/type",
     paste0(
-      "Key {.pkg options} must have options specified below it.",
+      "Key {.pkg options} must have options specified below it. ",
       "These options must be in a new line and indented by two spaces."
     ),
     "TRUE",
@@ -590,6 +684,16 @@ better.json.validate.error.messages <- matrix(
     # var.groups
     ###
 
+    "#/properties/var.groups/type",
+    paste0(
+      "{.pkg var.groups} must have at least one group specified. ",
+      "Groups must be in a new line and indented by two spaces. ",
+      "Group-specific keys must again be in a new line and indented."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/var.groups/additionalProperties",
     paste0(
       "In {.pkg var.groups}, the name of group/s ",
@@ -640,6 +744,16 @@ better.json.validate.error.messages <- matrix(
     # na.codes
     ###
 
+    "#/properties/na.codes/type",
+    paste0(
+      "{.pkg na.codes} must have at least one NA code specified. ",
+      "NA codes must be integers between 1 and 9999 and in a new line. ",
+      "They form the keys while values must be strings describing their labels."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
     "#/properties/na.codes/additionalProperties",
     paste0(
       "In {.pkg na.codes}, the name of missing code/s ",
@@ -660,8 +774,56 @@ better.json.validate.error.messages <- matrix(
     "FALSE",
 
     ###
+    # contras
+    ###
+
+    "#/properties/contras/type",
+    paste0(
+      "{.pkg contras} must be an array with string elements. Arrays are",
+      " written as lists with dashes (`- element`)."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/contras/minLength",
+    paste0(
+      "{.pkg contras} must have string elements with at least one character."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/contras/uniqueItems",
+    paste0(
+      "{.pkg contras} must only have unique elements."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    "#/properties/contras/items/type",
+    paste0(
+      "{.pkg contras} must only have string elements. Try wrapping the ",
+      "elements in quotation marks if this error persists."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
+
+    ###
     # import
     ###
+
+    "#/properties/import/type",
+    paste0(
+      "{.pkg import} must have at least one imported dataset specified. ",
+      "Datasets must be in a new line and indented by two spaces. ",
+      "Dataset-specific keys must again be in a new line and indented."
+    ),
+    "TRUE",
+    "FALSE",
+    "FALSE",
 
     "#/properties/import/additionalProperties",
     paste0(
@@ -722,8 +884,8 @@ better.json.validate.error.messages <- matrix(
     "#/properties/import/patternProperties/properties/vars/items/type",
     paste0(
       "In {.pkg import}, key `vars` of imported dataset/s ",
-      "{.strong {insert_keys}} must only have string elements. Try wrapping the",
-      " elements in quotation marks if this error persists."
+      "{.strong {insert_keys}} must only have string elements. Try wrapping ",
+      "the elements in quotation marks if this error persists."
     ),
     "TRUE",
     "FALSE",
@@ -748,7 +910,9 @@ better.json.validate.error.messages.hints <- c(
   vignette_hint = paste0(
     "Check {.vignette epicdata::metadata_long} for more information."
   ),
-  names_hint = "Look at `?make.names` for details.",
+  names_hint = paste0(
+    "Look at `?make.names` for details on syntactically valid names."
+  ),
   boolean_hint = "Please don't use `yes`, `no`, `on`, `off`, `y`, or `n`."
 )
 

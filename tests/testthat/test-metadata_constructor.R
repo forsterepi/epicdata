@@ -1,4 +1,4 @@
-test_that("regex in json schema works", {
+test_that("json: regex", {
   file <- withr::local_tempfile(
     pattern = "test",
     fileext = "yml",
@@ -10,9 +10,6 @@ test_that("regex in json schema works", {
       "    type: text"
     )
   )
-
-  testthat::skip("error messages need to be finalised before re-snapshotting")
-
   expect_snapshot(metadata(file), error = TRUE)
 
   file <- withr::local_tempfile(
@@ -26,7 +23,6 @@ test_that("regex in json schema works", {
       "    type: text"
     )
   )
-
   expect_snapshot(metadata(file), error = TRUE)
 
   file <- withr::local_tempfile(
@@ -40,7 +36,6 @@ test_that("regex in json schema works", {
       "    type: text"
     )
   )
-
   expect_snapshot(metadata(file), error = TRUE)
 
   file <- withr::local_tempfile(
@@ -94,4 +89,142 @@ test_that("regex in json schema works", {
     )
   )
   expect_no_error(metadata(file))
+})
+
+test_that("json: errors for empty keys", {
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "options: 3",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "options:",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "var.list:"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "var.list: 3"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "var.groups:",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "na.codes:",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "import:",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+})
+
+test_that("json: errors for contras", {
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "var.list:",
+      "  a:",
+      "    type: text",
+      "contras:"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "var.list:",
+      "  a:",
+      "    type: text",
+      "contras:",
+      "- true",
+      "- 3"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "var.list:",
+      "  a:",
+      "    type: text",
+      "contras:",
+      "- a",
+      "- a"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
+})
+
+test_that("json: errors for alias keys", {
+  file <- withr::local_tempfile(
+    pattern = "test",
+    fileext = "yml",
+    lines = c(
+      "options:",
+      "  remove.vars: true",
+      "  vars.remove: true",
+      "var.list:",
+      "  a:",
+      "    type: text"
+    )
+  )
+  expect_snapshot(metadata(file), error = TRUE)
 })
